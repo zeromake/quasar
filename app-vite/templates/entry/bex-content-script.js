@@ -10,11 +10,10 @@
 /* global chrome */
 
 import Bridge from './bex-bridge.js'
-import { listenForWindowEvents } from './bex-window-event-listener.js'
-import runDevlandContentScript from 'app/src-bex/__NAME__'
+import runDevlandContentScript from 'app/src-bex/__IMPORT_NAME__'
 
 const port = chrome.runtime.connect({
-  name: 'contentScript'
+  name: 'contentScript:__CONNECT_NAME__'
 })
 
 let disconnected = false
@@ -36,22 +35,5 @@ let bridge = new Bridge({
     }
   }
 })
-
-// Inject our dom script for communications.
-function injectScript (url) {
-  const script = document.createElement('script')
-  script.src = url
-  script.onload = function () {
-    this.remove()
-  }
-  ;(document.head || document.documentElement).appendChild(script)
-}
-
-if (document instanceof HTMLDocument) {
-  injectScript(chrome.runtime.getURL('dom.js'))
-}
-
-// Listen for event from the web page
-listenForWindowEvents(bridge, 'bex-dom')
 
 runDevlandContentScript(bridge)

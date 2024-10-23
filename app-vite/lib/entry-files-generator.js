@@ -24,10 +24,7 @@ export class EntryFilesGenerator {
     }
     else if (ctx.mode.bex) {
       regularFiles.push(
-        'bex-bridge.js',
-        'bex-entry-background.js',
-        'bex-entry-dom.js',
-        'bex-window-event-listener.js'
+        'bex-bridge.js'
       )
     }
 

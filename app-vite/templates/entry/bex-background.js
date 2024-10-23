@@ -11,7 +11,7 @@
 /* global chrome */
 
 import Bridge from './bex-bridge.js'
-import runDevlandBackgroundScript from 'app/src-bex/background'
+import runDevlandBackgroundScript from 'app/src-bex/__IMPORT_NAME__'
 
 const connections = {}
 

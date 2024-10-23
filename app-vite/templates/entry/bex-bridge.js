@@ -92,8 +92,7 @@ export default class Bridge extends EventEmitter {
     const
       messages = this._sendingQueue.shift(),
       currentMessage = messages[0],
-      eventListenerKey = `${currentMessage.event}.${uid()}`,
-      eventResponseKey = eventListenerKey + '.result'
+      eventResponseKey = `${currentMessage.event}.${uid()}.result`
 
     return new Promise((resolve, reject) => {
       let allChunks = []

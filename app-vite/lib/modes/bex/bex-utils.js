@@ -5,21 +5,21 @@ import { warn } from '../../utils/logger.js'
 
 export function createManifest (quasarConf) {
   let json
-  const filename = quasarConf.metaConf.bexManifestFile
+  const bexManifestPath = quasarConf.metaConf.bexManifestFile
 
   try {
     json = JSON.parse(
-      fse.readFileSync(filename, 'utf-8')
+      fse.readFileSync(bexManifestPath, 'utf-8')
     )
   }
   catch (err) {
     warn('Could not read BEX manifest. Please check its syntax.')
-    return { err, filename }
+    return { err, bexManifestPath }
   }
 
   if (json.manifest_version === void 0) {
     warn('The BEX manifest requires a "manifest_version" prop, which is currently missing.')
-    return { err: true, filename }
+    return { err: true, bexManifestPath }
   }
 
   const {
@@ -49,13 +49,17 @@ export function createManifest (quasarConf) {
     quasarConf.bex.extendBexManifestJson(json)
   }
 
+  fse.ensureDirSync(quasarConf.build.distDir)
   fse.writeFileSync(
     join(quasarConf.build.distDir, 'manifest.json'),
     JSON.stringify(json, null, quasarConf.build.minify === true ? void 0 : 2),
     'utf-8'
   )
 
-  return { filename }
+  return {
+    bexManifestPath,
+    ...extractBexScripts(quasarConf, json)
+  }
 }
 
 export function copyBexAssets (quasarConf) {
@@ -78,4 +82,40 @@ export function copyBexAssets (quasarConf) {
   }
 
   return folders
+}
+
+function extractBexScripts (quasarConf, bexManifest) {
+  const bgName = (
+    bexManifest.background?.service_worker // Manifest v3
+    || bexManifest.background?.scripts?.[ 0 ] // Manifest v2
+  )
+
+  const bexBackgroundScript = bgName
+    ? {
+        name: bgName,
+        from: quasarConf.ctx.appPaths.resolve.bex(bgName),
+        to: join(quasarConf.build.distDir, bgName)
+      }
+    : null
+
+  const bexContentScriptList = []
+
+  if (bexManifest.content_scripts) {
+    bexManifest.content_scripts.forEach(entry => {
+      if (entry.js?.length > 0) {
+        entry.js.forEach(script => {
+          bexContentScriptList.push({
+            name: script,
+            from: quasarConf.ctx.appPaths.resolve.bex(script),
+            to: join(quasarConf.build.distDir, script)
+          })
+        })
+      }
+    })
+  }
+
+  return {
+    bexBackgroundScript,
+    bexContentScriptList
+  }
 }

@@ -38,6 +38,7 @@ module.exports.bexContent = function (callback) {
   return callback
 }
 
+// legacy q/app-vite v1 & q/app-webpack v3
 module.exports.bexDom = function (callback) {
   return callback
 }

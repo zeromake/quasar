@@ -38,6 +38,7 @@ export function bexContent (callback) {
   return callback
 }
 
+// Below only for @quasar/app-vite v1 & @quasar/app-webpack v3
 export function bexDom (callback) {
   return callback
 }
