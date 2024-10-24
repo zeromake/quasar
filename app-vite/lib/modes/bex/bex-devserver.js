@@ -21,7 +21,7 @@ export class QuasarModeDevserver extends AppDevserver {
     this.registerDiff('bex', (quasarConf, diffMap) => [
       quasarConf.sourceFiles.bexManifestFile,
       quasarConf.bex.extendBexManifestJson,
-
+      quasarConf.bex.dynamicScripts,
       quasarConf.bex.extendBexScriptsConf,
       quasarConf.build.distDir,
 

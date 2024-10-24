@@ -515,7 +515,9 @@ export class QuasarConfigFile {
       capacitor: {
         capacitorCliPreparationParams: []
       },
-      bex: {}
+      bex: {
+        dynamicScripts: []
+      }
     }, userCfg)
 
     const metaConf = {
