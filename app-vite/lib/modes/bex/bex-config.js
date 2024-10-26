@@ -28,7 +28,6 @@ function createScript ({ quasarConf, type, entry }) {
 
   const content = scriptTemplates[ type ]
     .replace('__IMPORT_NAME__', entry.name.replaceAll('\\', '/').replace(jsExtRE, ''))
-    .replace('__CONNECT_NAME__', filename)
 
   writeFileSync(entryPath, content, 'utf-8')
 

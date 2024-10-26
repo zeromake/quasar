@@ -104,7 +104,6 @@ function extractBexScripts (quasarConf, bexManifest) {
         warn()
         warn(`The file for BEX script "${ rawEntry }" does NOT exists. Skipping.`)
         warn()
-        console.log(rawEntry, '||||', quasarConf.ctx.appPaths.resolve.bex(rawEntry))
         return
       }
 

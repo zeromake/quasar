@@ -4,176 +4,324 @@
  * DO NOT EDIT.
  **/
 
-import { EventEmitter } from 'events'
-import uid from 'quasar/src/utils/uid/uid.js'
-
-const
-  typeSizes = {
-    'undefined': () => 0,
-    'boolean': () => 4,
-    'number': () => 8,
-    'string': item => 2 * item.length,
-    'object': item => !item ? 0 : Object
-      .keys(item)
-      .reduce((total, key) => sizeOf(key) + sizeOf(item[key]) + total, 0)
-  },
-  sizeOf = value => typeSizes[typeof value](value)
-
-export default class Bridge extends EventEmitter {
-  constructor (wall) {
-    super()
-
-    this.setMaxListeners(Infinity)
-    this.wall = wall
-
-    wall.listen(messages => {
-      if (Array.isArray(messages)) {
-        messages.forEach(message => this._emit(message))
-      }
-      else {
-        this._emit(messages)
-      }
-    })
-
-    this._sendingQueue = []
-    this._sending = false
-    this._maxMessageSize = 32 * 1024 * 1024 // 32mb
-  }
+export class BexBridge {
+  /**
+   * Public properties
+   */
+  portMap = {}
+  listeners = {} // { type: 'on' | 'once' | 'reply', callback: message => void }
 
   /**
-   * Send an event.
-   *
-   * @param event
-   * @param payload
-   * @returns Promise<>
+   * Private properties
    */
-  send (event, payload) {
-    return this._send([{ event, payload }])
-  }
+  #id = null
+  #debug = false
+  #banner = null
 
-  /**
-   * Return all registered events
-   * @returns {*}
-   */
-  getEvents () {
-    return this._events
-  }
+  constructor ({ type, name, debug }) {
+    this.#id = type
 
-  on(eventName, listener) {
-    return super.on(eventName, (originalPayload) => {
-      listener({
-        ...originalPayload,
-        // Convenient alternative to the manual usage of `eventResponseKey`
-        // We can't send this in `_nextSend` which will then be sent using `port.postMessage()`, which can't serialize functions.
-        // So, we hook into the underlying listener and include the function there, which happens after the send operation.
-        respond: (payload /* optional */) => this.send(originalPayload.eventResponseKey, payload)
-      })
-    })
-  }
-
-  _emit (message) {
-    if (typeof message === 'string') {
-      this.emit(message)
+    if (type === 'content-script') {
+      /**
+       * There can be multiple instances of the same content script
+       * but for different tabs, so we need to differentiate them.
+       *
+       * Generating an easy to handle id for the content script.
+       */
+      this.#id = `${ type }@${ name.replaceAll('@', '-') }-${ Math.floor(Math.random() * 10000) }`
     }
-    else {
-      this.emit(message.event, message.payload)
+
+    this.#banner = `[Quasar BEX | ${ this.#id }]`
+    this.#debug = debug === true
+
+    if (type === 'content-script' && name.indexOf('@') !== -1) {
+      this.#warn(
+        `The "@" character is not allowed in the content script name (${ name }).`
+        + ' It was replaced with a "-".'
+      )
     }
-  }
 
-  _send (messages) {
-    this._sendingQueue.push(messages)
-    return this._nextSend()
-  }
+    const onMessage = message => { this.#handleMessage(message) }
 
-  _nextSend () {
-    if (!this._sendingQueue.length || this._sending) return Promise.resolve()
-    this._sending = true
-
-    const
-      messages = this._sendingQueue.shift(),
-      currentMessage = messages[0],
-      eventResponseKey = `${currentMessage.event}.${uid()}.result`
-
-    return new Promise((resolve, reject) => {
-      let allChunks = []
-
-      const fn = (r) => {
-        // If this is a split message then keep listening for the chunks and build a list to resolve
-        if (r !== void 0 && r._chunkSplit) {
-          const chunkData = r._chunkSplit
-          allChunks = [...allChunks, ...r.data]
-
-          // Last chunk received so resolve the promise.
-          if (chunkData.lastChunk) {
-            this.off(eventResponseKey, fn)
-            resolve(allChunks)
-          }
+    if (type === 'background') {
+      chrome.runtime.onConnect.addListener(port => {
+        if (this.portMap[ port.name ] !== void 0) {
+          this.#warn(
+            `Connection with "${ port.name }" already exists.`
+            + ' Disconnecting the previous one and connecting the new one.'
+          )
+          this.portMap[ port.name ].disconnect()
         }
-        else {
-          this.off(eventResponseKey, fn)
-          resolve(r)
-        }
-      }
 
-      this.on(eventResponseKey, fn)
+        this.portMap[ port.name ] = port
 
-      try {
-        // Add an event response key to the payload we're sending so the message knows which channel to respond on.
-        const messagesToSend = messages.map(m => {
-          return {
-            ...m,
-            ...{
-              payload: {
-                data: m.payload,
-                eventResponseKey
-              }
-            }
-          }
+        port.onMessage.addListener(onMessage)
+        port.onDisconnect.addListener(() => {
+          port.onMessage.removeListener(onMessage)
+          delete this.portMap[ portType ]
+          this.#log(`Closed connection with "${ port.name }".`)
         })
 
-        this.wall.send(messagesToSend)
+        this.#log(`Opened connection with ${ port.name }.`)
+      })
+
+      return
+    }
+
+    // else we're a content script or a popup/page
+
+    const portToBackground = chrome.runtime.connect({ name: this.#id })
+    this.portMap = { background: portToBackground }
+
+    portToBackground.onMessage.addListener(onMessage)
+    portToBackground.onDisconnect.addListener(() => {
+      portToBackground.onMessage.removeListener(onMessage)
+      delete this.portMap.background
+      this.reset()
+      this.#log('Connection with the background script was closed.')
+    })
+  }
+
+  on (event, callback) {
+    const target = this.listeners[ event ] || (this.listeners[ event ] = [])
+    target.push({ type: 'on', callback })
+    this.#log(`Started listening for "${ event }"`)
+    return this // chainable
+  }
+
+  once (event, callback) {
+    const target = this.listeners[ event ] || (this.listeners[ event ] = [])
+    target.push({ type: 'once', callback })
+    this.#log(`Started listening once for "${ event }"`)
+    return this // chainable
+  }
+
+  off (event, callback) {
+    const list = this.listeners[ event ]
+
+    if (list === void 0) {
+      this.#warn(`Tried to remove listener for "${ event }" but there is no listener attached`)
+      return this // chainable
+    }
+
+    if (callback === void 0) {
+      delete this.listeners[ event ]
+      return this // chainable
+    }
+
+    const liveEvents = list.filter(entry => entry.callback !== callback)
+
+    if (liveEvents.length !== 0) {
+      this.listeners[ event ] = liveEvents
+    }
+    else {
+      delete this.listeners[ event ]
+    }
+
+    this.#log(`Stopped listening for "${ event }"`)
+    return this // chainable
+  }
+
+  send ({ event, to, reply = false, payload } = {}) {
+    if (event === void 0) {
+      const log = 'Tried to send message with no "event" prop specified'
+      this.#warn(log, { event, to, reply, payload })
+      return Promise.reject(log)
+    }
+
+    if (to === void 0) {
+      const log = 'Tried to send message with no "to" prop specified'
+      this.#warn(log, { event, to, reply, payload })
+      return Promise.reject(log)
+    }
+
+    const message = {
+      event,
+      from: this.#id,
+      to,
+      reply: reply === true,
+      payload,
+      timestamp: Date.now()
+    }
+
+    this.#log(
+      `Sending event "${ event }" to "${ to }"`,
+      { event, to, reply, payload }
+    )
+
+    if (message.reply === false) {
+      this.#handleMessage(message)
+      return Promise.resolve() // be consistent with the return value
+    }
+
+    return new Promise(resolve => {
+      // flag the message with the event that should trigger the reply
+      message.reply = `${ event }____quasarResponseFrom:${ to }:${ message.timestamp }`
+
+      // register a temporary callback to be called when a reply is received
+      this.listeners[ message.reply ] = [ { type: 'reply', callback: resolve } ]
+
+      this.#handleMessage(message)
+    })
+  }
+
+  setDebug (value) {
+    this.#debug = value === true
+  }
+
+  reset () {
+    this.listeners = {}
+    this.#log('All listeners were removed')
+  }
+
+  #isMessage (message) {
+    if (Object(message) !== message) return false
+    if (Array.isArray(message)) return false
+    if (message.event === void 0) return false
+    if (message.from === void 0) return false
+    if (message.to === void 0) return false
+    if (message.timestamp === void 0) return false
+    return true
+  }
+
+  #createReplyMessage (message, replyPayload) {
+    return {
+      event: message.reply,
+      from: this.#id,
+      to: message.from,
+      payload: replyPayload,
+      timestamp: Date.now()
+    }
+  }
+
+  #formatLog (message) {
+    return `${ this.#banner } ${ message }`
+  }
+
+  #log (message, debugObject) {
+    if (this.#debug !== true) return
+
+    const log = this.#formatLog(message)
+
+    if (debugObject !== void 0) {
+      console.groupCollapsed(log)
+      console.dir(debugObject)
+      console.groupEnd(log)
+    }
+    else {
+      console.log(log)
+    }
+  }
+
+  #warn (message, debugObject) {
+    const log = this.#formatLog(message)
+    if (debugObject !== void 0) {
+      console.warn(log, debugObject)
+    }
+    else {
+      console.warn(log)
+    }
+  }
+
+  async #trigger (message) {
+    const list = this.listeners[ message.event ]
+    let replyPayload
+
+    if (list === void 0) {
+      this.#warn(
+        `Event "${ message.event }" was sent from "${ message.from }" but there is no listener attached`,
+        message
+      )
+    }
+    else {
+      const plural = list.length > 1 ? 's' : ''
+      this.#log(
+        `Triggering ${ list.length } listener${ plural } for "${ message.event }" event`,
+        message
+      )
+
+      // ensure the message is not tampered with
+      const callbackParam = message.payload !== void 0
+        ? JSON.parse(JSON.stringify(message.payload))
+        : void 0
+
+      for (const { type, callback } of list.slice(0)) {
+        if (type !== 'on') {
+          this.off(message.event, callback)
+        }
+
+        if (message.reply !== void 0 && replyPayload === void 0) {
+          replyPayload = await callback(callbackParam)
+        }
+        else {
+          callback(callbackParam)
+        }
       }
-      catch (err) {
-        const errorMessage = 'Message length exceeded maximum allowed length.'
+    }
 
-        if (err.message === errorMessage) {
-          // If the payload is an array and too big then split it into chunks and send to the clients bridge
-          // the client bridge will then resolve the promise.
-          if (!Array.isArray(currentMessage.payload)) {
-            if (process.env.NODE_ENV !== 'production') {
-              console.error(errorMessage + ' Note: The bridge can deal with this is if the payload is an Array.')
-            }
-          }
-          else {
-            const objectSize = sizeOf(currentMessage)
+    typeof message.reply === 'string' && this.#handleMessage(
+      this.#createReplyMessage(message, replyPayload)
+    )
+  }
 
-            if (objectSize > this._maxMessageSize) {
-              const
-                chunksRequired = Math.ceil(objectSize / this._maxMessageSize),
-                arrayItemCount = Math.ceil(currentMessage.payload.length / chunksRequired)
+  #getPort (to) {
+    const [ type, name ] = to.split('@')
+    const target = this.portMap[ type ]
+    return name === void 0
+      ? target
+      : target?.[ name ]
+  }
 
-              let data = currentMessage.payload
-              for (let i = 0; i < chunksRequired; i++) {
-                let take = Math.min(data.length, arrayItemCount)
+  #handleMessage (message) {
+    // if it's not ours, then ignore
+    if (this.#isMessage(message) === false) return
 
-                this.wall.send([{
-                  event: currentMessage.event,
-                  payload: {
-                    _chunkSplit: {
-                      count: chunksRequired,
-                      lastChunk: i === chunksRequired - 1
-                    },
-                    data: data.splice(0, take)
-                  }
-                }])
-              }
-            }
-          }
+    const { to } = message
+
+    // if it's for us, then trigger the event
+    if (to === this.#id) {
+      this.#trigger(message)
+      return
+    }
+
+    if (this.#id === 'background') {
+      const port = this.#getPort(to)
+
+      if (port !== void 0) {
+        port.postMessage(message)
+        return
+      }
+
+      this.#warn(
+        `Event "${ message.event }" was sent to "${ to }" but there is no such connection`,
+        message
+      )
+
+      // if it requires an answer but there is no one to answer,
+      // then we do it for resources to free up...
+      if (message.reply !== void 0) {
+        const fromPort = this.#getPort(message.from)
+
+        // if the port does not exist anymore,
+        // then the reply is already not needed anymore
+        if (fromPort === void 0) {
+          this.#warn(
+            `Event "${ message.event }" was sent from "${ message.from }" but there is no such connection to reply to`,
+            message
+          )
+        }
+        else {
+          fromPort.postMessage(
+            this.#createReplyMessage(message)
+          )
         }
       }
 
-      this._sending = false
-      setTimeout(() => { return this._nextSend() }, 16)
-    })
+      return
+    }
+
+    // otherwise we're a script that connects to the background
+    // so send/relay to the message to the background (it'll know what to do with it)
+    this.portMap.background.postMessage(message)
   }
 }

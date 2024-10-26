@@ -9,31 +9,21 @@
 
 /* global chrome */
 
-import Bridge from './bex-bridge.js'
+import { BexBridge } from './bex-bridge.js'
 import runDevlandContentScript from 'app/src-bex/__IMPORT_NAME__'
 
-const port = chrome.runtime.connect({
-  name: 'contentScript:__CONNECT_NAME__'
-})
+let bridge = null
 
-let disconnected = false
-port.onDisconnect.addListener(() => {
-  disconnected = true
-})
-
-let bridge = new Bridge({
-  listen (fn) {
-    port.onMessage.addListener(fn)
-  },
-  send (data) {
-    if (!disconnected) {
-      port.postMessage(data)
-      window.postMessage({
-        ...data,
-        from: 'bex-content-script'
-      }, '*')
-    }
+function useBridge ({ name, debug }) {
+  if (bridge === null) {
+    bridge = new BexBridge({
+      type: 'content-script',
+      name,
+      debug
+    })
   }
-})
 
-runDevlandContentScript(bridge)
+  return bridge
+}
+
+runDevlandContentScript({ useBridge })

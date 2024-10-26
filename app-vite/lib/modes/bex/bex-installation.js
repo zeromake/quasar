@@ -5,10 +5,6 @@ import inquirer from 'inquirer'
 import { log, warn } from '../../utils/logger.js'
 import { generateTypesFeatureFlag } from '../../utils/types-feature-flags.js'
 
-const bexDeps = {
-  events: '^3.3.0'
-}
-
 export function isModeInstalled (appPaths) {
   return fs.existsSync(appPaths.bexDir)
 }
@@ -23,12 +19,6 @@ export async function addMode ({
     }
     return
   }
-
-  const nodePackager = await cacheProxy.getModule('nodePackager')
-  nodePackager.installPackage(
-    Object.entries(bexDeps).map(([ name, version ]) => `${ name }@${ version }`),
-    { displayName: 'BEX dependencies' }
-  )
 
   console.log()
   const answer = await inquirer.prompt([ {
@@ -54,7 +44,7 @@ export async function addMode ({
 }
 
 export async function removeMode ({
-  ctx: { appPaths, cacheProxy }
+  ctx: { appPaths }
 }) {
   if (!isModeInstalled(appPaths)) {
     warn('No Browser Extension support detected. Aborting.')
@@ -63,12 +53,6 @@ export async function removeMode ({
 
   log('Removing Browser Extension source folder')
   fse.removeSync(appPaths.bexDir)
-
-  const nodePackager = await cacheProxy.getModule('nodePackager')
-  nodePackager.uninstallPackage(
-    Object.keys(bexDeps),
-    { displayName: 'BEX dependencies' }
-  )
 
   log('Browser Extension support was removed')
 }
