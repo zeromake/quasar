@@ -3,11 +3,13 @@
 
 import { bexContent } from 'quasar/wrappers'
 
-export default bexContent((/* bridge */) => {
+export default bexContent(({ useBridge }) => {
+  const bridge = useBridge({ name: 'my-content-script', debug: false })
+
   // Hook into the bridge to listen for events sent from the client BEX.
   /*
-  bridge.on('some.event', event => {
-    if (event.data.yourProp) {
+  bridge.on('some.event', message => {
+    if (message.payload.yourProp) {
       // Access a DOM element from here.
       // Document in this instance is the underlying website the contentScript runs on
       const el = document.getElementById('some-id')
