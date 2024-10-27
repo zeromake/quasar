@@ -58,7 +58,7 @@ export class BexBridge {
         port.onMessage.addListener(onMessage)
         port.onDisconnect.addListener(() => {
           port.onMessage.removeListener(onMessage)
-          delete this.portMap[ portType ]
+          delete this.portMap[ port.name ]
           this.#log(`Closed connection with "${ port.name }".`)
         })
 
