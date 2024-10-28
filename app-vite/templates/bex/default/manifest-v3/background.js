@@ -26,20 +26,18 @@ export default bexBackground(({ useBridge }) => {
   })
 
   bridge.on('storage.get', ({ payload }) => {
-    let result
-
-    if (payload === void 0) {
-      chrome.storage.local.get(null, items => {
-        // Group the values up into an array to take advantage of the bridge's chunk splitting.
-        result = Object.values(items)
-      })
-    } else {
-      chrome.storage.local.get([payload], items => {
-        result = items[payload]
-      })
-    }
-
-    return result
+    return new Promise(resolve => {
+      if (payload === void 0) {
+        chrome.storage.local.get(null, items => {
+          // Group the values up into an array to take advantage of the bridge's chunk splitting.
+          resolve(Object.values(items))
+        })
+      } else {
+        chrome.storage.local.get([payload], items => {
+          resolve(items[payload])
+        })
+      }
+    })
   })
   // Usage:
   // const { payload } = await bridge.send({
