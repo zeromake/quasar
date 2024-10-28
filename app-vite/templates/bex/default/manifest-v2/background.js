@@ -10,65 +10,92 @@ chrome.browserAction.onClicked.addListener((/* tab */) => {
   })
 })
 
-export default bexBackground((bridge /* , allActiveConnections */) => {
-  bridge.on('log', ({ data, respond }) => {
-    console.log(`[BEX] ${data.message}`, ...(data.data || []))
-    respond()
+export default bexBackground(({ useBridge }) => {
+  const bridge = useBridge({ debug: false })
+
+  bridge.on('log', ({ from, payload }) => {
+    console.log(`[BEX] @log from "${ from }"`, payload)
   })
 
-  bridge.on('getTime', ({ respond }) => {
-    respond(Date.now())
+  bridge.on('getTime', () => {
+    return Date.now()
   })
 
-  bridge.on('storage.get', ({ data, respond }) => {
-    const { key } = data
-    if (key === null) {
+  bridge.on('storage.get', ({ payload }) => {
+    let result
+
+    if (payload === void 0) {
       chrome.storage.local.get(null, items => {
         // Group the values up into an array to take advantage of the bridge's chunk splitting.
-        respond(Object.values(items))
+        result = Object.values(items)
       })
     } else {
-      chrome.storage.local.get([key], items => {
-        respond(items[key])
+      chrome.storage.local.get([payload], items => {
+        result = items[payload]
       })
     }
-  })
-  // Usage:
-  // const { data } = await bridge.send('storage.get', { key: 'someKey' })
 
-  bridge.on('storage.set', ({ data, respond }) => {
-    chrome.storage.local.set({ [data.key]: data.value }, () => {
-      respond()
-    })
+    return result
   })
   // Usage:
-  // await bridge.send('storage.set', { key: 'someKey', value: 'someValue' })
+  // const { payload } = await bridge.send({
+  //   event: 'storage.get',
+  //   to: 'background',
+  //   reply: true,
+  //   payload: key
+  // })
 
-  bridge.on('storage.remove', ({ data, respond }) => {
-    chrome.storage.local.remove(data.key, () => {
-      respond()
-    })
+  bridge.on('storage.set', ({ payload }) => {
+    chrome.storage.local.set({ [payload.key]: payload.value })
   })
   // Usage:
-  // await bridge.send('storage.remove', { key: 'someKey' })
+  // await bridge.send({
+  //   event: 'storage.set',
+  //   to: 'background',
+  //   payload: { key: 'someKey', value: 'someValue' }
+  // })
+
+  bridge.on('storage.remove', ({ payload }) => {
+    chrome.storage.local.remove(payload)
+  })
+  // Usage:
+  // await bridge.send({
+  //   event: 'storage.remove',
+  //   to: 'background',
+  //   payload: 'someKey'
+  // })
 
   /*
   // EXAMPLES
   // Listen to a message from the client
-  bridge.on('test', d => {
-    console.log(d)
+  bridge.on('test', message => {
+    console.log(message)
   })
 
   // Send a message to the client based on something happening.
   chrome.tabs.onCreated.addListener(tab => {
-    bridge.send('browserTabCreated', { tab })
+    bridge.send(...)
   })
 
   // Send a message to the client based on something happening.
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.url) {
-      bridge.send('browserTabUpdated', { tab, changeInfo })
+      bridge.send(...)
     }
   })
-   */
+
+  // send a message and wait for a response
+  const { payload } = await bridge.send({
+    event: 'test',
+    to: 'app',
+    reply: true, // required to get a response
+    payload: 'Hello from content-script'
+  })
+
+  // broadcast a message to app & content scripts
+  bridge.send({ event: 'test', payload: 'Hello from background!' })
+
+  // broadcast a message to all content scripts
+  bridge.send({ event: 'test', to: 'content-script', payload: 'Hello from background!' })
+  */
 })

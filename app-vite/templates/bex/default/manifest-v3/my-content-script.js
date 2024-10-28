@@ -19,4 +19,30 @@ export default bexContent(({ useBridge }) => {
     }
   })
   */
+
+  // More examples
+  /*
+  // send a message to background
+  bridge.send({ event: 'test', to: 'background', payload: 'Hello from content-script!' })
+
+  // send a message to app
+  bridge.send({ event: 'test', to: 'app', payload: 'Hello from content-script!' })
+
+  // send a message and wait for a response
+  const { payload } = await bridge.send({
+    event: 'test',
+    to: 'background',
+    reply: true, // required to get a response
+    payload: 'Hello from content-script'
+  })
+
+  // send a message to all other content scripts
+  bridge.send({ event: 'test', to: 'content-script', payload: 'Hello from content-script!' })
+
+  // broadcast a message to app & content scripts
+  bridge.send({ event: 'test', payload: 'Hello from background!' })
+
+  // broadcast a message to all content scripts
+  bridge.send({ event: 'test', to: 'content-script', payload: 'Hello from background!' })
+  */
 })
