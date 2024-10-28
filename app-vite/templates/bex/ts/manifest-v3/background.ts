@@ -1,5 +1,4 @@
 import { bexBackground } from 'quasar/wrappers';
-import { l } from 'vite/dist/node/types.d-aGj9QkWt';
 
 function openExtension () {
   chrome.tabs.create(
