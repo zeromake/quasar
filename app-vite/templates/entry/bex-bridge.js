@@ -4,12 +4,16 @@
  * DO NOT EDIT.
  **/
 
+function getRandomId (max) {
+  return Math.floor(Math.random() * max)
+}
+
 export class BexBridge {
   /**
    * Public properties
    */
   portMap = {}
-  listeners = {} // { type: 'on' | 'once' | 'reply', callback: message => void }
+  listeners = {} // { type: 'on' | 'once' | 'response', callback: message => void }
 
   /**
    * Private properties
@@ -30,7 +34,7 @@ export class BexBridge {
        *
        * Generating an easy to handle id for the content script.
        */
-      this.#id = `${ type }@${ name.replaceAll('@', '-') }-${ Math.floor(Math.random() * 10000) }`
+      this.#id = `${ type }@${ name.replaceAll('@', '-') }-${ getRandomId(10_000) }`
     }
 
     this.#banner = `[Quasar BEX | ${ this.#id }]`
@@ -124,54 +128,83 @@ export class BexBridge {
     return this // chainable
   }
 
-  send ({ event, to, reply = false, payload } = {}) {
-    if (event === void 0) {
+  // params: { event: string, to: string, respond: boolean, payload: any }
+  send (params = {}) {
+    const message = this.#createMessage(params)
+
+    if (message.event === void 0) {
       const log = 'Tried to send message with no "event" prop specified'
-      this.#warn(log, { event, to, reply, payload })
+      this.#warn(log, message)
       return Promise.reject(log)
     }
 
-    const isBroadcast = this.#isBroadcastDestination(to)
+    const isBroadcast = this.#isBroadcastDestination(message.to)
 
-    if (isBroadcast === true && reply !== false) {
-      const log = 'Broadcasting a message with "reply" is not allowed'
-      this.#warn(log, { event, to, reply, payload })
+    if (isBroadcast === true && message.respond === true) {
+      const log = 'Broadcasting a message and requiring a response (respond: true) is not allowed'
+      this.#warn(log, message)
       return Promise.reject(log)
-    }
-
-    const message = {
-      event,
-      from: this.#id,
-      to,
-      reply: reply === true,
-      payload,
-      timestamp: Date.now()
     }
 
     this.#log(
-      to === 'content-script'
-        ? `Broadcasting event "${ event }" to all content scripts`
+      message.to === 'content-script'
+        ? `Broadcasting event "${ message.event }" to all content scripts`
         : (
-            to === void 0
-              ? `Broadcasting event "${ event }"`
-              : `Sending event "${ event }" to "${ to }"`
+            message.to === void 0
+              ? `Broadcasting event "${ message.event }"`
+              : `Sending event "${ message.event }" to "${ message.to }"`
           ),
-      { event, to, reply, payload }
+      message
     )
 
-    if (message.reply === false) {
-      this.#handleMessage(message)
+    const sendMessage = () => {
+      if (Array.isArray(message.payload) === false) {
+        this.#handleMessage(message)
+        return
+      }
+
+      const chunkEvent = `${ message.event }@@@quasar:chunks:${ getRandomId(1000_000) }`
+      this.#handleMessage({
+        ...message,
+        payload: void 0,
+        chunks: {
+          number: message.payload.length,
+          event: chunkEvent
+        }
+      })
+
+      message.payload.forEach(data => {
+        this.#handleMessage(
+          this.#createMessage({
+            event: chunkEvent,
+            to: message.to,
+            payload: data
+          })
+        )
+      })
+    }
+
+    if (message.respond === false) {
+      sendMessage()
       return Promise.resolve() // be consistent with the return value
     }
 
     return new Promise(resolve => {
-      // flag the message with the event that should trigger the reply
-      message.reply = `${ event }____quasarResponseFrom:${ to }:${ message.timestamp }`
+      const respondEvent = `${ message.event }@@@quasar:response:${ getRandomId(1_000_000) }`
 
-      // register a temporary callback to be called when a reply is received
-      this.listeners[ message.reply ] = [ { type: 'reply', callback: resolve } ]
+      // flag the message with the event that should trigger the response
+      message.respondEvent = respondEvent
 
-      this.#handleMessage(message)
+      // register a temporary callback to be called when a response is received
+      this.listeners[ respondEvent ] = [ {
+        type: 'response',
+        callback: payload => {
+          delete this.listeners[ respondEvent ]
+          resolve(payload)
+        }
+      } ]
+
+      sendMessage()
     })
   }
 
@@ -182,6 +215,28 @@ export class BexBridge {
   reset () {
     this.listeners = {}
     this.#log('All listeners were removed')
+  }
+
+  #createMessage ({ event, to, respond, payload }) {
+    return {
+      event,
+      from: this.#id,
+      to,
+      respond: respond === true,
+      payload,
+      timestamp: Date.now()
+    }
+  }
+
+  #createResponseMessage (message, responsePayload) {
+    return {
+      event: message.respondEvent,
+      from: this.#id,
+      to: message.from,
+      payload: responsePayload,
+      respond: false,
+      timestamp: Date.now()
+    }
   }
 
   #isMessage (message) {
@@ -199,16 +254,6 @@ export class BexBridge {
       to === void 0
       || to === 'content-script'
     )
-  }
-
-  #createReplyMessage (message, replyPayload) {
-    return {
-      event: message.reply,
-      from: this.#id,
-      to: message.from,
-      payload: replyPayload,
-      timestamp: Date.now()
-    }
   }
 
   #formatLog (message) {
@@ -243,7 +288,7 @@ export class BexBridge {
   async #trigger (message) {
     const list = this.listeners[ message.event ]
     const isBroadcasted = this.#isBroadcastDestination(message.to)
-    let replyPayload
+    let responsePayload
 
     if (list === void 0) {
       // if it's a broadcast, we shouldn't complain
@@ -270,28 +315,50 @@ export class BexBridge {
         message
       )
 
-      // ensure the message is not tampered with
-      const callbackParam = message.payload !== void 0
-        ? JSON.parse(JSON.stringify(message.payload))
-        : void 0
+      if (message.chunks !== void 0) {
+        let localResolve
+        const promise = new Promise(resolve => {
+          localResolve = resolve
+        })
+
+        const acc = []
+        let chunksReceived = 0
+
+        // register a temporary callback to receive the chunk list
+        this.listeners[ message.chunks.event ] = [ {
+          type: 'chunk',
+          callback: chunk => {
+            acc.push(chunk)
+            chunksReceived++
+
+            if (chunksReceived === message.chunks.number) {
+              // we're done. free up the temporary listener
+              delete this.listeners[ message.chunks.event ]
+              localResolve(acc)
+            }
+          }
+        } ]
+
+        message.payload = await promise
+      }
 
       for (const { type, callback } of list.slice(0)) {
-        if (type !== 'on') {
+        if (type === 'once') {
           this.off(message.event, callback)
         }
 
-        if (message.reply !== void 0 && replyPayload === void 0) {
-          replyPayload = await callback(callbackParam)
+        if (message.respond === true && responsePayload === void 0) {
+          responsePayload = await callback(message)
         }
         else {
-          callback(callbackParam)
+          callback(message)
         }
       }
     }
 
-    if (isBroadcasted === false && typeof message.reply === 'string') {
+    if (isBroadcasted === false && message.respondEvent !== void 0) {
       this.#handleMessage(
-        this.#createReplyMessage(message, replyPayload)
+        this.#createResponseMessage(message, responsePayload)
       )
     }
   }
@@ -376,20 +443,20 @@ export class BexBridge {
 
       // if it requires an answer but there is no one to answer,
       // then we do it for resources to free up...
-      if (message.reply !== void 0) {
+      if (message.respond === true) {
         const fromPort = this.#getPort(message.from)
 
         // if the port does not exist anymore,
-        // then the reply is already not needed anymore
+        // then the response is already not needed anymore
         if (fromPort === void 0) {
           this.#warn(
-            `Event "${ message.event }" was sent from "${ message.from }" but there is no such connection to reply to`,
+            `Event "${ message.event }" was sent from "${ message.from }" but there is no such connection to respond to`,
             message
           )
         }
         else {
           fromPort.postMessage(
-            this.#createReplyMessage(message)
+            this.#createResponseMessage(message)
           )
         }
       }

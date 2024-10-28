@@ -39,7 +39,7 @@ export default bexBackground(({ useBridge }) => {
   // const { payload } = await bridge.send({
   //   event: 'storage.get',
   //   to: 'background',
-  //   reply: true,
+  //   respond: true,
   //   payload: key
   // })
 
@@ -47,7 +47,7 @@ export default bexBackground(({ useBridge }) => {
     chrome.storage.local.set({ [payload.key]: payload.value })
   })
   // Usage:
-  // await bridge.send({
+  // bridge.send({
   //   event: 'storage.set',
   //   to: 'background',
   //   payload: { key: 'someKey', value: 'someValue' }
@@ -70,6 +70,48 @@ export default bexBackground(({ useBridge }) => {
     console.log(message)
   })
 
+  // Send a message and split payload into chunks
+  // (to avoid max size limit of BEX messages)
+  bridge.send({
+    event: 'test',
+    to: 'app',
+    payload: [ 'chunk1', 'chunk2', 'chunk3', ... ]
+  })
+
+  // Send a message and wait for a response
+  const { payload } = await bridge.send({
+    event: 'test',
+    to: 'app',
+    respond: true, // required to get a response
+    payload: { banner: 'Hello from content-script' }
+  })
+
+  // Listen to a message from the client and only respond if requested so
+  bridge.on('test', message => {
+    console.log(message)
+    if (message.respond === true) {
+      return { banner: 'Hello from background!' }
+    }
+  })
+
+  // Listen to a message from the client and only respond if requested so
+  bridge.on('test', async message => {
+    console.log(message)
+    if (message.respond === true) {
+      const result = await someAsyncFunction()
+      return result
+    }
+  })
+
+  // Broadcast a message to app & content scripts
+  bridge.send({ event: 'test', payload: 'Hello from background!' })
+
+  // Broadcast a message to all content scripts
+  bridge.send({ event: 'test', to: 'content-script', payload: 'Hello from background!' })
+
+  // Send a message to a certain content script
+  bridge.send({ event: 'test', to: 'content-script@my-content-script-2345', payload: 'Hello from background!' })
+
   // Send a message to the client based on something happening.
   chrome.tabs.onCreated.addListener(tab => {
     bridge.send(...)
@@ -81,19 +123,5 @@ export default bexBackground(({ useBridge }) => {
       bridge.send(...)
     }
   })
-
-  // send a message and wait for a response
-  const { payload } = await bridge.send({
-    event: 'test',
-    to: 'app',
-    reply: true, // required to get a response
-    payload: 'Hello from content-script'
-  })
-
-  // broadcast a message to app & content scripts
-  bridge.send({ event: 'test', payload: 'Hello from background!' })
-
-  // broadcast a message to all content scripts
-  bridge.send({ event: 'test', to: 'content-script', payload: 'Hello from background!' })
   */
 })
