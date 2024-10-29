@@ -114,7 +114,6 @@ export class BexBridge {
     const target = this.listeners[ event ] || (this.listeners[ event ] = [])
     target.push({ type: 'on', callback })
     this.#log(`Started listening for "${ event }"`)
-    return this // chainable
   }
 
   // event: string
@@ -123,7 +122,6 @@ export class BexBridge {
     const target = this.listeners[ event ] || (this.listeners[ event ] = [])
     target.push({ type: 'once', callback })
     this.#log(`Started listening once for "${ event }"`)
-    return this // chainable
   }
 
   // event: string
@@ -133,12 +131,12 @@ export class BexBridge {
 
     if (list === void 0) {
       this.#warn(`Tried to remove listener for "${ event }" but there is no listener attached`)
-      return this // chainable
+      return
     }
 
     if (callback === void 0) {
       delete this.listeners[ event ]
-      return this // chainable
+      return
     }
 
     const liveEvents = list.filter(entry => entry.callback !== callback)
@@ -151,7 +149,6 @@ export class BexBridge {
     }
 
     this.#log(`Stopped listening for "${ event }"`)
-    return this // chainable
   }
 
   // param: {
@@ -235,9 +232,9 @@ export class BexBridge {
       // register a temporary callback to be called when a response is received
       this.listeners[ respondEvent ] = [ {
         type: 'response',
-        callback: payload => {
+        callback: responseMessage => {
           delete this.listeners[ respondEvent ]
-          resolve(payload)
+          resolve(responseMessage)
         }
       } ]
 
