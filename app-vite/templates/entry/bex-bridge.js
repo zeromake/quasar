@@ -8,12 +8,27 @@ function getRandomId (max) {
   return Math.floor(Math.random() * max)
 }
 
+/**
+ * Message: {
+ *  event: string,
+ *  from: string,
+ *  to?: string,
+ *  payload: any | void 0,
+ *  respond: boolean,
+ *  respondEvent?: string,
+ *  chunks?: {
+ *   event: string,
+ *   number: number
+ *  }
+ * }
+ */
+
 export class BexBridge {
   /**
    * Public properties
    */
   portMap = {}
-  listeners = {} // { type: 'on' | 'once' | 'response', callback: message => void }
+  listeners = {} // { type: "on" | "once" | "response", callback: Message => void }
 
   /**
    * Private properties
@@ -23,6 +38,11 @@ export class BexBridge {
   #debug = false
   #banner = null
 
+  // param: {
+  //   type: "background" | "content-script" | "app"
+  //   name: string
+  //   debug?: boolean
+  // }
   constructor ({ type, name, debug }) {
     this.#id = type
     this.#type = type
@@ -88,6 +108,8 @@ export class BexBridge {
     })
   }
 
+  // event: string
+  // callback: (message: Message) => Promise<any> | any | void
   on (event, callback) {
     const target = this.listeners[ event ] || (this.listeners[ event ] = [])
     target.push({ type: 'on', callback })
@@ -95,6 +117,8 @@ export class BexBridge {
     return this // chainable
   }
 
+  // event: string
+  // callback: (message: Message) => Promise<any> | any | void
   once (event, callback) {
     const target = this.listeners[ event ] || (this.listeners[ event ] = [])
     target.push({ type: 'once', callback })
@@ -102,6 +126,8 @@ export class BexBridge {
     return this // chainable
   }
 
+  // event: string
+  // callback: (message: Message) => Promise<any> | any | void
   off (event, callback) {
     const list = this.listeners[ event ]
 
@@ -128,8 +154,19 @@ export class BexBridge {
     return this // chainable
   }
 
-  // params: { event: string, to: string, respond: boolean, payload: any }
-  send (params = {}) {
+  // param: {
+  //   event: string,
+  //   to?: "background" | "app" | "content-script" | "content-script@<name>-<xxxxx>",
+  //   respond?: boolean,
+  //   payload?: any
+  // }
+  send (params) {
+    if (Object(params) !== params) {
+      const log = 'Tried to send message but no parameters were specified'
+      this.#warn(log)
+      return Promise.reject(log)
+    }
+
     const message = this.#createMessage(params)
 
     if (message.event === void 0) {
@@ -208,6 +245,7 @@ export class BexBridge {
     })
   }
 
+  // value: boolean
   setDebug (value) {
     this.#debug = value === true
   }
@@ -217,6 +255,12 @@ export class BexBridge {
     this.#log('All listeners were removed')
   }
 
+  // param: {
+  //   event: string,
+  //   to?: "background" | "app" | "content-script" | "content-script@<name>-<xxxx>",
+  //   respond?: boolean,
+  //   payload?: any
+  // }
   #createMessage ({ event, to, respond, payload }) {
     return {
       event,
@@ -228,6 +272,8 @@ export class BexBridge {
     }
   }
 
+  // message: Message
+  // responsePayload: any
   #createResponseMessage (message, responsePayload) {
     return {
       event: message.respondEvent,
@@ -239,6 +285,7 @@ export class BexBridge {
     }
   }
 
+  // message: Message | any
   #isMessage (message) {
     return (
       Object(message) === message
@@ -249,6 +296,7 @@ export class BexBridge {
     )
   }
 
+  // to: string | void 0
   #isBroadcastDestination (to) {
     return (
       to === void 0
@@ -256,14 +304,17 @@ export class BexBridge {
     )
   }
 
-  #formatLog (message) {
-    return `${ this.#banner } ${ message }`
+  // str: string
+  #formatLog (str) {
+    return `${ this.#banner } ${ str }`
   }
 
-  #log (message, debugObject) {
+  // str: string
+  // debugObject?: any | void 0
+  #log (str, debugObject) {
     if (this.#debug !== true) return
 
-    const log = this.#formatLog(message)
+    const log = this.#formatLog(str)
 
     if (debugObject !== void 0) {
       console.groupCollapsed(log)
@@ -275,8 +326,10 @@ export class BexBridge {
     }
   }
 
-  #warn (message, debugObject) {
-    const log = this.#formatLog(message)
+  // str: string
+  // debugObject?: any | void 0
+  #warn (str, debugObject) {
+    const log = this.#formatLog(str)
     if (debugObject !== void 0) {
       console.warn(log, debugObject)
     }
@@ -285,6 +338,7 @@ export class BexBridge {
     }
   }
 
+  // message: Message
   async #trigger (message) {
     const list = this.listeners[ message.event ]
     const isBroadcasted = this.#isBroadcastDestination(message.to)
@@ -316,30 +370,25 @@ export class BexBridge {
       )
 
       if (message.chunks !== void 0) {
-        let localResolve
-        const promise = new Promise(resolve => {
-          localResolve = resolve
-        })
+        message.payload = await new Promise(resolve => {
+          const acc = []
+          let chunksReceived = 0
 
-        const acc = []
-        let chunksReceived = 0
+          // register a temporary callback to receive the chunk list
+          this.listeners[ message.chunks.event ] = [ {
+            type: 'chunk',
+            callback: chunkMessage => {
+              acc.push(chunkMessage.payload)
+              chunksReceived++
 
-        // register a temporary callback to receive the chunk list
-        this.listeners[ message.chunks.event ] = [ {
-          type: 'chunk',
-          callback: chunk => {
-            acc.push(chunk)
-            chunksReceived++
-
-            if (chunksReceived === message.chunks.number) {
-              // we're done. free up the temporary listener
-              delete this.listeners[ message.chunks.event ]
-              localResolve(acc)
+              if (chunksReceived === message.chunks.number) {
+                // we're done. free up the temporary listener
+                delete this.listeners[ message.chunks.event ]
+                resolve(acc)
+              }
             }
-          }
-        } ]
-
-        message.payload = await promise
+          } ]
+        })
       }
 
       for (const { type, callback } of list.slice(0)) {
@@ -363,6 +412,7 @@ export class BexBridge {
     }
   }
 
+  // to: string
   #getPort (to) {
     const [ type, name ] = to.split('@')
     const target = this.portMap[ type ]
@@ -371,6 +421,7 @@ export class BexBridge {
       : target?.[ name ]
   }
 
+  // message: Message
   #handleMessage (message) {
     // if it's NOT generated by the bridge then ignore it
     if (this.#isMessage(message) === false) return
