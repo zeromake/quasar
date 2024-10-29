@@ -439,15 +439,15 @@ export class BexBridge {
           }
         }
         else {
-          // broadcasting it to all connected ports...
+          // triggering background first
+          this.#trigger(message)
+
+          // then broadcasting it to all connected ports...
           for (const name in this.portMap) {
             if (name !== message.from) {
               this.portMap[ name ].postMessage(message)
             }
           }
-
-          // then trigger it for background too
-          this.#trigger(message)
         }
 
         return
