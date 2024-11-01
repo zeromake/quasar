@@ -115,12 +115,12 @@ export class BexBridge {
 
       for (const id in this.packetMap) {
         const packet = this.packetMap[ id ]
-        packet.reject('Connection was closed')
+        item.reject('Connection was closed')
       }
 
       for (const id in this.messageMap) {
-        const packet = this.messageMap[ id ]
-        packet.reject('Connection was closed')
+        const item = this.messageMap[ id ]
+        item.reject('Connection was closed')
       }
 
       this.log('Closed connection with the background script.')
@@ -384,7 +384,22 @@ export class BexBridge {
      * then forward it to the target
      */
     if (packet.to !== this.portName) {
-      this.#sendPacket(packet)
+      this.#sendPacket(packet).catch(err => {
+        this.warn(
+          `Failed to forward message of type "${ packet.type }" from "${ packet.from }" to "${ packet.to }"`,
+          err
+        )
+
+        this.#sendMessage({
+          id: packet.id,
+          to: packet.from,
+          messageType: 'event-response',
+          messageProps: {
+            error: err.message || err,
+            quiet: true
+          }
+        })
+      })
       return
     }
 
@@ -402,6 +417,7 @@ export class BexBridge {
 
     if (packet.type === 'chunk') {
       const chunk = this.chunkMap[ packet.id ]
+
       if (chunk === void 0) {
         if (packet.chunkIndex !== void 0) {
           this.warn(
@@ -567,14 +583,15 @@ export class BexBridge {
 
   #onMessage (message) {
     if (message.type === 'event-response') {
-      const messageMapId = message.props.messageMapId
-      const target = this.messageMap[ messageMapId ]
+      const target = this.messageMap[ message.id ]
 
       if (target === void 0) {
-        this.warn(
-          `Received a response for an unknown message id: "${ messageMapId }"`,
-          message
-        )
+        if (message.props.quiet !== true) {
+          this.warn(
+            `Received a response for an unknown message id: "${ message.id }"`,
+            message
+          )
+        }
         return
       }
 
@@ -589,28 +606,25 @@ export class BexBridge {
     }
 
     if (message.type === 'event-send') {
-      const { event } = message.props
-
       this.#triggerMessageEvent({
         from: message.from,
         to: message.to,
-        event,
+        event: message.props.event,
         payload: message.payload
       }).then(returnPayload => {
         this.#sendMessage({
+          id: message.id,
           to: message.from,
           payload: returnPayload,
           messageType: 'event-response',
-          messageProps: {
-            messageMapId: message.id
-          }
+          messageProps: {}
         })
       }).catch(err => {
         this.#sendMessage({
+          id: message.id,
           to: message.from,
           messageType: 'event-response',
           messageProps: {
-            messageMapId: message.id,
             error: err
           }
         })
