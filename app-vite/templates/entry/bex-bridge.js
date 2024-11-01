@@ -62,10 +62,11 @@ export class BexBridge {
       }
     }
 
+    const runtime = chrome.runtime || browser.runtime
     const onPacket = this.#onPacket.bind(this)
 
     if (type === 'background') {
-      chrome.runtime.onConnect.addListener(port => {
+      runtime.onConnect.addListener(port => {
         if (this.portMap[ port.name ] !== void 0) {
           this.warn(
             `Connection with "${ port.name }" already exists.`
@@ -94,7 +95,14 @@ export class BexBridge {
 
     // else we're a content script or a popup/page
 
-    const portToBackground = chrome.runtime.connect({ name: this.portName })
+    this.on('@quasar:ports', ({ payload }) => {
+      this.portList = payload.portList
+      if (payload.removed !== void 0) {
+        this.#cleanupPort(payload.removed)
+      }
+    })
+
+    const portToBackground = runtime.connect({ name: this.portName })
     this.portMap = { background: portToBackground }
 
     portToBackground.onMessage.addListener(onPacket)
@@ -116,13 +124,6 @@ export class BexBridge {
       }
 
       this.log('Closed connection with the background script.')
-    })
-
-    this.on('@quasar:ports', ({ payload }) => {
-      this.portList = payload.portList
-      if (payload.removed !== void 0) {
-        this.#cleanupPort(payload.removed)
-      }
     })
   }
 
