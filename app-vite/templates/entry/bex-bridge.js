@@ -12,7 +12,7 @@ export class BexBridge {
   /**
    * Public properties
    */
-  name = null
+  portName = null // string
   listeners = {} // { type: "on" | "once", callback: Message => void }
   portMap = {} // { [portName]: chrome.runtime.Port }
   portList = [] // [ portName, ... ]
@@ -32,7 +32,7 @@ export class BexBridge {
   //   debug?: boolean
   // }
   constructor ({ type, name = '', debug }) {
-    this.name = type
+    this.portName = type
     this.#type = type
 
     if (type === 'content') {
@@ -42,10 +42,10 @@ export class BexBridge {
        *
        * Generating an easy to handle id for the content script.
        */
-      this.name = `${ type }@${ name.replaceAll('@', '-') }-${ getRandomId(10_000) }`
+      this.portName = `${ type }@${ name.replaceAll('@', '-') }-${ getRandomId(10_000) }`
     }
 
-    this.#banner = `[Quasar BEX | ${ this.name }]`
+    this.#banner = `[Quasar BEX | ${ this.portName }]`
     this.#debug = debug === true
 
     if (type === 'content') {
@@ -94,7 +94,7 @@ export class BexBridge {
 
     // else we're a content script or a popup/page
 
-    const portToBackground = chrome.runtime.connect({ name: this.name })
+    const portToBackground = chrome.runtime.connect({ name: this.portName })
     this.portMap = { background: portToBackground }
 
     portToBackground.onMessage.addListener(onPacket)
@@ -382,7 +382,7 @@ export class BexBridge {
      * if the packet is not addressed to this bridge
      * then forward it to the target
      */
-    if (packet.to !== this.name) {
+    if (packet.to !== this.portName) {
       this.#sendPacket(packet)
       return
     }
@@ -463,7 +463,7 @@ export class BexBridge {
 
   #sendPacket (packet) {
     this.log(
-      packet.from === this.name
+      packet.from === this.portName
         ? `Sending message of type "${ packet.type }" to "${ packet.to }"`
         : `Forwarding message of type "${ packet.type }" from "${ packet.from }" to "${ packet.to }"`
       ,
@@ -517,7 +517,7 @@ export class BexBridge {
     if (Array.isArray(payload) === false) {
       return this.#sendPacket({
         id,
-        from: this.name,
+        from: this.portName,
         to,
         type: 'full',
         payload,
@@ -528,7 +528,7 @@ export class BexBridge {
 
     let promise = this.#sendPacket({
       id,
-      from: this.name,
+      from: this.portName,
       to,
       type: 'chunk',
       chunksNumber: payload.length,
@@ -539,7 +539,7 @@ export class BexBridge {
     for (let i = 0; i < payload.length; i++) {
       promise = promise.then(() => this.#sendPacket({
         id,
-        from: this.name,
+        from: this.portName,
         to,
         type: 'chunk',
         payload: payload[ i ],
@@ -550,7 +550,7 @@ export class BexBridge {
     return promise.catch(err => {
       this.#sendPacket({
         id,
-        from: this.name,
+        from: this.portName,
         to,
         type: 'chunk-abort'
       }).catch(err => {

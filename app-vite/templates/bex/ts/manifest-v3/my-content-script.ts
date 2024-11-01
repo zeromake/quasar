@@ -106,7 +106,7 @@ export default bexContent(({ useBridge }) => {
   });
 
   // Current bridge port name (can be 'content@<name>-<xxxxx>')
-  console.log(bridge.name);
+  console.log(bridge.portName);
 
   // Log a message on the console (if debug is enabled)
   bridge.log('Hello world!');
