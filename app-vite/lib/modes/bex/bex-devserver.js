@@ -21,7 +21,8 @@ export class QuasarModeDevserver extends AppDevserver {
     this.registerDiff('bex', (quasarConf, diffMap) => [
       quasarConf.sourceFiles.bexManifestFile,
       quasarConf.bex.extendBexManifestJson,
-      quasarConf.bex.dynamicScripts,
+      quasarConf.bex.dynamicContentScripts,
+      quasarConf.bex.otherScripts,
       quasarConf.bex.extendBexScriptsConf,
       quasarConf.build.distDir,
 
@@ -63,7 +64,7 @@ export class QuasarModeDevserver extends AppDevserver {
       this.#manifestWatcher = null
     }
 
-    const { err, bexManifestPath, bexBackgroundScript, bexContentScriptList } = createManifest(quasarConf)
+    const { err, bexManifestPath, bexBackgroundScript, bexContentScriptList, bexOtherScriptList } = createManifest(quasarConf)
 
     if (err !== void 0) { process.exit(1) }
 
@@ -71,18 +72,18 @@ export class QuasarModeDevserver extends AppDevserver {
 
     this.#manifestWatcher.on('change', debounce(() => {
       queue(() => {
-        const { err, bexBackgroundScript, bexContentScriptList } = createManifest(quasarConf)
+        const { err, bexBackgroundScript, bexContentScriptList, bexOtherScriptList } = createManifest(quasarConf)
         if (err !== void 0) return
 
-        return this.#compileBexScripts(quasarConf, bexBackgroundScript, bexContentScriptList)
+        return this.#compileBexScripts(quasarConf, bexBackgroundScript, bexContentScriptList, bexOtherScriptList)
           .then(() => { this.printBanner(quasarConf) })
       })
     }, 1000))
 
-    return this.#compileBexScripts(quasarConf, bexBackgroundScript, bexContentScriptList)
+    return this.#compileBexScripts(quasarConf, bexBackgroundScript, bexContentScriptList, bexOtherScriptList)
   }
 
-  async #compileBexScripts (quasarConf, bexBackgroundScript, bexContentScriptList) {
+  async #compileBexScripts (quasarConf, bexBackgroundScript, bexContentScriptList, bexOtherScriptList) {
     this.#scriptWatchers.forEach(watcher => { watcher.close() })
     this.#scriptWatchers = []
 
@@ -100,6 +101,13 @@ export class QuasarModeDevserver extends AppDevserver {
       const contentConfig = await quasarBexConfig.contentScript(quasarConf, entry)
 
       await this.watchWithEsbuild(`Content Script (${ entry.name })`, contentConfig, rebuilt)
+        .then(esbuildCtx => { this.#scriptWatchers.push({ close: esbuildCtx.dispose }) })
+    }
+
+    for (const entry of bexOtherScriptList) {
+      const contentConfig = await quasarBexConfig.otherScript(quasarConf, entry)
+
+      await this.watchWithEsbuild(`Other Script (${ entry.name })`, contentConfig, rebuilt)
         .then(esbuildCtx => { this.#scriptWatchers.push({ close: esbuildCtx.dispose }) })
     }
   }

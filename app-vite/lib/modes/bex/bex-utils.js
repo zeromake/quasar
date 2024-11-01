@@ -80,6 +80,8 @@ function extractBexScripts (quasarConf, bexManifest) {
   const bexContentScriptList = []
   const rawContentScriptSet = new Set()
 
+  const bexOtherScriptList = []
+
   if (bexManifest.content_scripts) {
     bexManifest.content_scripts.forEach(entry => {
       if (entry.js?.length > 0) {
@@ -97,8 +99,8 @@ function extractBexScripts (quasarConf, bexManifest) {
     })
   }
 
-  if (quasarConf.bex.dynamicScripts.length !== 0) {
-    quasarConf.bex.dynamicScripts.forEach(rawEntry => {
+  if (quasarConf.bex.dynamicContentScripts.length !== 0) {
+    quasarConf.bex.dynamicContentScripts.forEach(rawEntry => {
       const filePath = resolveExtension(quasarConf.ctx.appPaths.resolve.bex(rawEntry))
       if (filePath === void 0) {
         warn()
@@ -114,7 +116,7 @@ function extractBexScripts (quasarConf, bexManifest) {
 
       if (rawContentScriptSet.has(jsScriptName) === true) {
         warn()
-        warn(`BEX script "${ scriptName }" is defined both in quasar config > bex > dynamicScripts and in the BEX manifest > content_scripts.`)
+        warn(`BEX script "${ scriptName }" is defined both in quasar config > bex > dynamicContentScripts and in the BEX manifest > content_scripts.`)
         warn()
         return
       }
@@ -128,9 +130,33 @@ function extractBexScripts (quasarConf, bexManifest) {
     })
   }
 
+  if (quasarConf.bex.otherScripts.length !== 0) {
+    quasarConf.bex.otherScripts.forEach(rawEntry => {
+      const filePath = resolveExtension(quasarConf.ctx.appPaths.resolve.bex(rawEntry))
+      if (filePath === void 0) {
+        warn()
+        warn(`The file for BEX other script "${ rawEntry }" does NOT exists. Skipping.`)
+        warn()
+        return
+      }
+
+      const entry = relative(quasarConf.ctx.appPaths.bexDir, filePath)
+      const extension = entry.substring(entry.lastIndexOf('.') + 1)
+      const scriptName = entry.substring(0, entry.length - extension.length - 1)
+      const jsScriptName = `${ scriptName }.js`
+
+      bexOtherScriptList.push({
+        name: jsScriptName,
+        from: filePath,
+        to: join(quasarConf.build.distDir, jsScriptName)
+      })
+    })
+  }
+
   return {
     bexBackgroundScript,
-    bexContentScriptList
+    bexContentScriptList,
+    bexOtherScriptList
   }
 }
 

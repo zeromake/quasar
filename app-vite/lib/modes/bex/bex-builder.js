@@ -12,7 +12,7 @@ export class QuasarModeBuilder extends AppBuilder {
     const viteConfig = await quasarBexConfig.vite(this.quasarConf)
     await this.buildWithVite('BEX UI', viteConfig)
 
-    const { err, bexBackgroundScript, bexContentScriptList } = createManifest(this.quasarConf)
+    const { err, bexBackgroundScript, bexContentScriptList, bexOtherScriptList } = createManifest(this.quasarConf)
     if (err !== void 0) process.exit(1)
 
     if (bexBackgroundScript !== null) {
@@ -23,6 +23,11 @@ export class QuasarModeBuilder extends AppBuilder {
     for (const entry of bexContentScriptList) {
       const contentConfig = await quasarBexConfig.contentScript(this.quasarConf, entry)
       await this.buildWithEsbuild(`Content Script (${ entry.name })`, contentConfig)
+    }
+
+    for (const entry of bexOtherScriptList) {
+      const contentConfig = await quasarBexConfig.otherScript(this.quasarConf, entry)
+      await this.buildWithEsbuild(`Other Script (${ entry.name })`, contentConfig)
     }
 
     copyBexAssets(this.quasarConf)

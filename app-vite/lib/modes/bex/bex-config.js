@@ -39,6 +39,24 @@ function createScript ({ quasarConf, type, entry }) {
   return extendEsbuildConfig(cfg, quasarConf.bex, quasarConf.ctx, 'extendBexScriptsConf')
 }
 
+// returns a Promise
+function createOtherScript ({ quasarConf, type, entry }) {
+  const filename = entry.name.replaceAll(sep, '_').replace(jsExtRE, '')
+  const entryPath = quasarConf.ctx.appPaths.resolve.entry(`bex-entry-${ type }-${ filename }.js`)
+
+  const content = scriptTemplates[ type ]
+    .replace('__IMPORT_NAME__', entry.name.replaceAll('\\', '/').replace(jsExtRE, ''))
+
+  writeFileSync(entryPath, content, 'utf-8')
+
+  const cfg = createBrowserEsbuildConfig(quasarConf, { compileId: `bex:${ type }:${ entry.name }` })
+
+  cfg.entryPoints = [ entryPath ]
+  cfg.outfile = join(quasarConf.build.distDir, entry.name)
+
+  return extendEsbuildConfig(cfg, quasarConf.bex, quasarConf.ctx, 'extendBexScriptsConf')
+}
+
 export const quasarBexConfig = {
   vite: async quasarConf => {
     const cfg = await createViteConfig(quasarConf, { compileId: 'vite-bex' })
@@ -49,7 +67,15 @@ export const quasarBexConfig = {
   },
 
   backgroundScript: (quasarConf, entry) => createScript({ quasarConf, type: 'background', entry }),
-  contentScript: (quasarConf, entry) => createScript({ quasarConf, type: 'content-script', entry })
+  contentScript: (quasarConf, entry) => createScript({ quasarConf, type: 'content-script', entry }),
+  otherScript: (quasarConf, entry) => {
+    const cfg = createBrowserEsbuildConfig(quasarConf, { compileId: `bex:other-script:${ entry.name }` })
+
+    cfg.entryPoints = [ entry.from ]
+    cfg.outfile = entry.to
+
+    return extendEsbuildConfig(cfg, quasarConf.bex, quasarConf.ctx, 'extendBexScriptsConf')
+  }
 }
 
 export const modeConfig = quasarBexConfig
