@@ -17,7 +17,7 @@ let bridge = null
 function useBridge ({ name, debug }) {
   if (bridge === null) {
     bridge = new BexBridge({
-      type: 'content-script',
+      type: 'content',
       name,
       debug
     })
