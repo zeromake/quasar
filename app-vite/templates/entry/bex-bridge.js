@@ -46,7 +46,7 @@ export class BexBridge {
       this.portName = `${ type }@${ name.replaceAll('@', '-') }-${ getRandomId(10_000) }`
     }
 
-    this.#banner = `[Quasar BEX | ${ this.portName }]`
+    this.#banner = `[QBex|${ this.portName }]`
     this.#debug = debug === true
 
     if (type !== 'background') {
@@ -180,50 +180,50 @@ export class BexBridge {
   // callback: (message: { from: string, to: string, payload?: any }) => void
   on (event, callback) {
     if (!event) {
-      this.warn('Tried add listener but no event specified')
+      this.warn('Tried add listener but no event specified.')
       return
     }
 
     if (typeof callback !== 'function') {
-      this.warn('Tried add listener but no valid callback function specified')
+      this.warn('Tried add listener but no valid callback function specified.')
       return
     }
 
     const target = this.listeners[ event ] || (this.listeners[ event ] = [])
     target.push({ type: 'on', callback })
-    this.log(`Added a listener for event: "${ event }"`)
+    this.log(`Added a listener for event: "${ event }".`)
   }
 
   // event: string
   // callback: (message: { from: string, to: string, payload?: any }) => void
   once (event, callback) {
     if (!event) {
-      this.warn('Tried add listener but no event specified')
+      this.warn('Tried add listener but no event specified.')
       return
     }
 
     if (typeof callback !== 'function') {
-      this.warn('Tried add listener but no valid callback function specified')
+      this.warn('Tried add listener but no valid callback function specified.')
       return
     }
 
     const target = this.listeners[ event ] || (this.listeners[ event ] = [])
     target.push({ type: 'once', callback })
-    this.log(`Added a one-time listener for event: "${ event }"`)
+    this.log(`Added a one-time listener for event: "${ event }".`)
   }
 
   // event: string
   // callback: (message: { from: string, to: string, payload?: any }) => void
   off (event, callback) {
     if (!event) {
-      this.warn('Tried to remove listeners but no event specified')
+      this.warn('Tried to remove listeners but no event specified.')
       return
     }
 
     const list = this.listeners[ event ]
 
     if (list === void 0) {
-      this.warn(`Tried to remove listener for "${ event }" event but there is no such listener attached`)
+      this.warn(`Tried to remove listener for "${ event }" event but there is no such listener attached.`)
       return
     }
 
@@ -236,12 +236,12 @@ export class BexBridge {
         delete this.listeners[ event ]
       }
 
-      this.log(`Stopped listening for "${ event }"`)
+      this.log(`Stopped listening for "${ event }".`)
       return
     }
 
     if (typeof callback !== 'function') {
-      this.warn('Tried to remove listener but the callback specified is not a function')
+      this.warn('Tried to remove listener but the callback specified is not a function.')
       return
     }
 
@@ -249,11 +249,11 @@ export class BexBridge {
 
     if (liveEvents.length !== 0) {
       this.listeners[ event ] = liveEvents
-      this.log(`Removed a listener for: "${ event }"`)
+      this.log(`Removed a listener for: "${ event }".`)
     }
     else {
       delete this.listeners[ event ]
-      this.log(`Stopped listening for: "${ event }"`)
+      this.log(`Stopped listening for: "${ event }".`)
     }
   }
 
@@ -325,35 +325,38 @@ export class BexBridge {
     this.#debug = value === true
   }
 
-  // str: string
-  #formatLog (str) {
-    return `${ this.#banner } ${ str }`
-  }
+  // ({ str: string, ...str?: string, debugObject?: any | void }) => void
+  log (...args) {
+    if (this.#debug !== true || args.length === 0) return
 
-  // ({ str: string, debugObject?: any | void }) => void
-  log (str, debugObject) {
-    if (this.#debug !== true) return
+    const lastArg = args[ args.length - 1 ]
 
-    const log = this.#formatLog(str)
-
-    if (debugObject !== void 0) {
+    if (lastArg !== void 0 && Object(lastArg) === lastArg) {
+      const log = `${ this.#banner } ${ args.slice(0, -1).join(' ') } (click to expand)`
       console.groupCollapsed(log)
-      console.dir(debugObject)
+      console.dir(lastArg)
       console.groupEnd(log)
     }
     else {
-      console.log(log)
+      console.log(this.#banner, ...args)
     }
   }
 
-  // ({ str: string, debugObject?: any | void }) => void
-  warn (str, debugObject) {
-    const log = this.#formatLog(str)
-    if (debugObject !== void 0) {
-      console.warn(log, debugObject)
+  // ({ str: string, ...str?: string, debugObject?: any | void }) => void
+  warn (...args) {
+    if (args.length === 0) return
+
+    const lastArg = args[ args.length - 1 ]
+
+    if (lastArg !== void 0 && Object(lastArg) === lastArg) {
+      console.warn(this.#banner, ...args.slice(0, -1))
+      const group = 'The above warning details (click to expand)'
+      console.groupCollapsed(group)
+      console.dir(lastArg)
+      console.groupEnd(group)
     }
     else {
-      console.warn(log)
+      console.warn(this.#banner, ...args)
     }
   }
 
@@ -372,7 +375,7 @@ export class BexBridge {
         }
       }).catch(err => {
         this.warn(
-          `Failed to inform "${ portName }" about the port list`,
+          `Failed to inform "${ portName }" about the port list.`,
           err
         )
       })
@@ -387,7 +390,7 @@ export class BexBridge {
 
     const plural = list.length > 1 ? 's' : ''
     this.log(
-      `Triggering ${ list.length } listener${ plural } for event: "${ message.event }"`,
+      `Triggering ${ list.length } listener${ plural } for event: "${ message.event }".`,
       { message, listeners: list }
     )
 
@@ -410,7 +413,7 @@ export class BexBridge {
       }
       catch (err) {
         this.warn(
-          `Error while triggering listener${ plural } for event: "${ message.event }"`,
+          `Error while triggering listener${ plural } for event: "${ message.event }".`,
           { error: err, message, listener: { type, callback } }
         )
         return Promise.reject(err)
@@ -452,14 +455,14 @@ export class BexBridge {
       || packet.type === void 0
     ) {
       this.log(
-        `Received a message that does not appear to be emitted by a Quasar bridge or is malformed`,
+        `Received a message that does not appear to be emitted by a Quasar bridge or is malformed.`,
         packet
       )
       return
     }
 
     this.log(
-      `Received message of type "${ packet.type }" from "${ packet.from }"`,
+      `Received message of type "${ packet.type }" from "${ packet.from }".`,
       packet
     )
 
@@ -470,7 +473,7 @@ export class BexBridge {
     if (packet.to !== this.portName) {
       this.#sendPacket(packet).catch(err => {
         this.warn(
-          `Failed to forward message of type "${ packet.type }" from "${ packet.from }" to "${ packet.to }"`,
+          `Failed to forward message of type "${ packet.type }" from "${ packet.from }" to "${ packet.to }".`,
           err
         )
 
@@ -505,7 +508,7 @@ export class BexBridge {
       if (chunk === void 0) {
         if (packet.chunkIndex !== void 0) {
           this.warn(
-            'Received an unregistered chunk',
+            'Received an unregistered chunk.',
             packet
           )
           return
@@ -524,7 +527,7 @@ export class BexBridge {
       // if we received an unexpected chunk
       if (packet.chunkIndex !== chunk.payload.length) {
         this.warn(
-          'Received an out of order chunk',
+          'Received an out of order chunk.',
           packet
         )
 
@@ -558,15 +561,15 @@ export class BexBridge {
     }
 
     this.warn(
-      `Received an unknown message type: "${ packet.type }"`
+      `Received an unknown message type: "${ packet.type }".`
     )
   }
 
   #sendPacket (packet) {
     this.log(
       packet.from === this.portName
-        ? `Sending message of type "${ packet.type }" to "${ packet.to }"`
-        : `Forwarding message of type "${ packet.type }" from "${ packet.from }" to "${ packet.to }"`
+        ? `Sending message of type "${ packet.type }" to "${ packet.to }".`
+        : `Forwarding message of type "${ packet.type }" from "${ packet.from }" to "${ packet.to }".`
       ,
       packet
     )
@@ -594,7 +597,7 @@ export class BexBridge {
     }
     catch (err) {
       this.warn(
-        `Failed to send message to "${ packet.to }"`,
+        `Failed to send message to "${ packet.to }".`,
         err
       )
       return Promise.reject(err)
@@ -656,7 +659,7 @@ export class BexBridge {
         type: 'chunk-abort'
       }).catch(err => {
         this.warn(
-          `Failed to send a chunk-abort message to "${ to }"`,
+          `Failed to send a chunk-abort message to "${ to }".`,
           err
         )
       })
@@ -672,7 +675,7 @@ export class BexBridge {
       if (target === void 0) {
         if (message.props.quiet !== true) {
           this.warn(
-            `Received a response for an unknown message id: "${ message.id }"`,
+            `Received a response for an unknown message id: "${ message.id }".`,
             message
           )
         }
@@ -718,7 +721,7 @@ export class BexBridge {
     }
 
     this.warn(
-      `Received a message with unknown type: "${ message.type }"`,
+      `Received a message with unknown type: "${ message.type }".`,
       message
     )
   }
