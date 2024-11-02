@@ -901,7 +901,11 @@ bridge.on('@quasar:ports', ({ portList, added, removed }) => {
 
 // Current bridge port name (can be 'background', 'app', or 'content@<name>-<xxxxx>')
 console.log(bridge.portName)
+```
 
+If you encounter problems with sending messages between the BEX parts, you could enable the debug mode for the bridges that interest you. In doing so, the communication will also be outputted to the browser console:
+
+```js Bridge debug mode
 // Dynamically set debug mode
 bridge.setDebug(true) // boolean
 
