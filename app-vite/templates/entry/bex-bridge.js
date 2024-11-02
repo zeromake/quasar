@@ -13,6 +13,7 @@ export class BexBridge {
    * Public properties
    */
   portName = null // string
+  isConnected = false // boolean
   listeners = {} // { type: "on" | "once", callback: Message => void }
   portMap = {} // { [portName]: chrome.runtime.Port }
   portList = [] // [ portName, ... ]
@@ -48,6 +49,15 @@ export class BexBridge {
     this.#banner = `[Quasar BEX | ${ this.portName }]`
     this.#debug = debug === true
 
+    if (type !== 'background') {
+      this.on('@quasar:ports', ({ payload }) => {
+        this.portList = payload.portList
+        if (payload.removed !== void 0) {
+          this.#cleanupPort(payload.removed)
+        }
+      })
+    }
+
     if (type === 'content') {
       if (!name) {
         this.warn('Content script name was not specified on instantiation.')
@@ -61,11 +71,11 @@ export class BexBridge {
         )
       }
     }
+    else if (type === 'background') {
+      this.isConnected = true
+      const runtime = chrome.runtime || browser.runtime
+      const onPacket = this.#onPacket.bind(this)
 
-    const runtime = chrome.runtime || browser.runtime
-    const onPacket = this.#onPacket.bind(this)
-
-    if (type === 'background') {
       runtime.onConnect.addListener(port => {
         if (this.portMap[ port.name ] !== void 0) {
           this.warn(
@@ -89,63 +99,127 @@ export class BexBridge {
         this.log(`Opened connection with ${ port.name }.`)
         this.#updatePortList({ added: port.name})
       })
+    }
+  }
 
-      return
+  // () => Promise<void>
+  connectToBackground () {
+    if (this.#type === 'background') {
+      return Promise.reject('The background script itself does not need to connect')
     }
 
-    // else we're a content script or a popup/page
+    if (this.isConnected === true) {
+      return Promise.reject('The bridge is already connected')
+    }
 
-    this.on('@quasar:ports', ({ payload }) => {
-      this.portList = payload.portList
-      if (payload.removed !== void 0) {
-        this.#cleanupPort(payload.removed)
-      }
-    })
-
+    const runtime = chrome.runtime || browser.runtime
     const portToBackground = runtime.connect({ name: this.portName })
-    this.portMap = { background: portToBackground }
 
-    portToBackground.onMessage.addListener(onPacket)
-    portToBackground.onDisconnect.addListener(() => {
-      portToBackground.onMessage.removeListener(onPacket)
+    return new Promise((resolve, reject) => {
+      const onPacket = packet => {
+        if (this.isConnected === false) {
+          /**
+           * We rely on the fact that upon connection is established
+           * the background script will send a @quasar:ports event
+           */
+          this.isConnected = true
+          this.log('Connected to the background script.')
+          this.portMap = { background: portToBackground }
+          resolve()
+        }
 
-      this.chunkMap = {}
-      this.portMap = {}
-      this.portList = []
-
-      for (const id in this.packetMap) {
-        const packet = this.packetMap[ id ]
-        item.reject('Connection was closed')
+        this.#onPacket(packet)
       }
 
-      for (const id in this.messageMap) {
-        const item = this.messageMap[ id ]
-        item.reject('Connection was closed')
+      const onDisconnect = () => {
+        if (chrome.runtime.lastError?.message?.indexOf('Could not establish connection') !== -1) {
+          this.isConnected = false
+          portToBackground.onMessage.removeListener(onPacket)
+          portToBackground.onMessage.removeListener(onDisconnect)
+          reject('Could not connect to the background script.')
+          return
+        }
+
+        this.isConnected = false
+
+        for (const id in this.messageMap) {
+          const item = this.messageMap[ id ]
+          item.reject('Connection was closed')
+        }
+
+        this.portMap = {}
+        this.portList = []
+        this.messageMap = {}
+        this.chunkMap = {}
+
+        this.log('Closed connection with the background script.')
       }
 
-      this.log('Closed connection with the background script.')
+      portToBackground.onMessage.addListener(onPacket)
+      portToBackground.onDisconnect.addListener(onDisconnect)
     })
+  }
+
+  // () => Promise<void>
+  disconnectFromBackground () {
+    if (this.#type === 'background') {
+      return Promise.reject('Background script does not need to disconnect')
+    }
+
+    if (this.isConnected === false) {
+      return Promise.reject('Tried to disconnect from the background script but the port was not connected')
+    }
+
+    this.portMap.background.disconnect()
+    delete this.portMap.background
+    this.isConnected = false
+    return Promise.resolve()
   }
 
   // event: string
   // callback: (message: { from: string, to: string, payload?: any }) => void
   on (event, callback) {
+    if (!event) {
+      this.warn('Tried add listener but no event specified')
+      return
+    }
+
+    if (typeof callback !== 'function') {
+      this.warn('Tried add listener but no valid callback function specified')
+      return
+    }
+
     const target = this.listeners[ event ] || (this.listeners[ event ] = [])
     target.push({ type: 'on', callback })
-    this.log(`Listening for event: "${ event }"`)
+    this.log(`Added a listener for event: "${ event }"`)
   }
 
   // event: string
   // callback: (message: { from: string, to: string, payload?: any }) => void
   once (event, callback) {
+    if (!event) {
+      this.warn('Tried add listener but no event specified')
+      return
+    }
+
+    if (typeof callback !== 'function') {
+      this.warn('Tried add listener but no valid callback function specified')
+      return
+    }
+
     const target = this.listeners[ event ] || (this.listeners[ event ] = [])
     target.push({ type: 'once', callback })
-    this.log(`Listening once for event: "${ event }"`)
+    this.log(`Added a one-time listener for event: "${ event }"`)
   }
 
   // event: string
   // callback: (message: { from: string, to: string, payload?: any }) => void
   off (event, callback) {
+    if (!event) {
+      this.warn('Tried to remove listeners but no event specified')
+      return
+    }
+
     const list = this.listeners[ event ]
 
     if (list === void 0) {
@@ -154,7 +228,20 @@ export class BexBridge {
     }
 
     if (callback === void 0) {
-      delete this.listeners[ event ]
+      if (event.startsWith('@quasar:')) {
+        // ensure we don't remove internal listeners
+        this.listeners[ event ] = [ list[ 0 ] ]
+      }
+      else {
+        delete this.listeners[ event ]
+      }
+
+      this.log(`Stopped listening for "${ event }"`)
+      return
+    }
+
+    if (typeof callback !== 'function') {
+      this.warn('Tried to remove listener but the callback specified is not a function')
       return
     }
 
@@ -162,12 +249,12 @@ export class BexBridge {
 
     if (liveEvents.length !== 0) {
       this.listeners[ event ] = liveEvents
+      this.log(`Removed a listener for: "${ event }"`)
     }
     else {
       delete this.listeners[ event ]
+      this.log(`Stopped listening for: "${ event }"`)
     }
-
-    this.log(`Stopped listening for "${ event }"`)
   }
 
   // ({
@@ -178,17 +265,21 @@ export class BexBridge {
   //
   // Returns a Promise that resolves with the response payload
   send ({ event, to, payload } = {}) {
+    if (this.isConnected === false) {
+      return Promise.reject(
+        'Tried to send message but the bridge is not connected. Please connect it first.'
+      )
+    }
+
     if (!event) {
       return Promise.reject(
-        'Tried to send message with no "event" prop specified',
-        { event, to, payload }
+        'Tried to send message with no "event" prop specified'
       )
     }
 
     if (!to) {
       return Promise.reject(
-        'Tried to send message with no "to" prop specified',
-        { event, to, payload }
+        'Tried to send message with no "to" prop specified'
       )
     }
 
@@ -331,13 +422,6 @@ export class BexBridge {
 
   // portName: string
   #cleanupPort (portName) {
-    for (const id in this.packetMap) {
-      const packet = this.packetMap[ id ]
-      if (packet.portName === portName) {
-        packet.reject('Connection was closed')
-      }
-    }
-
     for (const id in this.chunkMap) {
       const packet = this.chunkMap[ id ]
       if (packet.portName === portName) {

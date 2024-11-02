@@ -15,6 +15,9 @@ chrome.runtime.onInstalled.addListener(openExtension)
 chrome.action.onClicked.addListener(openExtension)
 
 export default bexBackground(({ useBridge }) => {
+  // Call useBridge() to enable communication with the app & content scripts
+  // (and between the app & content scripts), otherwise skip calling
+  // useBridge() and use no bridge.
   const bridge = useBridge({ debug: false })
 
   bridge.on('log', ({ from, payload }) => {

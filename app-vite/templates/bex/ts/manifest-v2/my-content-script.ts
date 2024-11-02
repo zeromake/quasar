@@ -4,6 +4,7 @@
 import { bexContent } from 'quasar/wrappers'
 
 export default bexContent(({ useBridge }) => {
+  // The use of the bridge is optional.
   const bridge = useBridge({ name: 'my-content-script', debug: false })
 
   // Hook into the bridge to listen for events sent from the client BEX.
@@ -17,6 +18,21 @@ export default bexContent(({ useBridge }) => {
       }
     }
   })
+
+  // Leave this AFTER you attach or send your initial events
+  // so that the bridge can properly handle them.
+  //
+  // You can also disconnect from the background script
+  // later on by calling bridge.disconnectFromBackground().
+  //
+  // To check connection status, access bridge.isConnected
+  bridge.connectToBackground()
+    .then(() => {
+      console.log('Connected to background');
+    })
+    .catch(err => {
+      console.error('Failed to connect to background:', err);
+    });
 
   /*
   // More examples:
