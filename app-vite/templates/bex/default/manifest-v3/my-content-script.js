@@ -19,7 +19,7 @@ export default bexContent(({ useBridge }) => {
     }
   })
 
-  // Leave this AFTER you attach or send your initial events
+  // Leave this AFTER you attach your initial events
   // so that the bridge can properly handle them.
   //
   // You can also disconnect from the background script
