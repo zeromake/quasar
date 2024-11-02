@@ -24,6 +24,7 @@ export class EntryFilesGenerator {
     }
     else if (ctx.mode.bex) {
       regularFiles.push(
+        'bex-app.js',
         'bex-bridge.js'
       )
     }
