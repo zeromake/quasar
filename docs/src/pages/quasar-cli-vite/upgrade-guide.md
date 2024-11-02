@@ -33,6 +33,7 @@ api.compatibleWith(
 * Typescript detection is based on the quasar.config file being in TS form (quasar.config.ts) and tsconfig.json file presence.
 * feat+refactor(app-vite): ability to run multiple modes + dev/build simultaneously (huge effort!)
 * SSR and Electron modes now build in ESM format.
+* New BEX mode with significant new capabilities.
 * Dropped support for our internal linting system (quasar.config file > eslint). Should use [vite-plugin-checker](https://vite-plugin-checker.netlify.app/) instead.
 * **We will detail more breaking changes for each of the Quasar modes below**.
 
@@ -73,6 +74,7 @@ Some of the work below has already been backported to the old @quasar/app-vite v
 * feat(app-vite): Support for Bun as package manager #16335
 * feat(app-vite): for default /src-ssr template -> prod ssr -> on error, print err stack if built with debugging enabled
 * feat(app-vite): extend build > vitePlugins form (additional { server?: boolean, client?: boolean } param
+* feat+refactor(app-vite): BEX -> Completely rewrote & redesigned the Quasar Bridge (with a ton of new features); Automatically infer the background script file & the content script files from the bex manifest itself; Ability to specify dynamic content scripts that you can register & load yourself at runtime; Ability to compile other js/ts files as well that you might need to dynamically load/inject; No more 3s delay when opening the popup; No more "dom" script (use content script directly); The bridge is available globally in App (/src) through the $q object or window.QBexBridge
 
 ### Beginning of the upgrade process
 
@@ -124,13 +126,14 @@ Preparations:
   You can now write this file in TS too should you wish (rename `/quasar.config.js` to `/quasar.config.ts` -- notice the `.ts` file extension).
   :::
 
-* We **highly recommend** setting `type` to `module` in your `/package.json`. Based on it, the Quasar CLI will make decisions on the distributables that it builds (example: Electron in ESM or CJS form).
+* We **highly recommend** setting `type` to `module` in your `/package.json`. Do not overlook this step.
   ```diff /package.json
   {
   + "type": "module"
   }
   ```
   <br>
+
   Remember to convert to ESM the `postcss.config.js` file should you use it. Also, rename `.eslintrc.js` to `.eslintrc.cjs` (with no change to its content).
   <br><br>
 
@@ -671,14 +674,247 @@ ssr: {
 }
 ```
 
-### Bex mode changes
-No need to change anything, however we are highlighting here an addition to the `/quasar.conf` file:
+### Bex mode changes <q-badge label="updated for v2.0.0-beta.25+" />
+
+There are quite a few improvements, however you will need to make some adjustments:
+* Completely rewrote & redesigned the Quasar Bridge to allow for:
+  * Sending messages directly between any part of your bex (app, content scripts, background)
+  * Ability to skip using the bridge altogether
+  * Error handling for sending & receiving messages through the bridge
+  * Better handling of internal resources to avoid memory leaks (there were some edge cases in the previous implementation)
+  * Debug mode (where all the bridge communication will be outputted to the browser console)
+  * Breaking changes highlights: background & content scripts initialization of the bridge; bride.on() calls when responding; bridge.send() calls
+  * The bridge is now available throughout the App in `/src/` (regardless of the file used: boot files, router init, App.vue, any Vue component, ...) by accessing the `$q object` or `window.QBexBridge`
+* Automatically infer the background script file & the content script files from `/src-bex/manifest.json`
+* Ability to specify dynamic content scripts that you can register & load yourself at runtime
+* Ability to compile other js/ts files as well that you might need to dynamically load/inject
+* No more 3s delay when opening the popup
+* The "dom" script support was removed. Simply move your logic from there into one of your content scripts.
 
 ```diff /quasar.config file
 sourceFiles: {
 + bexManifestFile: 'src-bex/manifest.json',
   // ...
 },
+bex: {
+- contentScripts: []
++ dynamicContentScripts: [],
++ otherScripts: []
+}
+```
+
+```js [highlight=3,7] Background script
+import { bexBackground } from 'quasar/wrappers'
+
+export default bexBackground(({ useBridge }) => {
+  // Call useBridge() to enable communication with the app & content scripts
+  // (and between the app & content scripts), otherwise skip calling
+  // useBridge() and use no bridge.
+  const bridge = useBridge({ debug: false })
+
+  // bridge.on(event, callback)
+  // bridge.send({ event, to, payload }).then(() => {}).catch(() => {})
+})
+```
+
+```js [highlight=3,5,17] Content scripts
+import { bexContent } from 'quasar/wrappers'
+
+export default bexContent(({ useBridge }) => {
+  // The use of the bridge is optional in content scripts.
+  const bridge = useBridge({ name: 'my-content-script', debug: false })
+
+  // Attach initial events, if any
+  // bridge.on(event, callback)
+
+  // Leave this AFTER you attach your initial events
+  // so that the bridge can properly handle them.
+  //
+  // You can also disconnect from the background script
+  // later on by calling bridge.disconnectFromBackground().
+  //
+  // To check connection status, access bridge.isConnected
+  bridge.connectToBackground()
+    .then(() => {
+      console.log('Connected to background')
+      // now you can send your initial messages, if any;
+      // bridge.send({ event, to, payload }).then(() => {}).catch(() => {})
+    })
+    .catch(err => {
+      console.error('Failed to connect to background:', err)
+    })
+})
+```
+
+```tabs App (/src/...) vue components
+<<| html Composition API + script setup |>>
+<template>
+  <div />
+</template>
+
+<script setup>
+import { useQuasar } from 'quasar'
+const $q = useQuasar()
+
+// Use $q.bex (the bridge)
+</script>
+<<| html Composition API + script |>>
+<template>
+  <div />
+</template>
+
+<script>
+import { useQuasar } from 'quasar'
+
+export default {
+  setup () {
+    const $q = useQuasar()
+    // Use $q.bex (the bridge)
+  }
+}
+</script>
+<<| html Options API |>>
+<template>
+  <div />
+</template>
+
+<script>
+export default {
+  // Use this.$q.bex (the bridge)
+}
+</script>
+```
+
+::: warning Warning! Sending large amounts of data
+All browser extensions have a hard limit on the amount of data that can be passed as communication messages (example: 50MB). If you exceed that amount on your payload, you can send chunks (**`payload` param should be an Array**).
+
+<br>
+
+```js
+bridge.send({
+  event: 'some.event',
+  to: 'app',
+  payload: [ chunk1, chunk2, ...chunkN ]
+})
+```
+
+<br>
+
+When calculating the payload size, have in mind that the payload is wrapped in a message built by the Bridge that contains some other properties too. That takes a few bytes as well. So your chunks' size should be with a few bytes below the browser's threshold.
+:::
+
+::: warning Warning! Performance on sending an Array
+Like we've seen on the warning above, if `payload` is Array then the bridge will send a message for each of the Array's elements.
+When you actually want to send an Array (not split the payload into chunks), this will be **VERY** inefficient.
+
+<br>
+
+The solution is to wrap your Array in an Object (so only one message will be sent):
+
+<br>
+
+```js
+bridge.send({
+  event: 'some.event',
+  to: 'background',
+  payload: {
+    myArray: [ /*...*/ ]
+  }
+})
+```
+:::
+
+```js Bex Bridge messaging
+// Listen to a message from the client
+bridge.on('test', message => {
+  console.log(message)
+  console.log(message.payload)
+  console.log(message.from)
+})
+
+// Send a message and split payload into chunks
+// to avoid max size limit of BEX messages.
+// Warning! This happens automatically when the payload is an array.
+// If you actually want to send an Array, wrap it in an object.
+bridge.send({
+  event: 'test',
+  to: 'app',
+  payload: [ 'chunk1', 'chunk2', 'chunk3', ... ]
+}).then(responsePayload => { ... }).catch(err => { ... })
+
+// Send a message and wait for a response
+bridge.send({
+  event: 'test',
+  to: 'background',
+  payload: { banner: 'Hello from content-script' }
+}).then(responsePayload => { ... }).catch(err => { ... })
+
+// Listen to a message from the client and respond synchronously
+bridge.on('test', message => {
+  console.log(message)
+  return { banner: 'Hello from a content-script!' }
+})
+
+// Listen to a message from the client and respond asynchronously
+bridge.on('test', async message => {
+  console.log(message)
+  const result = await someAsyncFunction()
+  return result
+})
+bridge.on('test', message => {
+  console.log(message)
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve({ banner: 'Hello from a content-script!' })
+    }, 1000)
+  })
+})
+
+// Broadcast a message to app & content scripts
+bridge.portList.forEach(portName => {
+  bridge.send({ event: 'test', to: portName, payload: 'Hello from background!' })
+})
+
+// Find any connected content script and send a message to it
+const contentPort = bridge.portList.find(portName => portName.startsWith('content@'))
+if (contentPort) {
+  bridge.send({ event: 'test', to: contentPort, payload: 'Hello from background!' })
+}
+
+// Send a message to a certain content script
+bridge
+  .send({ event: 'test', to: 'content@my-content-script-2345', payload: 'Hello from a content-script!' })
+  .then(responsePayload => { ... })
+  .catch(err => { ... })
+
+// Listen for connection events
+// (the "@quasar:ports" is an internal event name registered automatically by the bridge)
+// --> ({ portList: string[], added?: string } | { portList: string[], removed?: string })
+bridge.on('@quasar:ports', ({ portList, added, removed }) => {
+  console.log('Ports:', portList)
+  if (added) {
+    console.log('New connection:', added)
+  } else if (removed) {
+    console.log('Connection removed:', removed)
+  }
+})
+
+// Current bridge port name (can be 'background', 'app', or 'content@<name>-<xxxxx>')
+console.log(bridge.portName)
+
+// Dynamically set debug mode
+bridge.setDebug(true) // boolean
+
+// Log a message on the console (if debug is enabled)
+bridge.log('Hello world!')
+bridge.log('Hello', 'world!')
+bridge.log('Hello world!', { some: 'data' })
+bridge.log('Hello', 'world', '!', { some: 'object' })
+// Log a warning on the console (regardless of the debug setting)
+bridge.warn('Hello world!')
+bridge.warn('Hello', 'world!')
+bridge.warn('Hello world!', { some: 'data' })
+bridge.warn('Hello', 'world', '!', { some: 'object' })
 ```
 
 ### Other /quasar.config file changes
