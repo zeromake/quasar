@@ -1,12 +1,4 @@
-import type { EventEmitter } from "events";
 import type { LiteralUnion } from "quasar";
-
-type BexObjectMessage = { event: string; payload: any };
-type BexMessage = string | BexObjectMessage;
-interface BexWall {
-  listen(callback: (messages: BexMessage | BexMessage[]) => void): void;
-  send(data: BexObjectMessage[]): void;
-}
 
 /**
  * @example
@@ -19,17 +11,17 @@ interface BexWall {
  *   }
  * }
  *
- * bridge.send('without-payload-and-response');
+ * await bridge.send('without-payload-and-response');
  *
- * bridge.on('with-payload-without-response', ({ data }) => {
- *   data // type: { test: number[] }
+ * bridge.on('with-payload-without-response', ({ payload }) => {
+ *   payload // type: { test: number[] }
  * });
  *
- * bridge.on('with-payload-and-response', ({ data, respond }) => {
- *   const { foo } = data; // { foo: ['a', 'b'] }
+ * bridge.on('with-payload-and-response', async ({ payload }) => {
+ *   const { foo } = payload; // { foo: ['a', 'b'] }
  *
  *   const result = foo[0].charCodeAt() + foo[1].charCodeAt(); // 97 + 98
- *   void respond(result);
+ *   return result;
  * });
  * const response = await bridge.send('with-payload-and-response', { foo: ['a', 'b'] });
  * console.log(response); // 195
@@ -39,76 +31,93 @@ export interface BexEventMap {}
 type BexEventName = LiteralUnion<Exclude<keyof BexEventMap, number>>;
 type BexEventEntry<
   K extends BexEventName,
-  P = K extends keyof BexEventMap ? BexEventMap[K] : any[]
+  P = K extends keyof BexEventMap ? BexEventMap[K] : any[],
 > = P extends never
   ? [never, never]
   : P extends [unknown, unknown]
-  ? P
-  : [any, any];
+    ? P
+    : [any, any];
 type BexEventData<T extends BexEventName> = BexEventEntry<T>[0];
 type BexEventResponse<T extends BexEventName> = BexEventEntry<T>[1];
 
-type BexPayload<TData, TResponse> = {
-  data: TData;
-  /** @deprecated Use {@link BexPayload.respond} instead */
-  eventResponseKey: string;
-  /**
-   * Calling this will resolve the Promise of the `send()` call.
-   * You can use this to communicate back with the sender.
-   */
-  respond: (
-    ...payload: TResponse extends never ? [] : [TResponse]
-  ) => Promise<BexPayload<TData, TResponse>>;
-};
+type BexMessage<TPayload> = {
+  from: string;
+  to: string;
+  event: string;
+} & (TPayload extends never ? { payload?: undefined } : { payload: TPayload });
+
 type BexEventListener<T extends BexEventName> = (
-  payload: BexPayload<BexEventData<T>, BexEventResponse<T>>
-) => void;
+  message: BexMessage<BexEventData<T>>,
+) => BexEventResponse<T>;
 
-export interface BexBridge extends EventEmitter {
-  constructor(wall: BexWall): BexBridge;
-
-  getEvents(): {
-    [T in BexEventName]: (
-      ...payload: BexEventData<T> extends never ? [] : [BexEventData<T>]
-    ) => void;
+export interface BexBridge {
+  readonly portName: string;
+  readonly listeners: Record<
+    BexEventName,
+    { type: "on" | "once"; callback: BexEventListener<BexEventName> }[]
+  >;
+  readonly portMap: Record<string, chrome.runtime.Port>;
+  readonly portList: string[];
+  readonly messageMap: Record<
+    string,
+    {
+      portName: string;
+      resolve: (payload: any) => void;
+      reject: (error: any) => void;
+    }
+  >;
+  readonly chunkMap: Record<
+    string,
+    {
+      portName: string;
+      number: number;
+      payload: unknown[];
+    } & {
+      messageType: "event-send";
+      messageProps: {
+        event: BexEventName;
+      };
+    }
+  > & {
+    messageType: "event-response";
+    messageProps: {
+      messageMapId: string;
+      error?: Error;
+    };
   };
 
+  constructor(options: {
+    type: "background" | "content" | "app";
+    name?: string; // TODO: make it available&required only for content scripts
+    debug?: boolean;
+  }): BexBridge;
+
   send<T extends BexEventName>(
-    eventName: T,
-    ...payload: BexEventData<T> extends never ? [] : [BexEventData<T>]
-  ): Promise<BexPayload<BexEventResponse<T>, BexEventData<T>>>;
+    options: {
+      event: T;
+      to?: "background" | "app" | `content@${string}-${string}`;
+    } & (BexEventData<T> extends never
+      ? { payload?: undefined }
+      : { payload: BexEventData<T> }),
+  ): Promise<BexEventData<T>>;
 
   on<T extends BexEventName>(eventName: T, listener: BexEventListener<T>): this;
   once<T extends BexEventName>(
     eventName: T,
-    listener: BexEventListener<T>
+    listener: BexEventListener<T>,
   ): this;
   off<T extends BexEventName>(
     eventName: T,
-    listener: BexEventListener<T>
+    listener: BexEventListener<T>,
   ): this;
 }
 
 export type GlobalQuasarBex = BexBridge;
 
-interface BexConnection {
-  /** @see https://developer.chrome.com/docs/extensions/reference/runtime/#type-Port */
-  port: chrome.runtime.Port;
+export type BexBackgroundCallback = (payload: {
+  useBridge: (options?: { debug?: boolean }) => BexBridge;
+}) => void;
 
-  connected: boolean;
-  listening: boolean;
-}
-
-export type BexBackgroundCallback = (
-  bridge: BexBridge,
-  connections: {
-    [connectionId: string]: {
-      app?: BexConnection;
-      contentScript?: BexConnection;
-    };
-  }
+export type BexContentCallback = (
+  useBridge: (options: { name: string; debug?: boolean }) => BexBridge,
 ) => void;
-
-export type BexContentCallback = (bridge: BexBridge) => void;
-
-export type BexDomCallback = (bridge: BexBridge) => void;
