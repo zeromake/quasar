@@ -66,13 +66,32 @@ type BexBridgeOptions = {
 );
 
 export interface BexBridge {
+  /**
+   * The name of the port where the bridge belongs to.
+   */
   readonly portName: string;
+  /**
+   * The map of listeners:
+   * - key: event name
+   * - value: array of listener definitions
+   */
   readonly listeners: Record<
     BexEventName,
     { type: "on" | "once"; callback: BexEventListener<BexEventName> }[]
   >;
+  /**
+   * The map of connected ports:
+   * - key: port name
+   * - value: port instance
+   */
   readonly portMap: Record<string, chrome.runtime.Port>;
+  /**
+   * The list of connected port names.
+   */
   readonly portList: string[];
+  /**
+   * The key is the message ID, which is unique for each message.
+   */
   readonly messageMap: Record<
     string,
     {
@@ -81,6 +100,9 @@ export interface BexBridge {
       reject: (error: any) => void;
     }
   >;
+  /**
+   * The key is the message ID, which is unique for each message.
+   */
   readonly chunkMap: Record<
     string,
     {
@@ -103,6 +125,17 @@ export interface BexBridge {
 
   constructor(options: BexBridgeOptions): BexBridge;
 
+  /**
+   * Send a message to the specified bridge.
+   *
+   * @example
+   * const result = await bridge.send({
+   *   event: 'sum', // example event which sums two numbers
+   *   to: 'app',
+   *   payload: { a: 1, b: 2 }
+   * });
+   * console.log(result); // 3
+   */
   send<T extends BexEventName>(
     options: {
       event: T;
@@ -112,11 +145,28 @@ export interface BexBridge {
       : { payload: BexEventData<T> }),
   ): Promise<BexEventData<T>>;
 
+  /**
+   * Listen to the specified event.
+   *
+   * @see {@link BexBridge.off} for removing the listener
+   * @see {@link BexBridge.once} for listening to the event only once
+   * @see {@link BexEventMap} for strong typing your events
+   */
   on<T extends BexEventName>(eventName: T, listener: BexEventListener<T>): this;
+  /**
+   * Listen to the specified event once.
+   * The listener will be removed after the first call.
+   *
+   * @see {@link BexBridge.on} for listening to the event more than once
+   * @see {@link BexEventMap} for strong typing your events
+   */
   once<T extends BexEventName>(
     eventName: T,
     listener: BexEventListener<T>,
   ): this;
+  /**
+   * Remove the specified listener.
+   */
   off<T extends BexEventName>(
     eventName: T,
     listener: BexEventListener<T>,
@@ -131,9 +181,31 @@ type OptionsForType<T extends BexBridgeOptions['type']> = Omit<
 >;
 
 export type BexBackgroundCallback = (payload: {
+  /**
+   * Get the bridge for the background script.
+   * It is a singleton, which will be created on the first call.
+   * So, calling with a different option after the first call will not have any effect.
+   *
+   * @example
+   * const bridge = useBridge();
+   *
+   * @example
+   * const bridge = useBridge({ debug: true });
+   */
   useBridge: (options?: OptionsForType<"background">) => BexBridge;
 }) => void;
 
 export type BexContentCallback = (
+  /**
+   * Get the bridge for the current content script.
+   * It is a singleton, which will be created on the first call.
+   * So, calling with a different option after the first call will not have any effect.
+   *
+   * @example
+   * const bridge = useBridge({ name: 'content-script-1' });
+   *
+   * @example
+   * const bridge = useBridge({ name: 'content-script-1', debug: true });
+   */
   useBridge: (options: OptionsForType<"content">) => BexBridge,
 ) => void;
