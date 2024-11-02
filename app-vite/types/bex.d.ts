@@ -50,6 +50,21 @@ type BexEventListener<T extends BexEventName> = (
   message: BexMessage<BexEventData<T>>,
 ) => BexEventResponse<T>;
 
+type BexBridgeOptions = {
+  debug?: boolean;
+} & (
+  | {
+      type: "background";
+    }
+  | {
+      type: "app";
+    }
+  | {
+      type: "content";
+      name: string;
+    }
+);
+
 export interface BexBridge {
   readonly portName: string;
   readonly listeners: Record<
@@ -86,11 +101,7 @@ export interface BexBridge {
     };
   };
 
-  constructor(options: {
-    type: "background" | "content" | "app";
-    name?: string; // TODO: make it available&required only for content scripts
-    debug?: boolean;
-  }): BexBridge;
+  constructor(options: BexBridgeOptions): BexBridge;
 
   send<T extends BexEventName>(
     options: {
@@ -114,10 +125,15 @@ export interface BexBridge {
 
 export type GlobalQuasarBex = BexBridge;
 
+type OptionsForType<T extends BexBridgeOptions['type']> = Omit<
+  Extract<BexBridgeOptions, { type: T }>,
+  "type"
+>;
+
 export type BexBackgroundCallback = (payload: {
-  useBridge: (options?: { debug?: boolean }) => BexBridge;
+  useBridge: (options?: OptionsForType<"background">) => BexBridge;
 }) => void;
 
 export type BexContentCallback = (
-  useBridge: (options: { name: string; debug?: boolean }) => BexBridge,
+  useBridge: (options: OptionsForType<"content">) => BexBridge,
 ) => void;
