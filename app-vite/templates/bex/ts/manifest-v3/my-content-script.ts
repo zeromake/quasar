@@ -40,6 +40,7 @@ export default bexContent(({ useBridge }) => {
   // Listen to a message from the client
   bridge.on('test', message => {
     console.log(message);
+    console.log(message.payload);
   });
 
   // Send a message and split payload into chunks
@@ -109,26 +110,21 @@ export default bexContent(({ useBridge }) => {
     }
   });
 
-  // Send a message to the client based on something happening.
-  chrome.tabs.onCreated.addListener(tab => {
-    bridge.send(...).then(responsePayload => { ... }).catch(err => { ... });
-  });
-
-  // Send a message to the client based on something happening.
-  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (changeInfo.url) {
-      bridge.send(...).then(responsePayload => { ... }).catch(err => { ... });
-    }
-  });
-
   // Current bridge port name (can be 'content@<name>-<xxxxx>')
   console.log(bridge.portName);
 
+  // Dynamically set debug mode
+  bridge.setDebug(true); // boolean
+
   // Log a message on the console (if debug is enabled)
   bridge.log('Hello world!');
+  bridge.log('Hello', 'world!');
   bridge.log('Hello world!', { some: 'data' });
+  bridge.log('Hello', 'world', '!', { some: 'object' });
   // Log a warning on the console (regardless of the debug setting)
   bridge.warn('Hello world!');
+  bridge.warn('Hello', 'world!');
   bridge.warn('Hello world!', { some: 'data' });
+  bridge.warn('Hello', 'world', '!', { some: 'object' });
   */
 })

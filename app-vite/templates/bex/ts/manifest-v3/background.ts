@@ -88,12 +88,13 @@ export default bexBackground(({ useBridge }) => {
   // Listen to a message from the client
   bridge.on('test', message => {
     console.log(message);
+    console.log(message.payload);
   });
 
   // Send a message and split payload into chunks
   // to avoid max size limit of BEX messages.
   // Warning! This happens automatically when the payload is an array.
-  // If you actually want to send an Array, wrap it in an object.
+  // If you actually want to send an Array, wrap it in an Object.
   bridge.send({
     event: 'test',
     to: 'app',
@@ -104,7 +105,7 @@ export default bexBackground(({ useBridge }) => {
   bridge.send({
     event: 'test',
     to: 'app',
-    payload: { banner: 'Hello from content-script' }
+    payload: { banner: 'Hello from background!' }
   }).then(responsePayload => { ... }).catch(err => { ... });
 
   // Listen to a message from the client and respond synchronously
@@ -129,12 +130,12 @@ export default bexBackground(({ useBridge }) => {
   });
 
   // Broadcast a message to app & content scripts
-  bridge.portList.forEach(port => {
-    bridge.send({ event: 'test', to: port, payload: 'Hello from background!' });
+  bridge.portList.forEach(portName => {
+    bridge.send({ event: 'test', to: portName, payload: 'Hello from background!' });
   });
 
   // Find any connected content script and send a message to it
-  const contentPort = bridge.portList.find(port => port.startsWith('content@'));
+  const contentPort = bridge.portList.find(portName => portName.startsWith('content@'));
   if (contentPort) {
     bridge.send({ event: 'test', to: contentPort, payload: 'Hello from background!' });
   }
@@ -169,11 +170,18 @@ export default bexBackground(({ useBridge }) => {
     }
   });
 
+  // Dynamically set debug mode
+  bridge.setDebug(true); // boolean
+
   // Log a message on the console (if debug is enabled)
   bridge.log('Hello world!');
+  bridge.log('Hello', 'world!');
   bridge.log('Hello world!', { some: 'data' });
-  // Log a warning on the console (regardless of debug setting)
+  bridge.log('Hello', 'world', '!', { some: 'object' });
+  // Log a warning on the console (regardless of the debug setting)
   bridge.warn('Hello world!');
+  bridge.warn('Hello', 'world!');
   bridge.warn('Hello world!', { some: 'data' });
+  bridge.warn('Hello', 'world', '!', { some: 'object' });
   */
 });
