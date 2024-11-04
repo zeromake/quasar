@@ -1,5 +1,6 @@
 import fse from 'fs-extra'
 import { join, relative } from 'node:path'
+import { merge } from 'webpack-merge'
 
 import { warn } from '../../utils/logger.js'
 import { resolveExtension } from '../../utils/resolve-extension.js'
@@ -17,6 +18,8 @@ export function createManifest (quasarConf) {
     warn('Could not read BEX manifest. Please check its syntax.')
     return { err, bexManifestPath }
   }
+
+  json = merge({}, json.all, json[ quasarConf.ctx.targetName ])
 
   if (json.manifest_version === void 0) {
     warn('The BEX manifest requires a "manifest_version" prop, which is currently missing.')

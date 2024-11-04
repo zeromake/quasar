@@ -765,7 +765,7 @@ export class QuasarConfigFile {
       cfg.build.vueRouterMode = 'hash'
     }
 
-    if (this.#ctx.dev === true && this.#ctx.mode.bex) {
+    if (this.#ctx.mode.bex) {
       // we want to differentiate the folder
       // otherwise we can't run dev and build simultaneously;
       // it's better regardless because it's easier to select the dev folder
@@ -775,7 +775,7 @@ export class QuasarConfigFile {
 
       cfg.build.distDir = join(
         dirname(cfg.build.distDir),
-        name === 'bex' ? 'bex--dev' : `bex-dev--${ name }`
+        `bex-${ this.#ctx.targetName }${ name !== 'bex' ? `-${ name }` : '' }${ this.#ctx.dev ? '--dev' : '' }`
       )
     }
 

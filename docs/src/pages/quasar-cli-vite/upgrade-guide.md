@@ -691,17 +691,46 @@ There are quite a few improvements, however you will need to make some adjustmen
 * No more 3s delay when opening the popup
 * The "dom" script support was removed. Simply move your logic from there into one of your content scripts.
 
+#### Dependencies
+
+The `events` dependency is no longer required. If you have it installed, uninstall it:
+
+```tabs
+<<| bash Yarn |>>
+$ yarn remove events
+<<| bash NPM |>>
+$ npm uninstall --save events
+<<| bash PNPM |>>
+$ pnpm remove events
+<<| bash Bun |>>
+$ bun remove events
+```
+
+#### CLI commands
+
+The `quasar dev` and `quasar build` commands now require an explicit target (chrome or firefox). Should you wish to develop for both simultaneously, then you can spawn two quasar dev commands.
+
+```bash
+$ quasar dev -m bex <chrome|firefox>
+$ quasar build -m bex <chrome|firefox>
+```
+
+#### The quasar.config file
+
 ```diff /quasar.config file
 sourceFiles: {
 + bexManifestFile: 'src-bex/manifest.json',
   // ...
 },
 bex: {
-- contentScripts: []
+- contentScripts: [] // no longer needed as scripts are
+-                    // now extracted from the manifest file
 + dynamicContentScripts: [],
 + otherScripts: []
 }
 ```
+
+#### The script files
 
 ```js [highlight=3,7] Background script
 import { bexBackground } from 'quasar/wrappers'
@@ -785,44 +814,7 @@ export default {
 </script>
 ```
 
-::: warning Warning! Sending large amounts of data
-All browser extensions have a hard limit on the amount of data that can be passed as communication messages (example: 50MB). If you exceed that amount on your payload, you can send chunks (**`payload` param should be an Array**).
-
-<br>
-
-```js
-bridge.send({
-  event: 'some.event',
-  to: 'app',
-  payload: [ chunk1, chunk2, ...chunkN ]
-})
-```
-
-<br>
-
-When calculating the payload size, have in mind that the payload is wrapped in a message built by the Bridge that contains some other properties too. That takes a few bytes as well. So your chunks' size should be with a few bytes below the browser's threshold.
-:::
-
-::: warning Warning! Performance on sending an Array
-Like we've seen on the warning above, if `payload` is Array then the bridge will send a message for each of the Array's elements.
-When you actually want to send an Array (not split the payload into chunks), this will be **VERY** inefficient.
-
-<br>
-
-The solution is to wrap your Array in an Object (so only one message will be sent):
-
-<br>
-
-```js
-bridge.send({
-  event: 'some.event',
-  to: 'background',
-  payload: {
-    myArray: [ /*...*/ ]
-  }
-})
-```
-:::
+#### The new BEX bridge
 
 ```js Bex Bridge messaging
 // Listen to a message from the client
@@ -902,6 +894,45 @@ bridge.on('@quasar:ports', ({ portList, added, removed }) => {
 // Current bridge port name (can be 'background', 'app', or 'content@<name>-<xxxxx>')
 console.log(bridge.portName)
 ```
+
+::: warning Warning! Sending large amounts of data
+All browser extensions have a hard limit on the amount of data that can be passed as communication messages (example: 50MB). If you exceed that amount on your payload, you can send chunks (**`payload` param should be an Array**).
+
+<br>
+
+```js
+bridge.send({
+  event: 'some.event',
+  to: 'app',
+  payload: [ chunk1, chunk2, ...chunkN ]
+})
+```
+
+<br>
+
+When calculating the payload size, have in mind that the payload is wrapped in a message built by the Bridge that contains some other properties too. That takes a few bytes as well. So your chunks' size should be with a few bytes below the browser's threshold.
+:::
+
+::: warning Warning! Performance on sending an Array
+Like we've seen on the warning above, if `payload` is Array then the bridge will send a message for each of the Array's elements.
+When you actually want to send an Array (not split the payload into chunks), this will be **VERY** inefficient.
+
+<br>
+
+The solution is to wrap your Array in an Object (so only one message will be sent):
+
+<br>
+
+```js
+bridge.send({
+  event: 'some.event',
+  to: 'background',
+  payload: {
+    myArray: [ /*...*/ ]
+  }
+})
+```
+:::
 
 If you encounter problems with sending messages between the BEX parts, you could enable the debug mode for the bridges that interest you. In doing so, the communication will also be outputted to the browser console:
 
