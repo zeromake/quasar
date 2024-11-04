@@ -51,16 +51,38 @@ type BexEventListener<T extends BexEventName> = (
 ) => BexEventResponse<T>;
 
 type BexBridgeOptions = {
+  /**
+   * Whether to enable the debug mode.
+   *
+   * @see {@link BexBridge.setDebug} for updating the debug mode after the bridge is created
+   * @see {@link BexBridge.log} for logging a message if the debug mode is enabled
+   *
+   * @example
+   * const bridge = useBridge({ debug: process.env.DEBUGGING });
+   */
   debug?: boolean;
 } & (
   | {
       type: "background";
     }
   | {
+      /**
+       * @internal
+       */
       type: "app";
     }
   | {
       type: "content";
+      /**
+       * The name of the content script.
+       * It should be unique for each content script.
+       *
+       * It is used to identify the port name when sending messages.
+       * A content script will have a port per each browser tab where it is injected.
+       * As an example, for the name `content-script-1`, the name of the ports
+       * will be in the format `content@content-script-1-<xxxxx>`, where `<xxxxx>`
+       * is a random number between 0 and 10000.
+       */
       name: string;
     }
 );
@@ -163,6 +185,18 @@ export interface BexBridge {
   send<T extends BexEventName>(
     options: {
       event: T;
+      /**
+       * The target bridge to send the message.
+       * - `background`: send to background bridge
+       * - `app`: send to app bridge ($q.bex)
+       * - `content@<name>-<id>`: send to the content bridge with the specified name and id
+       *
+       * @example <caption>Send to all ports of a content script</caption>
+       * const portNames = bridge.portList.filter((portName) => portName.startsWith('content@content-script-1'));
+       * for (const portName of portNames) {
+       *   bridge.send({ event: 'test', to: portName, payload: 'Hello!' });
+       * }
+       */
       to?: "background" | "app" | `content@${string}-${string}`;
     } & (BexEventData<T> extends never
       ? { payload?: undefined }
