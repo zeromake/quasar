@@ -45,11 +45,17 @@ type BexEventResponse<T extends BexEventName> = BexEventEntry<T>[1];
 // It should be fine enough.
 type PortName = 'background' | 'app' | `content@${string}-${string}`;
 
+type BexPayload<T extends BexEventName> = BexEventData<T> extends never
+  ? { payload?: undefined }
+  : undefined extends BexEventData<T>
+    ? { payload?: BexEventData<T> }
+    : { payload: BexEventData<T> };
+
 type BexMessage<T extends BexEventName> = {
   from: PortName;
   to: PortName;
   event: T;
-} & (BexEventData<T> extends never ? { payload?: undefined } : { payload: BexEventData<T> });
+} & BexPayload<T>;
 
 type BexEventListener<T extends BexEventName> = (
   message: BexMessage<T>,
@@ -206,9 +212,7 @@ export interface BexBridge {
        * }
        */
       to: PortName;
-    } & (BexEventData<T> extends never
-      ? { payload?: undefined }
-      : { payload: BexEventData<T> }),
+    } & BexPayload<T>,
   ): Promise<BexEventResponse<T>>;
 
   /**
