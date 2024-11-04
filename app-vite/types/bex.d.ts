@@ -205,7 +205,7 @@ export interface BexBridge {
        *   bridge.send({ event: 'test', to: portName, payload: 'Hello!' });
        * }
        */
-      to?: PortName;
+      to: PortName;
     } & (BexEventData<T> extends never
       ? { payload?: undefined }
       : { payload: BexEventData<T> }),
