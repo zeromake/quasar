@@ -39,7 +39,9 @@
       "service_worker": "background.js"
     },
 
-    "action": {}
+    "action": {
+      "default_popup": "www/index.html"
+    }
   },
 
   "firefox": {
@@ -55,6 +57,10 @@
     "background": {
       "scripts": [ "background.js" ],
       "persistent": true
+    },
+
+    "browser_action": {
+      "default_popup": "www/index.html"
     }
   }
 }
