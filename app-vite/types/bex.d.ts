@@ -239,7 +239,7 @@ export type BexBackgroundCallback = (payload: {
   useBridge: (options?: OptionsForType<"background">) => BexBridge;
 }) => void;
 
-export type BexContentCallback = (
+export type BexContentCallback = (payload: {
   /**
    * Get the bridge for the current content script.
    * It is a singleton, which will be created on the first call.
@@ -251,5 +251,5 @@ export type BexContentCallback = (
    * @example
    * const bridge = useBridge({ name: 'content-script-1', debug: true });
    */
-  useBridge: (options: OptionsForType<"content">) => BexBridge,
-) => void;
+  useBridge: (options: OptionsForType<"content">) => BexBridge;
+}) => void;
