@@ -71,6 +71,12 @@ export interface BexBridge {
    */
   readonly portName: string;
   /**
+   * Whether the bridge is connected to the background script.
+   *
+   * @see {@link BexBridge.connectToBackground} for connecting to the background script
+   */
+  readonly isConnected: boolean;
+  /**
    * The map of listeners:
    * - key: event name
    * - value: array of listener definitions
@@ -126,6 +132,24 @@ export interface BexBridge {
   constructor(options: BexBridgeOptions): BexBridge;
 
   /**
+   * Connect to the background script.
+   *
+   * @see {@link BexBridge.isConnected} for checking the connection status
+   *
+   * @throws {string} if the bridge is already connected
+   * @throws {string} if there is no bridge for the background script. If you didn't call `useBridge` in the background script, it will not be created.
+   * @throws {string} if the bridge is for the background script, e.g. created with `type: 'background'`
+   */
+  connectToBackground(): Promise<void>;
+  /**
+   * Disconnect from the background script.
+   *
+   * @throws {string} if the bridge is not connected
+   * @throws {string} if the bridge is for the background script, e.g. created with `type: 'background'`
+   */
+  disconnectFromBackground(): Promise<void>;
+
+  /**
    * Send a message to the specified bridge.
    *
    * @example
@@ -171,6 +195,26 @@ export interface BexBridge {
     eventName: T,
     listener: BexEventListener<T>,
   ): this;
+
+  /**
+   * Update the debug mode.
+   */
+  setDebug(debug: boolean): void;
+  /**
+   * Log a message if the debug mode is enabled.
+   *
+   * If the last argument is an object, it will be logged using `console.dir`.
+   *
+   * @see {@link BexBridge.setDebug} for updating the debug mode
+   */
+  log(...args: any[]): void;
+  /**
+   * Log a warning message.
+   * It will always be logged regardless of the debug mode.,
+   *
+   * If the last argument is an object, it will be logged using `console.dir`.
+   */
+  warn(...args: any[]): void;
 }
 
 export type GlobalQuasarBex = BexBridge;
