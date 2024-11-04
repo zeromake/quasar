@@ -146,8 +146,11 @@ export interface BexBridge {
   > & {
     messageType: "event-response";
     messageProps: {
-      messageMapId: string;
-      error?: Error;
+      error?: {
+        message: string;
+        stack: string;
+      };
+      quiet?: boolean;
     };
   };
 
