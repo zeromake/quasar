@@ -6,34 +6,50 @@
 
 const portNameRE = /^background$|^app$|^content@/
 
+/**
+ * @param {number} max
+ * @returns {number}
+ */
 function getRandomId (max) {
   return Math.floor(Math.random() * max)
 }
 
+/**
+ * @typedef Message
+ * @property {string} from
+ * @property {string} to
+ * @property {string} event
+ * @property {any} payload
+ */
+
 export class BexBridge {
-  /**
-   * Public properties
-   */
-  portName = null // string
-  isConnected = false // boolean
-  listeners = {} // { type: "on" | "once", callback: Message => void }
-  portMap = {} // { [portName]: chrome.runtime.Port }
-  portList = [] // [ portName, ... ]
-  messageMap = {} // { [id]: { portName, resolve, reject } }
-  chunkMap = {} // { [id]: { portName, number, messageType, messageProps, payload: [] } }
+  // Public properties
+  /** @type {string} */
+  portName = null
+  /** @type {boolean} */
+  isConnected = false
+  /** @type {{ type: 'on' | 'once', callback: (message: Message) => void }[]} */
+  listeners = {}
+  /** @type {{ [portName: string]: chrome.runtime.Port }} */
+  portMap = {}
+  /** @type {string[]} */
+  portList = []
+  /** @type {{ [id: string]: { portName: string, resolve: (payload: any) => void, reject: (err: any) => void } }} */
+  messageMap = {}
+  /** @type {{ [id: string]: { portName: string, number: number, messageType: string, messageProps: any, payload: any[] } }} */
+  chunkMap = {}
 
-  /**
-   * Private properties
-   */
-  #type = null
+  // Private properties
+  /** @type {'background' | 'content' | 'app'} */
+  #type
+  /** @type {boolean} */
   #debug = false
-  #banner = null
+  /** @type {string} */
+  #banner
 
-  // param: {
-  //   type: "background" | "content" | "app"
-  //   name?: string (used & required for content scripts only)
-  //   debug?: boolean
-  // }
+  /**
+   * @param {{ type: 'background' | 'content' | 'app', name?: string, debug?: boolean }} options
+   */
   constructor ({ type, name = '', debug }) {
     this.portName = type
     this.#type = type
@@ -103,12 +119,14 @@ export class BexBridge {
         })
 
         this.log(`Opened connection with ${ port.name }.`)
-        this.#updatePortList({ added: port.name})
+        this.#updatePortList({ added: port.name })
       })
     }
   }
 
-  // () => Promise<void>
+  /**
+   * @returns {Promise<void>}
+   */
   connectToBackground () {
     if (this.#type === 'background') {
       return Promise.reject('The background script itself does not need to connect')
@@ -166,7 +184,9 @@ export class BexBridge {
     })
   }
 
-  // () => Promise<void>
+  /**
+   * @returns {Promise<void>}
+   */
   disconnectFromBackground () {
     if (this.#type === 'background') {
       return Promise.reject('Background script does not need to disconnect')
@@ -182,8 +202,10 @@ export class BexBridge {
     return Promise.resolve()
   }
 
-  // event: string
-  // callback: (message: { from: string, to: string, payload?: any }) => void
+  /**
+   * @param {string} event
+   * @param {(message: Message) => void} callback
+   */
   on (event, callback) {
     if (!event) {
       this.warn('Tried add listener but no event specified.')
@@ -200,8 +222,10 @@ export class BexBridge {
     this.log(`Added a listener for event: "${ event }".`)
   }
 
-  // event: string
-  // callback: (message: { from: string, to: string, payload?: any }) => void
+  /**
+   * @param {string} event
+   * @param {(message: Message) => void} callback
+   */
   once (event, callback) {
     if (!event) {
       this.warn('Tried add listener but no event specified.')
@@ -218,8 +242,10 @@ export class BexBridge {
     this.log(`Added a one-time listener for event: "${ event }".`)
   }
 
-  // event: string
-  // callback: (message: { from: string, to: string, payload?: any }) => void
+  /**
+   * @param {string} event
+   * @param {(message: Message) => void} callback
+   */
   off (event, callback) {
     if (!event) {
       this.warn('Tried to remove listeners but no event specified.')
@@ -263,13 +289,10 @@ export class BexBridge {
     }
   }
 
-  // ({
-  //   event: string,
-  //   to?: "background" | "app" | "content@<name>-<xxxxx>",
-  //   payload?: any (if it's Array then it will be split into chunks)
-  // }) => Promise<any | void>
-  //
-  // Returns a Promise that resolves with the response payload
+  /**
+   * @param {{ event: string, to: string, payload: any } | undefined} param
+   * @returns {Promise<any>} response payload
+   */
   send ({ event, to, payload } = {}) {
     if (this.isConnected === false) {
       return Promise.reject(
@@ -326,12 +349,13 @@ export class BexBridge {
     }))
   }
 
-  // value: boolean
+  /**
+   * @param {boolean} value
+   */
   setDebug (value) {
     this.#debug = value === true
   }
 
-  // ({ str: string, ...str?: string, debugObject?: any | void }) => void
   log (...args) {
     if (this.#debug !== true || args.length === 0) return
 
@@ -348,7 +372,6 @@ export class BexBridge {
     }
   }
 
-  // ({ str: string, ...str?: string, debugObject?: any | void }) => void
   warn (...args) {
     if (args.length === 0) return
 
@@ -366,7 +389,9 @@ export class BexBridge {
     }
   }
 
-  // reason: ({ added?: string } | { removed?: string })
+  /**
+   * @param {{ added?: string } | { removed?: string }} reason
+   */
   #updatePortList (reason) {
     this.portList = Object.keys(this.portMap)
     const list = [ 'background', ...this.portList ]
@@ -388,7 +413,9 @@ export class BexBridge {
     }
   }
 
-  // message: { from: string, to: string, event: string, payload: any | undefined }
+  /**
+   * @param {Message} message
+   */
   async #triggerMessageEvent (message) {
     const list = this.listeners[ message.event ]
 
@@ -429,7 +456,9 @@ export class BexBridge {
     return responsePayload
   }
 
-  // portName: string
+  /**
+   * @param {string} portName
+   */
   #cleanupPort (portName) {
     for (const id in this.chunkMap) {
       const packet = this.chunkMap[ id ]
@@ -615,11 +644,9 @@ export class BexBridge {
     return Promise.resolve()
   }
 
-  // id?: number,
-  // to: string,
-  // payload: any,
-  // messageType: "event-send" | "event-response",
-  // messageProps: any
+  /**
+   * @param {{ id?: number, to: string, payload: any, messageType: "event-send" | "event-response", messageProps: any }} param
+   */
   #sendMessage ({
     id = getRandomId(1_000_000),
     to,
