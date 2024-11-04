@@ -4,6 +4,8 @@
  * DO NOT EDIT.
  **/
 
+const portNameRE = /^background$|^app$|^content@/
+
 function getRandomId (max) {
   return Math.floor(Math.random() * max)
 }
@@ -77,6 +79,10 @@ export class BexBridge {
       const onPacket = this.#onPacket.bind(this)
 
       runtime.onConnect.addListener(port => {
+        // if it's not a bridge port on the other end,
+        // then ignore it
+        if (portNameRE.test(port.name) === false) return
+
         if (this.portMap[ port.name ] !== void 0) {
           this.warn(
             `Connection with "${ port.name }" already exists.`
