@@ -293,27 +293,21 @@ export class BexBridge {
    * @param {{ event: string, to: string, payload: any } | undefined} param
    * @returns {Promise<any>} response payload
    */
-  send ({ event, to, payload } = {}) {
+  async send ({ event, to, payload } = {}) {
     if (this.isConnected === false) {
-      return Promise.reject(
-        'Tried to send message but the bridge is not connected. Please connect it first.'
-      )
+      throw 'Tried to send message but the bridge is not connected. Please connect it first.'
     }
 
     if (!event) {
-      return Promise.reject(
-        'Tried to send message with no "event" prop specified'
-      )
+      throw 'Tried to send message with no "event" prop specified'
     }
 
     if (!to) {
-      return Promise.reject(
-        'Tried to send message with no "to" prop specified'
-      )
+      throw 'Tried to send message with no "to" prop specified'
     }
 
     if (this.portList.includes(to) === false) {
-      return Promise.reject(
+      throw (
         this.#type === 'background'
           ? `Tried to send message to "${ to }" but there is no such port registered`
           : `Tried to send message to "${ to }" but the port to background is not available to send through`
@@ -322,19 +316,17 @@ export class BexBridge {
 
     const id = getRandomId(1_000_000)
 
-    return this.#sendMessage({
+    await this.#sendMessage({
       id,
       to,
       payload,
       messageType: 'event-send',
       messageProps: { event }
-    }).then(() => new Promise((resolve, reject) => {
-      if (this.portList.includes(to) === false) {
-        return Promise.reject(
-          `Connection to "${ to }" was closed while waiting for a response`
-        )
-      }
-
+    })
+    if (this.portList.includes(to) === false) {
+      throw `Connection to "${ to }" was closed while waiting for a response`
+    }
+    return new Promise((resolve, reject) => {
       this.messageMap[ id ] = {
         portName: to,
         resolve: responsePayload => {
@@ -346,7 +338,7 @@ export class BexBridge {
           reject(err)
         }
       }
-    }))
+    })
   }
 
   /**
