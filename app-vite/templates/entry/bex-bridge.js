@@ -482,7 +482,10 @@ export class BexBridge {
           to: packet.from,
           messageType: 'event-response',
           messageProps: {
-            error: err.message || err,
+            error: {
+              message: err.message,
+              stack: err.stack || 'no stack available',
+            },
             quiet: true
           }
         })
@@ -712,7 +715,10 @@ export class BexBridge {
           to: message.from,
           messageType: 'event-response',
           messageProps: {
-            error: err
+            error: {
+              message: err.message,
+              stack: err.stack || 'no stack available',
+            }
           }
         })
       })
