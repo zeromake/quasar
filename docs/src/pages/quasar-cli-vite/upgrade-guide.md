@@ -733,13 +733,15 @@ bex: {
 
 #### The BEX manifest file
 
-Firefox has not yet updated to manifest v3, but regardless of that, we are now supplying a way to differentiate the manifest for each target (chrome and firefox).
+We are now supplying a way to differentiate the manifest for each target (chrome and firefox).
 
-Notice that the manifest file now contains three root props: `all`, `chrome` & `firefox`. The manifest for chrome is deeply merged from all+chrome, while the firefox one is generated from all+firefox.
+Notice that the manifest file now contains three root props: `all`, `chrome` & `firefox`. The manifest for chrome is deeply merged from all+chrome, while the firefox one is generated from all+firefox. You could even have different manifest versions for each target.
 
 ```json
 {
   "all": {
+    "manifest_version": 3,
+
     "icons": {
       "16": "icons/icon-16x16.png",
       "48": "icons/icon-48x48.png",
@@ -752,18 +754,6 @@ Notice that the manifest file now contains three root props: `all`, `chrome` & `
       "activeTab"
     ],
 
-    "content_scripts": [
-      {
-        "matches": [ "<all_urls>" ],
-        "css": [ "assets/content.css" ],
-        "js": [ "my-content-script.js" ]
-      }
-    ]
-  },
-
-  "chrome": {
-    "manifest_version": 3,
-
     "host_permissions": [ "*://*/*" ],
     "content_security_policy": {
       "extension_pages": "script-src 'self'; object-src 'self';"
@@ -775,26 +765,28 @@ Notice that the manifest file now contains three root props: `all`, `chrome` & `
       }
     ],
 
-    "background": {
-      "service_worker": "background.js"
+    "action": {
+      "default_popup": "www/index.html"
     },
 
-    "action": {}
+    "content_scripts": [
+      {
+        "matches": [ "<all_urls>" ],
+        "css": [ "assets/content.css" ],
+        "js": [ "my-content-script.js" ]
+      }
+    ]
+  },
+
+  "chrome": {
+    "background": {
+      "service_worker": "background.js"
+    }
   },
 
   "firefox": {
-    "manifest_version": 2,
-
-    "permissions": [ "<all_urls>" ],
-    "web_accessible_resources": [
-      "*",
-      "<all_urls>"
-    ],
-    "content_security_policy": "script-src 'self'; object-src 'self';",
-
     "background": {
-      "scripts": [ "background.js" ],
-      "persistent": true
+      "scripts": [ "background.js" ]
     }
   }
 }
