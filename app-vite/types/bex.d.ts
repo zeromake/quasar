@@ -6,7 +6,7 @@ import type { LiteralUnion } from "quasar";
  *   interface BexEventMap {
  *     'without-payload-and-response': never;
  *     'without-payload-with-response': [never, number];
- *     'with-payload-without-response': [{ test: number[] }, never];
+ *     'with-payload-without-response': [{ test: number[] }, void];
  *     'with-payload-and-response': [{ foo: string[] }, number];
  *   }
  * }
@@ -209,7 +209,7 @@ export interface BexBridge {
     } & (BexEventData<T> extends never
       ? { payload?: undefined }
       : { payload: BexEventData<T> }),
-  ): Promise<BexEventData<T>>;
+  ): Promise<BexEventResponse<T>>;
 
   /**
    * Listen to the specified event.
@@ -218,7 +218,7 @@ export interface BexBridge {
    * @see {@link BexBridge.once} for listening to the event only once
    * @see {@link BexEventMap} for strong typing your events
    */
-  on<T extends BexEventName>(eventName: T, listener: BexEventListener<T>): this;
+  on<T extends BexEventName>(eventName: T, listener: BexEventListener<T>): void;
   /**
    * Listen to the specified event once.
    * The listener will be removed after the first call.
@@ -229,14 +229,14 @@ export interface BexBridge {
   once<T extends BexEventName>(
     eventName: T,
     listener: BexEventListener<T>,
-  ): this;
+  ): void;
   /**
    * Remove the specified listener.
    */
   off<T extends BexEventName>(
     eventName: T,
     listener: BexEventListener<T>,
-  ): this;
+  ): void;
 
   /**
    * Update the debug mode.
