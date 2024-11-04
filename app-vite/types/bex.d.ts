@@ -40,14 +40,19 @@ type BexEventEntry<
 type BexEventData<T extends BexEventName> = BexEventEntry<T>[0];
 type BexEventResponse<T extends BexEventName> = BexEventEntry<T>[1];
 
-type BexMessage<TPayload> = {
-  from: string;
-  to: string;
-  event: string;
-} & (TPayload extends never ? { payload?: undefined } : { payload: TPayload });
+// We can't use `content@${string}-${number}` as it won't allow using dashes more than once
+// We choose to not do something like `content@${string}-${0 | 1 | 2 | ... | 9}${number}` to keep the hover type simple
+// It should be fine enough.
+type PortName = 'background' | 'app' | `content@${string}-${string}`;
+
+type BexMessage<T extends BexEventName> = {
+  from: PortName;
+  to: PortName;
+  event: T;
+} & (BexEventData<T> extends never ? { payload?: undefined } : { payload: BexEventData<T> });
 
 type BexEventListener<T extends BexEventName> = (
-  message: BexMessage<BexEventData<T>>,
+  message: BexMessage<T>,
 ) => BexEventResponse<T>;
 
 type BexBridgeOptions = {
@@ -91,7 +96,7 @@ export interface BexBridge {
   /**
    * The name of the port where the bridge belongs to.
    */
-  readonly portName: string;
+  readonly portName: PortName;
   /**
    * Whether the bridge is connected to the background script.
    *
@@ -112,18 +117,18 @@ export interface BexBridge {
    * - key: port name
    * - value: port instance
    */
-  readonly portMap: Record<string, chrome.runtime.Port>;
+  readonly portMap: Record<PortName, chrome.runtime.Port>;
   /**
    * The list of connected port names.
    */
-  readonly portList: string[];
+  readonly portList: PortName[];
   /**
    * The key is the message ID, which is unique for each message.
    */
   readonly messageMap: Record<
     string,
     {
-      portName: string;
+      portName: PortName;
       resolve: (payload: any) => void;
       reject: (error: any) => void;
     }
@@ -134,7 +139,7 @@ export interface BexBridge {
   readonly chunkMap: Record<
     string,
     {
-      portName: string;
+      portName: PortName;
       number: number;
       payload: unknown[];
     } & {
@@ -200,7 +205,7 @@ export interface BexBridge {
        *   bridge.send({ event: 'test', to: portName, payload: 'Hello!' });
        * }
        */
-      to?: "background" | "app" | `content@${string}-${string}`;
+      to?: PortName;
     } & (BexEventData<T> extends never
       ? { payload?: undefined }
       : { payload: BexEventData<T> }),
