@@ -685,7 +685,8 @@ There are quite a few improvements, however you will need to make some adjustmen
   * Debug mode (where all the bridge communication will be outputted to the browser console)
   * Breaking changes highlights: background & content scripts initialization of the bridge; bride.on() calls when responding; bridge.send() calls
   * The bridge is now available throughout the App in `/src/` (regardless of the file used: boot files, router init, App.vue, any Vue component, ...) by accessing the `$q object` or `window.QBexBridge`
-* Automatically infer the background script file & the content script files from `/src-bex/manifest.json`
+* One single manifest file from which both chrome & firefox ones can be extracted
+* Automatically infer the background script file & the content script files from the BEX manifest file
 * Ability to specify dynamic content scripts that you can register & load yourself at runtime
 * Ability to compile other js/ts files as well that you might need to dynamically load/inject
 * No more 3s delay when opening the popup
@@ -727,6 +728,75 @@ bex: {
 -                    // now extracted from the manifest file
 + dynamicContentScripts: [],
 + otherScripts: []
+}
+```
+
+#### The BEX manifest file
+
+Firefox has not yet updated to manifest v3, but regardless of that, we are now supplying a way to differentiate the manifest for each target (chrome and firefox).
+
+Notice that the manifest file now contains three root props: `all`, `chrome` & `firefox`. The manifest for chrome is deeply merged from all+chrome, while the firefox one is generated from all+firefox.
+
+```json
+{
+  "all": {
+    "icons": {
+      "16": "icons/icon-16x16.png",
+      "48": "icons/icon-48x48.png",
+      "128": "icons/icon-128x128.png"
+    },
+
+    "permissions": [
+      "storage",
+      "tabs",
+      "activeTab"
+    ],
+
+    "content_scripts": [
+      {
+        "matches": [ "<all_urls>" ],
+        "css": [ "assets/content.css" ],
+        "js": [ "my-content-script.js" ]
+      }
+    ]
+  },
+
+  "chrome": {
+    "manifest_version": 3,
+
+    "host_permissions": [ "*://*/*" ],
+    "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self';"
+    },
+    "web_accessible_resources": [
+      {
+        "resources": [ "*" ],
+        "matches": [ "*://*/*" ]
+      }
+    ],
+
+    "background": {
+      "service_worker": "background.js"
+    },
+
+    "action": {}
+  },
+
+  "firefox": {
+    "manifest_version": 2,
+
+    "permissions": [ "<all_urls>" ],
+    "web_accessible_resources": [
+      "*",
+      "<all_urls>"
+    ],
+    "content_security_policy": "script-src 'self'; object-src 'self';",
+
+    "background": {
+      "scripts": [ "background.js" ],
+      "persistent": true
+    }
+  }
 }
 ```
 

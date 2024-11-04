@@ -66,7 +66,7 @@ export class QuasarModeDevserver extends AppDevserver {
 
     const { err, bexManifestPath, bexBackgroundScript, bexContentScriptList, bexOtherScriptList } = createManifest(quasarConf)
 
-    if (err !== void 0) { process.exit(1) }
+    if (err !== void 0) process.exit(1)
 
     this.#manifestWatcher = chokidar.watch(bexManifestPath, { ignoreInitial: true })
 
