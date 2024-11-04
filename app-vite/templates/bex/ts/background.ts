@@ -17,12 +17,12 @@ chrome.action.onClicked.addListener(openExtension);
 declare module '@quasar/app-vite' {
   interface BexEventMap {
     /* eslint-disable @typescript-eslint/no-explicit-any */
-    log: [{ message: string; data?: any[] }, never];
+    log: [{ message: string; data?: any[] }, void];
     getTime: [never, number];
 
-    'storage.get': [{ key: string | null }, any];
-    'storage.set': [{ key: string; value: any }, any];
-    'storage.remove': [{ key: string }, any];
+    'storage.get': [string | undefined, any];
+    'storage.set': [{ key: string; value: any }, void];
+    'storage.remove': [string, void];
     /* eslint-enable @typescript-eslint/no-explicit-any */
   }
 }
@@ -41,16 +41,16 @@ export default bexBackground(({ useBridge }) => {
     return Date.now();
   });
 
-  bridge.on('storage.get', ({ payload }) => {
+  bridge.on('storage.get', async ({ payload: key }) => {
     return new Promise(resolve => {
-      if (payload === void 0) {
+      if (key === void 0) {
         chrome.storage.local.get(null, items => {
           // Group the values up into an array to take advantage of the bridge's chunk splitting.
           resolve(Object.values(items));
         });
       } else {
-        chrome.storage.local.get([payload], items => {
-          resolve(items[payload]);
+        chrome.storage.local.get([key], items => {
+          resolve(items[key]);
         });
       }
     });
@@ -59,28 +59,28 @@ export default bexBackground(({ useBridge }) => {
   // bridge.send({
   //   event: 'storage.get',
   //   to: 'background',
-  //   payload: key
-  // }).then(responsePayload => { ... }).catch(err => { ... });
+  //   payload: 'key' // or omit `payload` to get data for all keys
+  // }).then((result) => { ... }).catch((error) => { ... });
 
-  bridge.on('storage.set', ({ payload }) => {
-    chrome.storage.local.set({ [payload.key]: payload.value });
+  bridge.on('storage.set', async ({ payload: { key, value } }) => {
+    await chrome.storage.local.set({ [key]: value });
   });
   // Usage:
   // bridge.send({
   //   event: 'storage.set',
   //   to: 'background',
   //   payload: { key: 'someKey', value: 'someValue' }
-  // }).then(responsePayload => { ... }).catch(err => { ... });
+  // }).then(() => { ... }).catch((error) => { ... });
 
-  bridge.on('storage.remove', ({ payload }) => {
-    chrome.storage.local.remove(payload)
-  })
+  bridge.on('storage.remove', async ({ payload: key }) => {
+    await chrome.storage.local.remove(key);
+  });
   // Usage:
   // bridge.send({
   //   event: 'storage.remove',
   //   to: 'background',
   //   payload: 'someKey'
-  // }).then(responsePayload => { ... }).catch(err => { ... });
+  // }).then(() => { ... }).catch((error) => { ... });
 
   /*
   // More examples:

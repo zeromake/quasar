@@ -3,13 +3,21 @@
 
 import { bexContent } from 'quasar/wrappers'
 
+declare module '@quasar/app-vite' {
+  interface BexEventMap {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    'some.event': [{ someProp: string }, void];
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+  }
+}
+
 export default bexContent(({ useBridge }) => {
   // The use of the bridge is optional.
   const bridge = useBridge({ name: 'my-content-script', debug: false })
 
   // Hook into the bridge to listen for events sent from the client BEX.
-  bridge.on('some.event', message => {
-    if (message.payload.yourProp) {
+  bridge.on('some.event', ({ payload }) => {
+    if (payload.someProp) {
       // Access a DOM element from here.
       // Document in this instance is the underlying website the contentScript runs on
       const el = document.getElementById('some-id')
