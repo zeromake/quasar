@@ -16,14 +16,14 @@ export function createManifest (quasarConf) {
   }
   catch (err) {
     warn('Could not read BEX manifest. Please check its syntax.')
-    return { err, bexManifestPath }
+    return { err }
   }
 
   json = merge({}, json.all, json[ quasarConf.ctx.targetName ])
 
   if (json.manifest_version === void 0) {
     warn('The BEX manifest requires a "manifest_version" prop, which is currently missing.')
-    return { err: true, bexManifestPath }
+    return { err: true }
   }
 
   const {
@@ -60,10 +60,7 @@ export function createManifest (quasarConf) {
     'utf-8'
   )
 
-  return {
-    bexManifestPath,
-    ...extractBexScripts(quasarConf, json)
-  }
+  return extractBexScripts(quasarConf, json)
 }
 
 function extractBexScripts (quasarConf, bexManifest) {

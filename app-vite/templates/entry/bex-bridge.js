@@ -5,6 +5,7 @@
  **/
 
 const portNameRE = /^background$|^app$|^content@/
+const { runtime } = process.env.TARGET === 'firefox' ? browser : chrome
 
 /**
  * @param {number} max
@@ -61,7 +62,7 @@ export class BexBridge {
        *
        * Generating an easy to handle id for the content script.
        */
-      this.portName = `${ type }@${ name.replaceAll('@', '-') }-${ getRandomId(10_000) }`
+      this.portName = `${ type }@${ name }-${ getRandomId(10_000) }`
     }
 
     this.#banner = `[QBex|${ this.portName }]`
@@ -74,54 +75,44 @@ export class BexBridge {
           this.#cleanupPort(payload.removed)
         }
       })
+
+      return
     }
 
-    if (type === 'content') {
-      if (!name) {
-        this.warn('Content script name was not specified on instantiation.')
-        return
-      }
+    /**
+     * Else we're the background script
+     */
 
-      if (name.indexOf('@') !== -1) {
+    this.isConnected = true
+    const onPacket = this.#onPacket.bind(this)
+
+    runtime.onConnect.addListener(port => {
+      // if it's not a bridge port on the other end,
+      // then ignore it
+      if (portNameRE.test(port.name) === false) return
+
+      if (this.portMap[ port.name ] !== void 0) {
         this.warn(
-          `The "@" character is not allowed in the content script name (${ name }).`
-          + ' It was replaced with a "-".'
+          `Connection with "${ port.name }" already exists.`
+          + ' Disconnecting the previous one and connecting the new one.'
         )
+        this.portMap[ port.name ].disconnect()
+        this.#cleanupPort(port.name)
       }
-    }
-    else if (type === 'background') {
-      this.isConnected = true
-      const runtime = chrome.runtime || browser.runtime
-      const onPacket = this.#onPacket.bind(this)
 
-      runtime.onConnect.addListener(port => {
-        // if it's not a bridge port on the other end,
-        // then ignore it
-        if (portNameRE.test(port.name) === false) return
+      this.portMap[ port.name ] = port
 
-        if (this.portMap[ port.name ] !== void 0) {
-          this.warn(
-            `Connection with "${ port.name }" already exists.`
-            + ' Disconnecting the previous one and connecting the new one.'
-          )
-          this.portMap[ port.name ].disconnect()
-          this.#cleanupPort(port.name)
-        }
-
-        this.portMap[ port.name ] = port
-
-        port.onMessage.addListener(onPacket)
-        port.onDisconnect.addListener(() => {
-          port.onMessage.removeListener(onPacket)
-          this.#cleanupPort(port.name)
-          this.log(`Closed connection with ${ port.name }.`)
-          this.#updatePortList({ removed: port.name })
-        })
-
-        this.log(`Opened connection with ${ port.name }.`)
-        this.#updatePortList({ added: port.name })
+      port.onMessage.addListener(onPacket)
+      port.onDisconnect.addListener(() => {
+        port.onMessage.removeListener(onPacket)
+        this.#cleanupPort(port.name)
+        this.log(`Closed connection with ${ port.name }.`)
+        this.#updatePortList({ removed: port.name })
       })
-    }
+
+      this.log(`Opened connection with ${ port.name }.`)
+      this.#updatePortList({ added: port.name })
+    })
   }
 
   /**
@@ -136,7 +127,6 @@ export class BexBridge {
       return Promise.reject('The bridge is already connected')
     }
 
-    const runtime = chrome.runtime || browser.runtime
     const portToBackground = runtime.connect({ name: this.portName })
 
     return new Promise((resolve, reject) => {
@@ -156,7 +146,7 @@ export class BexBridge {
       }
 
       const onDisconnect = () => {
-        if (chrome.runtime.lastError?.message?.indexOf('Could not establish connection') !== -1) {
+        if (runtime.lastError?.message?.indexOf('Could not establish connection') !== -1) {
           this.isConnected = false
           portToBackground.onMessage.removeListener(onPacket)
           portToBackground.onMessage.removeListener(onDisconnect)

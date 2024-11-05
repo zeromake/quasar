@@ -53,7 +53,7 @@ const ctx = getCtx({
   mode: argv.mode,
   target: argv.mode === 'cordova' || argv.mode === 'capacitor'
     ? 'android'
-    : void 0,
+    : (argv.mode === 'bex' ? 'chrome' : void 0),
   debug: argv.debug,
   dev: argv.cmd === 'dev',
   prod: argv.cmd === 'build'

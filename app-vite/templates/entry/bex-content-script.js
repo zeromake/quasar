@@ -10,15 +10,61 @@
 /* global chrome */
 
 import { BexBridge } from './bex-bridge.js'
-import runDevlandContentScript from 'app/src-bex/__IMPORT_NAME__'
+import runDevlandContentScript from 'app/src-bex/<%= importName %>'
+
+if (process.env.DEV === true) {
+  const { runtime } = process.env.TARGET === 'firefox' ? browser : chrome
+  const portName = 'quasar@hmr/content-script/<%= importName %>'
+  const banner = '[QBex|HMR] [<%= importName %>]'
+
+  let isReloading = false
+
+  function onMessage (message) {
+    if (message === 'qbex:hmr:hello') {
+      console.log(`${ banner } Connected to background`)
+      return
+    }
+
+    if (message === 'qbex:hmr:reload-content') {
+      console.log(`${ banner } Reload requested by background...`)
+      isReloading = true
+
+      // reload the page with a small delay,
+      // to allow the extension to be also reloaded
+      setTimeout(() => {
+        location.reload()
+      }, 100)
+    }
+  }
+
+  function connect () {
+    const port = runtime.connect({ name: portName })
+
+    port.onMessage.addListener(onMessage)
+    port.onDisconnect.addListener(() => {
+      if (isReloading === true) return
+      port.onMessage.removeListener(onMessage)
+
+      console.log(
+        runtime.lastError?.message?.indexOf('Could not establish connection') !== -1
+          ? `${ banner } Could not connect to background`
+          : `${ banner } Lost connection to background`
+      )
+
+      setTimeout(connect, 1000)
+    })
+  }
+
+  connect()
+}
 
 let bridge = null
 
-function useBridge ({ name, debug }) {
+function useBridge ({ debug } = {}) {
   if (bridge === null) {
     bridge = new BexBridge({
       type: 'content',
-      name,
+      name: '<%= importName %>',
       debug
     })
   }

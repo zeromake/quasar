@@ -177,9 +177,7 @@ export function printDevRunningBanner (quasarConf) {
     banner.push(
       line,
       ` ${ greenBanner } Load the dev extension in ${ capitalize(ctx.targetName) } from:`,
-      `     ${ green(folder) }`,
-      line,
-      ` ${ greenBanner } You will need to manually refresh the browser page to see changes after recompilations.`
+      `   ${ green(folder) }`
     )
   }
 

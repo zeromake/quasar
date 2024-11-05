@@ -84,14 +84,42 @@ type BexBridgeOptions = {
     }
   | {
       type: "content";
+    }
+);
+
+type BexBridgeConstructorOptions = {
+  /**
+   * Whether to enable the debug mode.
+   *
+   * @see {@link BexBridge.setDebug} for updating the debug mode after the bridge is created
+   * @see {@link BexBridge.log} for logging a message if the debug mode is enabled
+   *
+   * @example
+   * const bridge = useBridge({ debug: process.env.DEBUGGING });
+   */
+  debug?: boolean;
+} & (
+  | {
+      type: "background";
+    }
+  | {
+      /**
+       * @internal
+       */
+      type: "app";
+    }
+  | {
+      type: "content";
+
       /**
        * The name of the content script.
        * It should be unique for each content script.
        *
        * It is used to identify the port name when sending messages.
        * A content script will have a port per each browser tab where it is injected.
-       * As an example, for the name `content-script-1`, the name of the ports
-       * will be in the format `content@content-script-1-<xxxxx>`, where `<xxxxx>`
+       * As an example, for a content script at /src-bex/group/my-content-script.js
+       * the name of the port will be in the format:
+       * `content@group/my-content-script-<xxxxx>`, where `<xxxxx>`
        * is a random number between 0 and 10000.
        */
       name: string;
@@ -101,6 +129,15 @@ type BexBridgeOptions = {
 export interface BexBridge {
   /**
    * The name of the port where the bridge belongs to.
+   *
+   * @example
+   * 'background'
+   *
+   * @example
+   * 'app'
+   *
+   * @example
+   * 'content@sub-folder/my-content-script-1234'
    */
   readonly portName: PortName;
   /**
@@ -165,7 +202,7 @@ export interface BexBridge {
     };
   };
 
-  constructor(options: BexBridgeOptions): BexBridge;
+  constructor(options: BexBridgeConstructorOptions): BexBridge;
 
   /**
    * Connect to the background script.
@@ -292,10 +329,10 @@ export type BexContentCallback = (payload: {
    * So, calling with a different option after the first call will not have any effect.
    *
    * @example
-   * const bridge = useBridge({ name: 'content-script-1' });
+   * const bridge = useBridge();
    *
    * @example
-   * const bridge = useBridge({ name: 'content-script-1', debug: true });
+   * const bridge = useBridge({ debug: true });
    */
-  useBridge: (options: OptionsForType<"content">) => BexBridge;
+  useBridge: (options?: OptionsForType<"content">) => BexBridge;
 }) => void;

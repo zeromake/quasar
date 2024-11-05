@@ -13,7 +13,7 @@ declare module '@quasar/app-vite' {
 
 export default bexContent(({ useBridge }) => {
   // The use of the bridge is optional.
-  const bridge = useBridge({ name: 'my-content-script', debug: false })
+  const bridge = useBridge({ debug: false })
 
   // Hook into the bridge to listen for events sent from the client BEX.
   bridge.on('some.event', ({ payload }) => {

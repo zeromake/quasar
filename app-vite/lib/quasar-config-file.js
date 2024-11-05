@@ -27,7 +27,8 @@ const defaultPortMapping = {
   pwa: 9200,
   electron: 9300,
   cordova: 9400,
-  capacitor: 9500
+  capacitor: 9500,
+  bex: 9600
 }
 
 const quasarComponentRE = /^(Q[A-Z]|q-)/
@@ -567,8 +568,7 @@ export class QuasarConfigFile {
       }, cfg.ssr)
     }
 
-    // if DEV and not BEX mode (BEX does not use a regular devserver)
-    if (this.#ctx.dev && this.#ctx.mode.bex !== true) {
+    if (this.#ctx.dev) {
       if (this.#opts.host) {
         cfg.devServer.host = this.#opts.host
       }
@@ -829,37 +829,6 @@ export class QuasarConfigFile {
       cfg.capacitor.capacitorCliPreparationParams = [ 'sync', this.#ctx.targetName ]
     }
 
-    if (this.#ctx.dev) {
-      if (cfg.devServer.https === true) {
-        const { getCertificate } = await import('@quasar/ssl-certificate')
-        const sslCertificate = getCertificate({ log, fatal })
-        cfg.devServer.https = {
-          key: sslCertificate,
-          cert: sslCertificate
-        }
-      }
-      else if (Object(cfg.devServer.https) === cfg.devServer.https) {
-        const { https } = cfg.devServer
-
-        // we now check if config is specifying a file path
-        // and we actually read the contents so we can later supply correct
-        // params to the node HTTPS server
-        ;[ 'ca', 'pfx', 'key', 'cert' ].forEach(prop => {
-          if (typeof https[ prop ] === 'string') {
-            try {
-              https[ prop ] = readFileSync(https[ prop ])
-            }
-            catch (e) {
-              console.error(e)
-              console.log()
-              delete https[ prop ]
-              warn(`The devServer.https.${ prop } file could not be read. Removed the config.`)
-            }
-          }
-        })
-      }
-    }
-
     if (this.#ctx.mode.ssr) {
       if (cfg.ssr.manualPostHydrationTrigger !== true) {
         cfg.metaConf.needsAppMountHook = true
@@ -897,18 +866,47 @@ export class QuasarConfigFile {
         cfg.metaConf.vueDevtools = { ...this.#vueDevtools }
       }
 
-      if (this.#ctx.mode.cordova || this.#ctx.mode.capacitor || this.#ctx.mode.electron) {
-        if (this.#ctx.mode.electron) {
-          cfg.devServer.https = false
-        }
+      if (this.#ctx.mode.electron || this.#ctx.mode.bex) {
+        cfg.devServer.https = false
       }
-      else if (cfg.devServer.open) {
+      else if (cfg.devServer.open && !this.#ctx.mode.cordova && !this.#ctx.mode.capacitor) {
         cfg.metaConf.openBrowser = !isMinimalTerminal
           ? cfg.devServer.open
           : false
       }
 
       delete cfg.devServer.open
+    }
+
+    if (this.#ctx.dev) {
+      if (cfg.devServer.https === true) {
+        const { getCertificate } = await import('@quasar/ssl-certificate')
+        const sslCertificate = getCertificate({ log, fatal })
+        cfg.devServer.https = {
+          key: sslCertificate,
+          cert: sslCertificate
+        }
+      }
+      else if (Object(cfg.devServer.https) === cfg.devServer.https) {
+        const { https } = cfg.devServer
+
+        // we now check if config is specifying a file path
+        // and we actually read the contents so we can later supply correct
+        // params to the node HTTPS server
+        ;[ 'ca', 'pfx', 'key', 'cert' ].forEach(prop => {
+          if (typeof https[ prop ] === 'string') {
+            try {
+              https[ prop ] = readFileSync(https[ prop ])
+            }
+            catch (e) {
+              console.error(e)
+              console.log()
+              delete https[ prop ]
+              warn(`The devServer.https.${ prop } file could not be read. Removed the config.`)
+            }
+          }
+        })
+      }
     }
 
     if (this.#ctx.mode.pwa) {
@@ -949,7 +947,7 @@ export class QuasarConfigFile {
         ? 'localhost'
         : cfg.devServer.host
 
-      cfg.metaConf.APP_URL = getUrl(hostname)
+      cfg.metaConf.APP_URL = this.#ctx.mode.bex ? 'index.html' : getUrl(hostname)
       cfg.metaConf.getUrl = getUrl
     }
     else if (this.#ctx.mode.cordova || this.#ctx.mode.capacitor || this.#ctx.mode.bex) {
@@ -967,6 +965,10 @@ export class QuasarConfigFile {
       VUE_ROUTER_MODE: cfg.build.vueRouterMode,
       VUE_ROUTER_BASE: cfg.build.vueRouterBase
     })
+
+    if (this.#ctx.targetName) {
+      cfg.build.env.TARGET = this.#ctx.targetName
+    }
 
     if (cfg.metaConf.APP_URL) {
       cfg.build.env.APP_URL = cfg.metaConf.APP_URL
