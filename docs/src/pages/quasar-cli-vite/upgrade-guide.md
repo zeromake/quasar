@@ -33,7 +33,7 @@ api.compatibleWith(
 * Typescript detection is based on the quasar.config file being in TS form (quasar.config.ts) and tsconfig.json file presence.
 * feat+refactor(app-vite): ability to run multiple modes + dev/build simultaneously (huge effort!)
 * SSR and Electron modes now build in ESM format.
-* New BEX mode with significant new capabilities.
+* New BEX mode with significant new capabilities (includes HMR now!).
 * Dropped support for our internal linting system (quasar.config file > eslint). Should use [vite-plugin-checker](https://vite-plugin-checker.netlify.app/) instead.
 * **We will detail more breaking changes for each of the Quasar modes below**.
 
@@ -75,6 +75,7 @@ Some of the work below has already been backported to the old @quasar/app-vite v
 * feat(app-vite): for default /src-ssr template -> prod ssr -> on error, print err stack if built with debugging enabled
 * feat(app-vite): extend build > vitePlugins form (additional { server?: boolean, client?: boolean } param
 * feat+refactor(app-vite): BEX -> Completely rewrote & redesigned the Quasar Bridge (with a ton of new features); Automatically infer the background script file & the content script files from the bex manifest itself; Ability to specify dynamic content scripts that you can register & load yourself at runtime; Ability to compile other js/ts files as well that you might need to dynamically load/inject; No more 3s delay when opening the popup; No more "dom" script (use content script directly); The bridge is available globally in App (/src) through the $q object or window.QBexBridge
+* feat(app-vite): BEX with HMR (hot module reload)
 
 ### Beginning of the upgrade process
 
@@ -685,6 +686,7 @@ There are quite a few improvements, however you will need to make some adjustmen
   * Debug mode (where all the bridge communication will be outputted to the browser console)
   * Breaking changes highlights: background & content scripts initialization of the bridge; bride.on() calls when responding; bridge.send() calls
   * The bridge is now available throughout the App in `/src/` (regardless of the file used: boot files, router init, App.vue, any Vue component, ...) by accessing the `$q object` or `window.QBexBridge`
+* **The BEX mode now has HMR** (hot module reload)!!!
 * One single manifest file from which both chrome & firefox ones can be extracted
 * Automatically infer the background script file & the content script files from the BEX manifest file
 * Ability to specify dynamic content scripts that you can register & load yourself at runtime
@@ -813,7 +815,7 @@ import { bexContent } from 'quasar/wrappers'
 
 export default bexContent(({ useBridge }) => {
   // The use of the bridge is optional in content scripts.
-  const bridge = useBridge({ name: 'my-content-script', debug: false })
+  const bridge = useBridge({ debug: false })
 
   // Attach initial events, if any
   // bridge.on(event, callback)
