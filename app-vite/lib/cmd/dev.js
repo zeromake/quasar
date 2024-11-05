@@ -9,7 +9,7 @@ import { log } from '../utils/logger.js'
 const argv = parseArgs(process.argv.slice(2), {
   alias: {
     m: 'mode',
-    T: 'target', // cordova/capacitor mode only
+    T: 'target', // cordova/capacitor/bex mode only
     e: 'emulator', // cordova-mode only
     p: 'port',
     H: 'hostname',
@@ -69,6 +69,9 @@ if (argv.help) {
 
     Only for Capacitor mode:
     --target, -T     (required) App target [android|ios]
+
+    Only for BEX mode:
+    --target, -T     (required) Browser family target [chrome|firefox]
   `)
   process.exit(0)
 }
