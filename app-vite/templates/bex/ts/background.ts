@@ -41,7 +41,7 @@ export default bexBackground(({ useBridge }) => {
     return Date.now();
   });
 
-  bridge.on('storage.get', async ({ payload: key }) => {
+  bridge.on('storage.get', ({ payload: key }) => {
     return new Promise(resolve => {
       if (key === void 0) {
         chrome.storage.local.get(null, items => {

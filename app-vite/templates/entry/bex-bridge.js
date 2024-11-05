@@ -323,9 +323,11 @@ export class BexBridge {
       messageType: 'event-send',
       messageProps: { event }
     })
+
     if (this.portList.includes(to) === false) {
       throw `Connection to "${ to }" was closed while waiting for a response`
     }
+
     return new Promise((resolve, reject) => {
       this.messageMap[ id ] = {
         portName: to,

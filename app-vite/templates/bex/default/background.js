@@ -49,8 +49,8 @@ export default bexBackground(({ useBridge }) => {
   //   payload: key
   // }).then(responsePayload => { ... }).catch(err => { ... })
 
-  bridge.on('storage.set', ({ payload }) => {
-    chrome.storage.local.set({ [payload.key]: payload.value })
+  bridge.on('storage.set', async ({ payload }) => {
+    await chrome.storage.local.set({ [payload.key]: payload.value })
   })
   // Usage:
   // bridge.send({
@@ -59,8 +59,8 @@ export default bexBackground(({ useBridge }) => {
   //   payload: { key: 'someKey', value: 'someValue' }
   // }).then(responsePayload => { ... }).catch(err => { ... })
 
-  bridge.on('storage.remove', ({ payload }) => {
-    chrome.storage.local.remove(payload)
+  bridge.on('storage.remove', async ({ payload }) => {
+    await chrome.storage.local.remove(payload)
   })
   // Usage:
   // bridge.send({
