@@ -171,7 +171,12 @@ export default createComponent({
 
     const onComposition = useKeyComposition(onInput)
 
-    const virtualScrollLength = computed(() => props.options.length)
+    const virtualScrollLength = computed(() => (
+      Array.isArray(props.options)
+        ? props.options.length
+        : 0
+    ))
+
     const virtualScrollItemSizeComputed = computed(() => (
       props.virtualScrollItemSize === void 0
         ? (props.optionsDense === true ? 24 : 48)
@@ -200,7 +205,7 @@ export default createComponent({
           ? (props.multiple === true && Array.isArray(props.modelValue) ? props.modelValue : [ props.modelValue ])
           : []
 
-      if (props.mapOptions === true) {
+      if (props.mapOptions === true && Array.isArray(props.options) === true) {
         const cache = props.mapOptions === true && innerValueCache !== void 0
           ? innerValueCache
           : []
