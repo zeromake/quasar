@@ -73,7 +73,7 @@ export class QuasarModeDevserver extends AppDevserver {
     }
 
     if (diff('vite', quasarConf)) {
-      return queue(() => this.#runVite(quasarConf))
+      return queue(() => this.#runVite(quasarConf, queue))
     }
   }
 
@@ -146,29 +146,44 @@ export class QuasarModeDevserver extends AppDevserver {
     }
   }
 
-  async #runVite (quasarConf) {
+  async #runVite (quasarConf, queue) {
     this.#viteWatchers.forEach(watcher => { watcher.close() })
     this.#viteWatchers = []
 
-    const viteConfig = await quasarBexConfig.vite(quasarConf)
-    this.#viteServer = await createServer(viteConfig)
+    if (this.ctx.target.firefox) {
+      const viteConfig = await quasarBexConfig.vite(quasarConf)
+      await this.buildWithVite('BEX UI', viteConfig)
 
-    await this.#viteServer.listen()
+      this.#viteWatchers.push(
+        this.#getAppSourceWatcher(quasarConf, viteConfig, queue),
+        this.#getPublicDirWatcher(quasarConf)
+      )
+    }
+    else {
+      const viteConfig = await quasarBexConfig.vite(quasarConf)
+      this.#viteServer = await createServer(viteConfig)
+
+      await this.#viteServer.listen()
+
+      this.#viteWatchers.push(
+        {
+          close: () => {
+            this.#viteServer.close()
+            this.#viteServer = null
+          }
+        },
+        this.#getIndexHtmlWatcher(quasarConf, this.#viteServer)
+      )
+    }
 
     this.#viteWatchers.push(
-      {
-        close: () => {
-          this.#viteServer.close()
-          this.#viteServer = null
-        }
-      },
-      this.#getIndexHtmlWatcher(quasarConf, this.#viteServer),
       this.#getBexAssetsDirWatcher(quasarConf)
     )
 
     this.printBanner(quasarConf)
   }
 
+  // chrome only
   #getIndexHtmlWatcher (quasarConf, viteServer) {
     fse.ensureDirSync(join(quasarConf.build.distDir, 'www'))
 
@@ -189,12 +204,51 @@ export class QuasarModeDevserver extends AppDevserver {
     return htmlWatcher
   }
 
+  // chrome & firefox
   #getBexAssetsDirWatcher (quasarConf) {
     const folders = copyBexAssets(quasarConf)
     const watcher = chokidar.watch(folders, { ignoreInitial: true })
 
     const copy = debounce(() => {
       copyBexAssets(quasarConf)
+      this.printBanner(quasarConf)
+    }, 1000)
+
+    watcher.on('add', copy)
+    watcher.on('change', copy)
+
+    return watcher
+  }
+
+  // firefox only
+  #getAppSourceWatcher (quasarConf, viteConfig, queue) {
+    const watcher = chokidar.watch([
+      this.ctx.appPaths.srcDir,
+      this.ctx.appPaths.resolve.app('index.html')
+    ], {
+      ignoreInitial: true
+    })
+
+    const rebuild = debounce(() => {
+      queue(() => {
+        return this.buildWithVite('BEX UI', viteConfig)
+          .then(() => { this.printBanner(quasarConf) })
+      })
+    }, 1000)
+
+    watcher.on('add', rebuild)
+    watcher.on('change', rebuild)
+    watcher.on('unlink', rebuild)
+
+    return watcher
+  }
+
+  // firefox only
+  #getPublicDirWatcher (quasarConf) {
+    const watcher = chokidar.watch(this.ctx.appPaths.publicDir, { ignoreInitial: true })
+
+    const copy = debounce(() => {
+      fse.copySync(this.ctx.appPaths.publicDir, quasarConf.build.distDir)
       this.printBanner(quasarConf)
     }, 1000)
 

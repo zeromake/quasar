@@ -13,8 +13,7 @@
 import { BexBridge } from './bex-bridge.js'
 import runDevlandBackgroundScript from 'app/src-bex/<%= importName %>'
 
-if (process.env.DEV === true) {
-  const { runtime } = process.env.TARGET === 'firefox' ? browser : chrome
+<% if (isDev === true && isChrome === true) { %>
   const devServerPort = <%= devServerPort %>
 
   interceptRequests()
@@ -26,7 +25,7 @@ if (process.env.DEV === true) {
      * for HMR purposes.
      */
 
-    const bexOrigin = `chrome-extension://${ runtime.id }`
+    const bexOrigin = `chrome-extension://${ chrome.runtime.id }`
     const hrefRE = /=$|=(?=&)/g
 
     async function getDevServerResponse (url) {
@@ -80,7 +79,7 @@ if (process.env.DEV === true) {
         port.postMessage('qbex:hmr:reload-content')
       }
 
-      runtime.reload()
+      chrome.runtime.reload()
     }
 
     // Listen for messages
@@ -125,7 +124,7 @@ if (process.env.DEV === true) {
       reloadExtension()
     })
 
-    runtime.onConnect.addListener(port => {
+    chrome.runtime.onConnect.addListener(port => {
       const { name } = port
 
       if (contentScriptPortNameRE.test(name) === true) {
@@ -139,7 +138,7 @@ if (process.env.DEV === true) {
       }
     })
   }
-}
+<% } %>
 
 let bridge = null
 

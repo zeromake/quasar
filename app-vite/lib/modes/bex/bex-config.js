@@ -45,6 +45,8 @@ function createScript ({ quasarConf, type, entry }) {
 
   const content = scriptTemplates[ type ]({
     importName: entry.name.replaceAll('\\', '/').replace(jsExtRE, ''),
+    isDev: quasarConf.ctx.dev,
+    isChrome: quasarConf.ctx.target.chrome,
     devServerPort: quasarConf.devServer.port
   })
 
@@ -61,6 +63,11 @@ function createScript ({ quasarConf, type, entry }) {
 export const quasarBexConfig = {
   vite: async quasarConf => {
     const cfg = await createViteConfig(quasarConf, { compileId: 'vite-bex' })
+
+    if (quasarConf.ctx.target.firefox) {
+      cfg.build.outDir = join(quasarConf.build.distDir, 'www')
+    }
+
     return extendViteConfig(cfg, quasarConf, { isClient: true })
   },
 

@@ -12,7 +12,7 @@
 import { BexBridge } from './bex-bridge.js'
 import runDevlandContentScript from 'app/src-bex/<%= importName %>'
 
-if (process.env.DEV === true) {
+<% if (isDev === true && isChrome === true) { %>
   const { runtime } = process.env.TARGET === 'firefox' ? browser : chrome
   const portName = 'quasar@hmr/content-script/<%= importName %>'
   const banner = '[QBex|HMR] [<%= importName %>]'
@@ -56,7 +56,7 @@ if (process.env.DEV === true) {
   }
 
   connect()
-}
+<% } %>
 
 let bridge = null
 
