@@ -415,6 +415,10 @@
           "type": "Boolean",
           "desc": "Always true -- passed down as prop to QItem (when using QItem)"
         },
+        "html": {
+          "type": "Boolean",
+          "desc": "Is the content HTML?"
+        },
         "removeAtIndex": {
           "type": "Function",
           "desc": "Remove selected option located at specific index",
@@ -457,6 +461,14 @@
         "opt": {
           "type": "Any",
           "desc": "Option -- its value is taken from 'options' prop"
+        },
+        "html": {
+          "type": "Boolean",
+          "desc": "Is the content HTML?"
+        },
+        "label": {
+          "type": "String",
+          "desc": "Label of the option"
         },
         "selected": {
           "type": "Boolean",
