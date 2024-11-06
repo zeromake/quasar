@@ -532,7 +532,7 @@ Should you want, you can customize the mapping of icon names. This can be done b
   - At the top-level if using Composition API with `<script setup>`
   - In the `setup()` function if using Composition API
   - In the `created()` hook if using Options API
-- Set `iconMapFn` in Quasar Vue plugin options, e.g. `app.use(Quasar, { iconMapFn: () => { /* ... */ } })` (for flavours other than Quasar CLI).
+- Set `iconMapFn` in Quasar Vue plugin options > config, e.g. `app.use(Quasar, { config: { iconMapFn } })` (for flavours other than Quasar CLI).
 
 We will use the `$q.iconMapFn` approach using `<script setup>` in the use case examples below, but the same principle applies to the other methods.
 

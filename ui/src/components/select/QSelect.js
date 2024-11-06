@@ -665,11 +665,9 @@ export default createComponent({
       if (typeof value === 'string' && value.length !== 0) {
         const needle = value.toLocaleLowerCase()
         const findFn = extractFn => {
-          const option = props.options.find(opt => extractFn.value(opt).toLocaleLowerCase() === needle)
+          const option = props.options.find(opt => String(extractFn.value(opt)).toLocaleLowerCase() === needle)
 
-          if (option === void 0) {
-            return false
-          }
+          if (option === void 0) return false
 
           if (innerValue.value.indexOf(option) === -1) {
             toggleOption(option)
@@ -681,14 +679,13 @@ export default createComponent({
           return true
         }
         const fillFn = afterFilter => {
-          if (findFn(getOptionValue) === true) {
-            return
+          if (
+            findFn(getOptionValue) !== true
+            && afterFilter !== true
+            && findFn(getOptionLabel) !== true
+          ) {
+            filter(value, true, () => fillFn(true))
           }
-          if (findFn(getOptionLabel) === true || afterFilter === true) {
-            return
-          }
-
-          filter(value, true, () => fillFn(true))
         }
 
         fillFn()
