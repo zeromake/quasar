@@ -1,4 +1,4 @@
-/* Fontawesome Free v6.5.2 */
+/* Fontawesome Free v6.6.0 */
 
 export declare const fab42Group: string;
 export declare const fab500px: string;
@@ -102,6 +102,7 @@ export declare const fabCuttlefish: string;
 export declare const fabDAndD: string;
 export declare const fabDAndDBeyond: string;
 export declare const fabDailymotion: string;
+export declare const fabDartLang: string;
 export declare const fabDashcube: string;
 export declare const fabDebian: string;
 export declare const fabDeezer: string;
@@ -151,6 +152,7 @@ export declare const fabFirstOrderAlt: string;
 export declare const fabFirstdraft: string;
 export declare const fabFlickr: string;
 export declare const fabFlipboard: string;
+export declare const fabFlutter: string;
 export declare const fabFly: string;
 export declare const fabFontAwesome: string;
 export declare const fabFonticons: string;
@@ -1842,6 +1844,7 @@ export declare const fasTableCells: string;
 export declare const fasTableCellsColumnLock: string;
 export declare const fasTableCellsLarge: string;
 export declare const fasTableCellsRowLock: string;
+export declare const fasTableCellsRowUnlock: string;
 export declare const fasTableColumns: string;
 export declare const fasTableList: string;
 export declare const fasTableTennisPaddleBall: string;
@@ -1882,6 +1885,7 @@ export declare const fasThermometer: string;
 export declare const fasThumbsDown: string;
 export declare const fasThumbsUp: string;
 export declare const fasThumbtack: string;
+export declare const fasThumbtackSlash: string;
 export declare const fasTicket: string;
 export declare const fasTicketSimple: string;
 export declare const fasTimeline: string;
@@ -2019,6 +2023,7 @@ export declare const fasWarehouse: string;
 export declare const fasWater: string;
 export declare const fasWaterLadder: string;
 export declare const fasWaveSquare: string;
+export declare const fasWebAwesome: string;
 export declare const fasWeightHanging: string;
 export declare const fasWeightScale: string;
 export declare const fasWheatAwn: string;
