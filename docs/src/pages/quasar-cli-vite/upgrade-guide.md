@@ -320,6 +320,8 @@ $ bun add --dev vite-plugin-checker
 
 No need to change anything in the `/src`, `/src-capacitor` or `/src-cordova` folders.
 
+Note that the UI code (`/src`) can now use `process.env.TARGET` (which will be "ios" or "android").
+
 ### PWA mode changes
 
 The `register-service-worker` dependency is no longer supplied by the CLI. You will have to install it yourself in your project folder.
@@ -678,7 +680,7 @@ ssr: {
 ### Bex mode changes <q-badge label="updated for v2.0.0-beta.25+" />
 
 There are quite a few improvements:
-* **The BEX mode now has HMR (hot module reload)** for Chrome only!!!
+* **The BEX mode now has HMR (hot module reload)!!!** (Chrome only)
 * Completely rewrote & redesigned the Quasar Bridge to allow for:
   * Sending messages directly between any part of your bex (app, content scripts, background)
   * Ability to skip using the bridge altogether
@@ -714,9 +716,21 @@ $ bun remove events
 The `quasar dev` and `quasar build` commands now require an explicit target (chrome or firefox). Should you wish to develop for both simultaneously, then you can spawn two quasar dev commands.
 
 ```bash
-$ quasar dev -m bex <chrome|firefox>
-$ quasar build -m bex <chrome|firefox>
+$ quasar dev -m bex -T <chrome|firefox>
+$ quasar dev -m bex --target <chrome|firefox>
+
+$ quasar build -m bex -T <chrome|firefox>
+$ quasar build -m bex --target <chrome|firefox>
 ```
+
+Note that the UI code (`/src`) can now use `process.env.TARGET` (which will be "ios" or "android").
+
+### HMR for Chrome
+
+Significant improvements to the DX:
+* Full HMR for popup/page
+* When changing the background script, the extension will automatically reload.
+* When changing a content script, the extension will automatically reload & the tabs using those content scripts will auto-refresh.
 
 #### The quasar.config file
 
