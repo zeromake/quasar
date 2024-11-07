@@ -6,7 +6,6 @@
     "quasar": "./bin/quasar.js"
   },
   "type": "module",
-  "typings": "types/index.d.ts",
   "files": [
     "assets",
     "bex",
@@ -17,6 +16,29 @@
     "stricter-tsconfig-preset.json",
     "tsconfig-preset.json"
   ],
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts"
+    },
+    "./bex/background": {
+      "import": "./bex/background.js",
+      "types": "./types/bex/entrypoints/background.d.ts"
+    },
+    "./bex/content": {
+      "import": "./bex/content.js",
+      "types": "./types/bex/entrypoints/content.d.ts"
+    },
+    "./bex/private/bex-bridge": {
+      "import": "./bex/private/bex-bridge.js",
+      "types": "./types/bex/bex-bridge.d.ts"
+    },
+    "./tsconfig-preset": {
+      "default": "./tsconfig-preset.json"
+    },
+    "./stricter-tsconfig-preset": {
+      "default": "./stricter-tsconfig-preset.json"
+    }
+  },
   "keywords": [
     "quasar",
     "vue",

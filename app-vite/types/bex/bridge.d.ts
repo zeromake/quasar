@@ -84,32 +84,6 @@ type BexBridgeOptions = {
     }
   | {
       type: "content";
-    }
-);
-
-type BexBridgeConstructorOptions = {
-  /**
-   * Whether to enable the debug mode.
-   *
-   * @see {@link BexBridge.setDebug} for updating the debug mode after the bridge is created
-   * @see {@link BexBridge.log} for logging a message if the debug mode is enabled
-   *
-   * @example
-   * const bridge = useBridge({ debug: process.env.DEBUGGING });
-   */
-  debug?: boolean;
-} & (
-  | {
-      type: "background";
-    }
-  | {
-      /**
-       * @internal
-       */
-      type: "app";
-    }
-  | {
-      type: "content";
 
       /**
        * The name of the content script.
@@ -202,7 +176,7 @@ export interface BexBridge {
     };
   };
 
-  constructor(options: BexBridgeConstructorOptions): BexBridge;
+  constructor(options: BexBridgeOptions): BexBridge;
 
   /**
    * Connect to the background script.
@@ -299,40 +273,3 @@ export interface BexBridge {
    */
   warn(...args: any[]): void;
 }
-
-export type GlobalQuasarBex = BexBridge;
-
-type OptionsForType<T extends BexBridgeOptions['type']> = Omit<
-  Extract<BexBridgeOptions, { type: T }>,
-  "type"
->;
-
-export type BexBackgroundCallback = (payload: {
-  /**
-   * Get the bridge for the background script.
-   * It is a singleton, which will be created on the first call.
-   * So, calling with a different option after the first call will not have any effect.
-   *
-   * @example
-   * const bridge = useBridge();
-   *
-   * @example
-   * const bridge = useBridge({ debug: true });
-   */
-  useBridge: (options?: OptionsForType<"background">) => BexBridge;
-}) => void;
-
-export type BexContentCallback = (payload: {
-  /**
-   * Get the bridge for the current content script.
-   * It is a singleton, which will be created on the first call.
-   * So, calling with a different option after the first call will not have any effect.
-   *
-   * @example
-   * const bridge = useBridge();
-   *
-   * @example
-   * const bridge = useBridge({ debug: true });
-   */
-  useBridge: (options?: OptionsForType<"content">) => BexBridge;
-}) => void;
