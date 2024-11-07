@@ -37,6 +37,9 @@
     },
     "./stricter-tsconfig-preset": {
       "default": "./stricter-tsconfig-preset.json"
+    },
+    "./lib/testing.js": {
+      "import": "./lib/testing.js"
     }
   },
   "keywords": [
