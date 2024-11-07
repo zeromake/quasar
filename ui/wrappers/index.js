@@ -30,19 +30,6 @@ export function ssrMiddleware (callback) {
   return callback
 }
 
-export function bexBackground (callback) {
-  return callback
-}
-
-export function bexContent (callback) {
-  return callback
-}
-
-// Below only for @quasar/app-vite v1 & @quasar/app-webpack v3
-export function bexDom (callback) {
-  return callback
-}
-
 /**
  * Below only for @quasar/app-webpack v3
  */
@@ -72,5 +59,21 @@ export function ssrServeStaticContent (callback) {
 }
 
 export function ssrRenderPreloadTag (callback) {
+  return callback
+}
+
+/**
+ * Below only for legacy @quasar/app-vite v1 & @quasar/app-webpack v3
+ */
+
+export function bexBackground (callback) {
+  return callback
+}
+
+export function bexContent (callback) {
+  return callback
+}
+
+export function bexDom (callback) {
   return callback
 }
