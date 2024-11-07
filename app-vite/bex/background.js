@@ -1,6 +1,3 @@
-/* eslint-env browser */
-/* global chrome */
-
 import { BexBridge } from './private/bex-bridge.js'
 
 function interceptRequests (devServerPort) {

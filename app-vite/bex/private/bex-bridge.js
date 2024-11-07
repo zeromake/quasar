@@ -1,6 +1,3 @@
-/* eslint-env browser */
-/* global browser chrome */
-
 const portNameRE = /^background$|^app$|^content@/
 const { runtime } = process.env.TARGET === 'firefox' ? browser : chrome
 
