@@ -9,6 +9,13 @@ import { createBridge } from '@quasar/app-vite/bex/content'
 
 // The use of the bridge is optional.
 const bridge = createBridge({ debug: false })
+/**
+ * bridge.portName is 'content@<path>-<number>'
+ *   where <path> is the relative path of this content script
+ *   filename (without extension) from /src-bex
+ *   (eg. 'my-content-script', 'subdir/my-script')
+ *   and <number> is a unique instance number (1-10000).
+ */
 
 // Hook into the bridge to listen for events sent from the other BEX parts.
 bridge.on('some.event', message => {
@@ -114,9 +121,6 @@ bridge.on('@quasar:ports', ({ portList, added, removed }) => {
     console.log('Connection removed:', removed)
   }
 })
-
-// Current bridge port name (can be 'content@<name>-<xxxxx>')
-console.log(bridge.portName)
 
 // Dynamically set debug mode
 bridge.setDebug(true) // boolean

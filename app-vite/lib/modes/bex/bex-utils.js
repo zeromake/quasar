@@ -82,8 +82,7 @@ function getScriptSetEntry (quasarConf, filePath) {
   const scriptName = entry.substring(0, entry.length - extension.length - 1)
 
   return {
-    rawName: scriptName,
-    name: scriptName,
+    name: scriptName.replaceAll('\\', '/'),
     from: filePath,
     to: join(quasarConf.build.distDir, `${ scriptName }.js`)
   }

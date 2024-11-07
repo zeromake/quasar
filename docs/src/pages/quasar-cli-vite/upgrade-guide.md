@@ -847,6 +847,13 @@ import { createBridge } from '@quasar/app-vite/bex/content'
 
 // The use of the bridge is optional.
 const bridge = createBridge({ name: 'my-content-script', debug: false })
+/**
+ * bridge.portName is 'content@<path>-<number>'
+ *   where <path> is the relative path of this content script
+ *   filename (without extension) from /src-bex
+ *   (eg. 'my-content-script', 'subdir/my-script')
+ *   and <number> is a unique instance number (1-10000).
+ */
 
 // Attach initial bridge listeners...
 
@@ -885,6 +892,7 @@ import { useQuasar } from 'quasar'
 const $q = useQuasar()
 
 // Use $q.bex (the bridge)
+// $q.bex.portName is "app"
 </script>
 <<| html Composition API + script |>>
 <template>
@@ -898,6 +906,7 @@ export default {
   setup () {
     const $q = useQuasar()
     // Use $q.bex (the bridge)
+    // $q.bex.portName is "app"
   }
 }
 </script>
@@ -909,9 +918,12 @@ export default {
 <script>
 export default {
   // Use this.$q.bex (the bridge)
+  // this.$q.bex.portName is "app"
 }
 </script>
 ```
+
+Please note that the popup/page portName will be `app`.
 
 #### The new BEX bridge
 

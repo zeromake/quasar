@@ -9,6 +9,13 @@ import { createBridge } from '@quasar/app-vite/bex/content';
 
 // The use of the bridge is optional.
 const bridge = createBridge({ name: 'my-content-script', debug: false });
+/**
+ * bridge.portName is 'content@<path>-<number>'
+ *   where <path> is the relative path of this content script
+ *   filename (without extension) from /src-bex
+ *   (eg. 'my-content-script', 'subdir/my-script')
+ *   and <number> is a unique instance number (1-10000).
+ */
 
 declare module '@quasar/app-vite' {
   interface BexEventMap {

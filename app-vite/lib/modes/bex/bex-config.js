@@ -9,8 +9,7 @@ import { getBuildSystemDefine } from '../../utils/env.js'
 
 function generateDefaultEntry (quasarConf) {
   return {
-    rawName: 'file',
-    name: 'file.js',
+    name: 'file', // or subdir/file (regardless of OS)
     from: quasarConf.ctx.appPaths.resolve.bex('file.js'),
     to: join(quasarConf.build.distDir, 'file.js')
   }
@@ -34,7 +33,7 @@ export const quasarBexConfig = {
       ...cfg.define,
       ...getBuildSystemDefine({
         buildEnv: {
-          __QUASAR_BEX_SCRIPT_NAME__: entry.rawName,
+          __QUASAR_BEX_SCRIPT_NAME__: entry.name,
           __QUASAR_BEX_SERVER_PORT__: quasarConf.devServer.port || 0
         }
       })
