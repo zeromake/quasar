@@ -33,7 +33,7 @@ api.compatibleWith(
 * Typescript detection is based on the quasar.config file being in TS form (quasar.config.ts) and tsconfig.json file presence.
 * feat+refactor(app-vite): ability to run multiple modes + dev/build simultaneously (huge effort!)
 * SSR and Electron modes now build in ESM format.
-* New BEX mode with significant new capabilities (includes HMR for Chrome now!).
+* New BEX mode with significant new capabilities and ease of use (includes HMR for Chrome now!).
 * Dropped support for our internal linting system (quasar.config file > eslint). Should use [vite-plugin-checker](https://vite-plugin-checker.netlify.app/) instead.
 * **We will detail more breaking changes for each of the Quasar modes below**.
 
@@ -74,7 +74,7 @@ Some of the work below has already been backported to the old @quasar/app-vite v
 * feat(app-vite): Support for Bun as package manager #16335
 * feat(app-vite): for default /src-ssr template -> prod ssr -> on error, print err stack if built with debugging enabled
 * feat(app-vite): extend build > vitePlugins form (additional { server?: boolean, client?: boolean } param
-* feat+refactor(app-vite): BEX -> Completely rewrote & redesigned the Quasar Bridge (with a ton of new features); Automatically infer the background script file & the content script files from the bex manifest itself; Ability to specify dynamic content scripts that you can register & load yourself at runtime; Ability to compile other js/ts files as well that you might need to dynamically load/inject; No more 3s delay when opening the popup; No more "dom" script (use content script directly); The bridge is available globally in App (/src) through the $q object or window.QBexBridge
+* feat+refactor(app-vite): BEX -> Completely rewrote & redesigned the Quasar Bridge (with a ton of new features); Automatically infer the background script file & the content script files from the bex manifest itself; Ability to compile other js/ts files as well that you might need to dynamically load/inject; No more 3s delay when opening the popup; No more "dom" script (use content script directly); The bridge is available globally in App (/src) through the $q object or window.QBexBridge
 * feat(app-vite): BEX with HMR (hot module reload) for Chrome
 
 ### Beginning of the upgrade process
@@ -316,11 +316,9 @@ $ bun add --dev vite-plugin-checker
   }
 ```
 
-### SPA / Capacitor / Cordova modes changes
+### Capacitor / Cordova modes changes
 
-No need to change anything in the `/src`, `/src-capacitor` or `/src-cordova` folders.
-
-Note that the UI code (`/src`) can now use `process.env.TARGET` (which will be "ios" or "android").
+The UI code (`/src`) can now use `process.env.TARGET` (which will be "ios" or "android").
 
 ### PWA mode changes
 
@@ -682,19 +680,19 @@ ssr: {
 There are quite a few improvements:
 * **The BEX mode now has HMR (hot module reload)!!!** (Chrome only)
 * Completely rewrote & redesigned the Quasar Bridge to allow for:
-  * Sending messages directly between any part of your bex (app, content scripts, background)
+  * Sending/receiving messages directly between any part of your bex (app, content scripts, background)
   * Ability to skip using the bridge altogether
   * Error handling for sending & receiving messages through the bridge
   * Better handling of internal resources to avoid memory leaks (there were some edge cases in the previous implementation)
   * Debug mode (where all the bridge communication will be outputted to the browser console)
   * Breaking changes highlights: background & content scripts initialization of the bridge; bride.on() calls when responding; bridge.send() calls
   * The bridge is now available throughout the App in `/src/` (regardless of the file used: boot files, router init, App.vue, any Vue component, ...) by accessing the `$q object` or `window.QBexBridge`
-* One single manifest file from which both chrome & firefox ones can be extracted
-* Automatically infer the background script file & the content script files from the BEX manifest file
-* Ability to specify dynamic content scripts that you can register & load yourself at runtime
-* Ability to compile other js/ts files as well that you might need to dynamically load/inject
-* No more 3s delay when opening the popup
+* One single manifest file from which both chrome & firefox ones can be extracted.
+* Automatically infer the background script file & the content script files from the BEX manifest file.
+* Ability to compile other js/ts files as well that you might need to dynamically load/inject.
+* No more 3s delay when opening the popup.
 * The "dom" script support was removed. Simply move your logic from there into one of your content scripts.
+* New, easier API for the background/content scripts.
 
 #### Dependencies
 
@@ -723,7 +721,7 @@ $ quasar build -m bex -T <chrome|firefox>
 $ quasar build -m bex --target <chrome|firefox>
 ```
 
-Note that the UI code (`/src`) can now use `process.env.TARGET` (which will be "ios" or "android").
+Note that the code in `/src` and `/src-bex` can now use `process.env.TARGET` (which will be "chrome" or "firefox").
 
 ### HMR for Chrome
 
@@ -742,8 +740,7 @@ sourceFiles: {
 bex: {
 - contentScripts: [] // no longer needed as scripts are
 -                    // now extracted from the manifest file
-+ dynamicContentScripts: [],
-+ otherScripts: []
++ extraScripts: []
 }
 ```
 
@@ -810,46 +807,70 @@ Notice that the manifest file now contains three root props: `all`, `chrome` & `
 
 #### The script files
 
-```js [highlight=3,7] Background script
+```tabs Background script
+<<| js New way |>>
+/**
+ * Importing the file below initializes the extension background.
+ *
+ * Warnings:
+ * 1. Do NOT remove the import statement below. It is required for the extension to work.
+ *    If you don't need createBridge(), leave it as "import '@quasar/app-vite/bex/background'".
+ * 2. Do NOT import this file in multiple background scripts. Only in one!
+ * 3. Import it in your background service worker (if available for your target browser).
+ */
+import { createBridge } from '@quasar/app-vite/bex/background'
+
+/**
+ * Call useBridge() to enable communication with the app & content scripts
+ * (and between the app & content scripts), otherwise skip calling
+ * useBridge() and use no bridge.
+ */
+const bridge = createBridge({ debug: false })
+<<| js Old way |>>
 import { bexBackground } from 'quasar/wrappers'
 
-export default bexBackground(({ useBridge }) => {
-  // Call useBridge() to enable communication with the app & content scripts
-  // (and between the app & content scripts), otherwise skip calling
-  // useBridge() and use no bridge.
-  const bridge = useBridge({ debug: false })
-
-  // bridge.on(event, callback)
-  // bridge.send({ event, to, payload }).then(() => {}).catch(() => {})
+export default bexBackground((bridge /* , allActiveConnections */) => {
+  // ...
 })
 ```
 
-```js [highlight=3,5,17] Content scripts
+```tabs Content script
+<<| js New way |>>
+/**
+ * Importing the file below initializes the content script.
+ *
+ * Warning:
+ *   Do not remove the import statement below. It is required for the extension to work.
+ *   If you don't need createBridge(), leave it as "import '@quasar/app-vite/bex/content'".
+ */
+import { createBridge } from '@quasar/app-vite/bex/content'
+
+// The use of the bridge is optional.
+const bridge = createBridge({ name: 'my-content-script', debug: false })
+
+// Attach initial bridge listeners...
+
+/**
+ * Leave this AFTER you attach your initial listeners
+ * so that the bridge can properly handle them.
+ *
+ * You can also disconnect from the background script
+ * later on by calling bridge.disconnectFromBackground().
+ *
+ * To check connection status, access bridge.isConnected
+ */
+bridge.connectToBackground()
+  .then(() => {
+    console.log('Connected to background')
+  })
+  .catch(err => {
+    console.error('Failed to connect to background:', err)
+  })
+<<| js Old way |>>
 import { bexContent } from 'quasar/wrappers'
 
-export default bexContent(({ useBridge }) => {
-  // The use of the bridge is optional in content scripts.
-  const bridge = useBridge({ debug: false })
-
-  // Attach initial events, if any
-  // bridge.on(event, callback)
-
-  // Leave this AFTER you attach your initial events
-  // so that the bridge can properly handle them.
-  //
-  // You can also disconnect from the background script
-  // later on by calling bridge.disconnectFromBackground().
-  //
-  // To check connection status, access bridge.isConnected
-  bridge.connectToBackground()
-    .then(() => {
-      console.log('Connected to background')
-      // now you can send your initial messages, if any;
-      // bridge.send({ event, to, payload }).then(() => {}).catch(() => {})
-    })
-    .catch(err => {
-      console.error('Failed to connect to background:', err)
-    })
+export default bexContent((/* bridge */) => {
+  // ...
 })
 ```
 

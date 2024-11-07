@@ -9,6 +9,7 @@
   "typings": "types/index.d.ts",
   "files": [
     "assets",
+    "bex",
     "bin",
     "lib",
     "templates",

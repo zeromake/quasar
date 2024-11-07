@@ -48,6 +48,11 @@ export function createManifest (quasarConf) {
       json.action.default_title = json.name
     }
   }
+  else {
+    warn()
+    warn(`The bex manifest version specified (${ json.manifest_version }) is NOT yet officially supported by Quasar CLI. Things might go wrong.`)
+    warn()
+  }
 
   if (typeof quasarConf.bex.extendBexManifestJson === 'function') {
     quasarConf.bex.extendBexManifestJson(json)
@@ -60,104 +65,110 @@ export function createManifest (quasarConf) {
     'utf-8'
   )
 
-  return extractBexScripts(quasarConf, json)
+  return {
+    scriptList: extractBexScripts(quasarConf, json)
+  }
+}
+
+const scriptRawNameRE = /\.[jt]sx?$/i
+
+function getScriptRawName (item) {
+  return item.replace(scriptRawNameRE, '')
+}
+
+function getScriptSetEntry (quasarConf, filePath) {
+  const entry = relative(quasarConf.ctx.appPaths.bexDir, filePath)
+  const extension = entry.substring(entry.lastIndexOf('.') + 1)
+  const scriptName = entry.substring(0, entry.length - extension.length - 1)
+
+  return {
+    rawName: scriptName,
+    name: scriptName,
+    from: filePath,
+    to: join(quasarConf.build.distDir, `${ scriptName }.js`)
+  }
 }
 
 function extractBexScripts (quasarConf, bexManifest) {
-  const bgName = (
-    bexManifest.background?.service_worker // Manifest v3
-    || bexManifest.background?.scripts?.[ 0 ] // Manifest v2
-  )
+  const scriptList = []
+  const nameSet = new Set()
 
-  const bexBackgroundScript = bgName
-    ? {
-        name: bgName,
-        from: quasarConf.ctx.appPaths.resolve.bex(bgName),
-        to: join(quasarConf.build.distDir, bgName)
+  if (bexManifest.background?.service_worker) {
+    const rawName = getScriptRawName(bexManifest.background.service_worker)
+    const filePath = resolveExtension(quasarConf.ctx.appPaths.resolve.bex(rawName))
+
+    if (filePath === void 0) {
+      warn()
+      warn(`The file defined in bex manifest > background > service_worker > "${ rawName }" does NOT exists. Skipping.`)
+      warn()
+    }
+    else {
+      const entry = getScriptSetEntry(quasarConf, filePath)
+      if (nameSet.has(entry.name) === false) {
+        nameSet.add(entry.name)
+        scriptList.push(entry)
       }
-    : null
-
-  const bexContentScriptList = []
-  const rawContentScriptSet = new Set()
-
-  const bexOtherScriptList = []
-
-  if (bexManifest.content_scripts) {
-    bexManifest.content_scripts.forEach(entry => {
-      if (entry.js?.length > 0) {
-        entry.js.forEach(script => {
-          if (rawContentScriptSet.has(script) === true) return
-
-          rawContentScriptSet.add(script)
-          bexContentScriptList.push({
-            name: script,
-            from: quasarConf.ctx.appPaths.resolve.bex(script),
-            to: join(quasarConf.build.distDir, script)
-          })
-        })
-      }
-    })
+    }
   }
 
-  if (quasarConf.bex.dynamicContentScripts.length !== 0) {
-    quasarConf.bex.dynamicContentScripts.forEach(rawEntry => {
-      const filePath = resolveExtension(quasarConf.ctx.appPaths.resolve.bex(rawEntry))
+  bexManifest.background?.scripts?.forEach(entry => {
+    entry.js?.forEach(item => {
+      const rawName = getScriptRawName(item)
+      const filePath = resolveExtension(quasarConf.ctx.appPaths.resolve.bex(rawName))
+
       if (filePath === void 0) {
         warn()
-        warn(`The file for BEX script "${ rawEntry }" does NOT exists. Skipping.`)
+        warn(`The file defined in bex manifest > background > scripts > "${ rawName }" does NOT exists. Skipping.`)
         warn()
         return
       }
 
-      const entry = relative(quasarConf.ctx.appPaths.bexDir, filePath)
-      const extension = entry.substring(entry.lastIndexOf('.') + 1)
-      const scriptName = entry.substring(0, entry.length - extension.length - 1)
-      const jsScriptName = `${ scriptName }.js`
-
-      if (rawContentScriptSet.has(jsScriptName) === true) {
-        warn()
-        warn(`BEX script "${ scriptName }" is defined both in quasar config > bex > dynamicContentScripts and in the BEX manifest > content_scripts.`)
-        warn()
-        return
+      const entry = getScriptSetEntry(quasarConf, filePath)
+      if (nameSet.has(entry.name) === false) {
+        nameSet.add(entry.name)
+        scriptList.push(entry)
       }
-
-      rawContentScriptSet.add(jsScriptName)
-      bexContentScriptList.push({
-        name: jsScriptName,
-        from: filePath,
-        to: join(quasarConf.build.distDir, jsScriptName)
-      })
     })
-  }
+  })
 
-  if (quasarConf.bex.otherScripts.length !== 0) {
-    quasarConf.bex.otherScripts.forEach(rawEntry => {
-      const filePath = resolveExtension(quasarConf.ctx.appPaths.resolve.bex(rawEntry))
+  bexManifest.content_scripts?.forEach(contentScript => {
+    contentScript.js?.forEach(item => {
+      const rawName = getScriptRawName(item)
+      const filePath = resolveExtension(quasarConf.ctx.appPaths.resolve.bex(rawName))
+
       if (filePath === void 0) {
         warn()
-        warn(`The file for BEX other script "${ rawEntry }" does NOT exists. Skipping.`)
+        warn(`The file defined in bex manifest > content_scripts > js > "${ rawName }" does NOT exists. Skipping.`)
         warn()
         return
       }
 
-      const entry = relative(quasarConf.ctx.appPaths.bexDir, filePath)
-      const extension = entry.substring(entry.lastIndexOf('.') + 1)
-      const scriptName = entry.substring(0, entry.length - extension.length - 1)
-      const jsScriptName = `${ scriptName }.js`
-
-      bexOtherScriptList.push({
-        name: jsScriptName,
-        from: filePath,
-        to: join(quasarConf.build.distDir, jsScriptName)
-      })
+      const entry = getScriptSetEntry(quasarConf, filePath)
+      if (nameSet.has(entry.name) === false) {
+        nameSet.add(entry.name)
+        scriptList.push(entry)
+      }
     })
-  }
+  })
 
-  return {
-    bexBackgroundScript,
-    bexContentScriptList,
-    bexOtherScriptList
-  }
+  quasarConf.bex.extraScripts.forEach(item => {
+    const rawName = getScriptRawName(item)
+    const filePath = resolveExtension(quasarConf.ctx.appPaths.resolve.bex(rawName))
+    if (filePath === void 0) {
+      warn()
+      warn(`The file defined in quasar.config > bex > extraScripts > "${ rawName }" does NOT exists. Skipping.`)
+      warn()
+      return
+    }
+
+    const entry = getScriptSetEntry(quasarConf, filePath)
+    if (nameSet.has(entry.name) === false) {
+      nameSet.add(entry.name)
+      scriptList.push(entry)
+    }
+  })
+
+  return scriptList
 }
 
 export function copyBexAssets (quasarConf) {

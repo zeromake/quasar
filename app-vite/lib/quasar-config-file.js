@@ -517,8 +517,7 @@ export class QuasarConfigFile {
         capacitorCliPreparationParams: []
       },
       bex: {
-        dynamicContentScripts: [],
-        otherScripts: []
+        extraScripts: []
       }
     }, userCfg)
 
@@ -966,7 +965,7 @@ export class QuasarConfigFile {
       VUE_ROUTER_BASE: cfg.build.vueRouterBase
     })
 
-    if (this.#ctx.targetName) {
+    if (this.#ctx.mode.bex || this.#ctx.mode.capacitor || this.#ctx.mode.cordova) {
       cfg.build.env.TARGET = this.#ctx.targetName
     }
 

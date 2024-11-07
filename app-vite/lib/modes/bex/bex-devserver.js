@@ -14,11 +14,7 @@ export class QuasarModeDevserver extends AppDevserver {
   #scriptWatchers = []
 
   #viteServer = null
-  #scripts = {
-    background: null,
-    contentList: [],
-    otherList: []
-  }
+  #scriptList = []
 
   constructor (opts) {
     super(opts)
@@ -37,8 +33,7 @@ export class QuasarModeDevserver extends AppDevserver {
       quasarConf.build.distDir,
       quasarConf.devServer.port,
 
-      quasarConf.bex.dynamicContentScripts,
-      quasarConf.bex.otherScripts,
+      quasarConf.bex.extraScripts,
       quasarConf.bex.extendBexScriptsConf,
 
       // extends 'esbuild' diff
@@ -82,18 +77,15 @@ export class QuasarModeDevserver extends AppDevserver {
       this.#manifestWatcher.close()
     }
 
-    const { err, bexBackgroundScript, bexContentScriptList, bexOtherScriptList } = createManifest(quasarConf)
+    const { err, scriptList } = createManifest(quasarConf)
     if (err !== void 0) process.exit(1)
 
-    const setScripts = (background, contentList, otherList) => {
-      this.#scripts.background = background || null
-      this.#scripts.contentList = contentList
-      this.#scripts.otherList = otherList
-
-      return JSON.stringify(this.#scripts)
+    const setScripts = list => {
+      this.#scriptList = list
+      return JSON.stringify(list)
     }
 
-    let scriptSnapshot = setScripts(bexBackgroundScript, bexContentScriptList, bexOtherScriptList)
+    let scriptSnapshot = setScripts(scriptList)
     const updateClient = () => {
       this.printBanner(quasarConf)
       this.#viteServer?.ws.send({ type: 'qbex:hmr:reload' })
@@ -101,18 +93,18 @@ export class QuasarModeDevserver extends AppDevserver {
 
     this.#manifestWatcher = chokidar.watch(quasarConf.metaConf.bexManifestFile, { ignoreInitial: true })
     this.#manifestWatcher.on('change', debounce(() => {
-      const { err, bexBackgroundScript, bexContentScriptList, bexOtherScriptList } = createManifest(quasarConf)
-      if (err === void 0) {
-        const newSnapshot = setScripts(bexBackgroundScript, bexContentScriptList, bexOtherScriptList)
+      const { err, scriptList } = createManifest(quasarConf)
+      if (err !== void 0) return
 
-        if (newSnapshot === scriptSnapshot) {
-          updateClient()
-          return
-        }
+      const newSnapshot = setScripts(scriptList)
 
-        scriptSnapshot = newSnapshot
-        queue(() => this.#compileBexScripts(quasarConf).then(updateClient))
+      if (newSnapshot === scriptSnapshot) {
+        updateClient()
+        return
       }
+
+      scriptSnapshot = newSnapshot
+      queue(() => this.#compileBexScripts(quasarConf).then(updateClient))
     }, 1000))
   }
 
@@ -125,23 +117,10 @@ export class QuasarModeDevserver extends AppDevserver {
       this.#viteServer?.ws.send({ type: 'qbex:hmr:reload' })
     }
 
-    if (this.#scripts.background !== null) {
-      const bgConfig = await quasarBexConfig.backgroundScript(quasarConf, this.#scripts.background)
-      await this.watchWithEsbuild(`Background Script (${ this.#scripts.background.name })`, bgConfig, onRebuild)
-        .then(esbuildCtx => { this.#scriptWatchers.push({ close: esbuildCtx.dispose }) })
-    }
+    for (const entry of this.#scriptList) {
+      const contentConfig = await quasarBexConfig.bexScript(quasarConf, entry)
 
-    for (const entry of this.#scripts.contentList) {
-      const contentConfig = await quasarBexConfig.contentScript(quasarConf, entry)
-
-      await this.watchWithEsbuild(`Content Script (${ entry.name })`, contentConfig, onRebuild)
-        .then(esbuildCtx => { this.#scriptWatchers.push({ close: esbuildCtx.dispose }) })
-    }
-
-    for (const entry of this.#scripts.otherList) {
-      const contentConfig = await quasarBexConfig.otherScript(quasarConf, entry)
-
-      await this.watchWithEsbuild(`Other Script (${ entry.name })`, contentConfig, onRebuild)
+      await this.watchWithEsbuild(`Bex Script (${ entry.name })`, contentConfig, onRebuild)
         .then(esbuildCtx => { this.#scriptWatchers.push({ close: esbuildCtx.dispose }) })
     }
   }

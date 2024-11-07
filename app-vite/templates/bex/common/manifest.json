@@ -10,8 +10,7 @@
 
     "permissions": [
       "storage",
-      "tabs",
-      "activeTab"
+      "tabs"
     ],
 
     "host_permissions": [ "*://*/*" ],

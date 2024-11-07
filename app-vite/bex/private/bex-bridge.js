@@ -1,8 +1,5 @@
-/* eslint-disable */
-/**
- * THIS FILE IS GENERATED AUTOMATICALLY.
- * DO NOT EDIT.
- **/
+/* eslint-env browser */
+/* global browser chrome */
 
 const portNameRE = /^background$|^app$|^content@/
 const { runtime } = process.env.TARGET === 'firefox' ? browser : chrome
@@ -285,19 +282,19 @@ export class BexBridge {
    */
   async send ({ event, to, payload } = {}) {
     if (this.isConnected === false) {
-      throw 'Tried to send message but the bridge is not connected. Please connect it first.'
+      throw new Error('Tried to send message but the bridge is not connected. Please connect it first.')
     }
 
     if (!event) {
-      throw 'Tried to send message with no "event" prop specified'
+      throw new Error('Tried to send message with no "event" prop specified')
     }
 
     if (!to) {
-      throw 'Tried to send message with no "to" prop specified'
+      throw new Error('Tried to send message with no "to" prop specified')
     }
 
     if (this.portList.includes(to) === false) {
-      throw (
+      throw new Error(
         this.#type === 'background'
           ? `Tried to send message to "${ to }" but there is no such port registered`
           : `Tried to send message to "${ to }" but the port to background is not available to send through`
@@ -315,7 +312,7 @@ export class BexBridge {
     })
 
     if (this.portList.includes(to) === false) {
-      throw `Connection to "${ to }" was closed while waiting for a response`
+      throw new Error(`Connection to "${ to }" was closed while waiting for a response`)
     }
 
     return new Promise((resolve, reject) => {
@@ -474,7 +471,7 @@ export class BexBridge {
       || packet.type === void 0
     ) {
       this.log(
-        `Received a message that does not appear to be emitted by a Quasar bridge or is malformed.`,
+        'Received a message that does not appear to be emitted by a Quasar bridge or is malformed.',
         packet
       )
       return
@@ -503,7 +500,7 @@ export class BexBridge {
           messageProps: {
             error: {
               message: err.message,
-              stack: err.stack || 'no stack available',
+              stack: err.stack || 'no stack available'
             },
             quiet: true
           }
@@ -734,7 +731,7 @@ export class BexBridge {
           messageProps: {
             error: {
               message: err.message,
-              stack: err.stack || 'no stack available',
+              stack: err.stack || 'no stack available'
             }
           }
         })
