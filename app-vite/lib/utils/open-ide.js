@@ -1,5 +1,5 @@
 import fs from 'node:fs'
-import path, { resolve } from 'node:path'
+import path from 'node:path'
 import { execSync } from 'node:child_process'
 import open from 'open'
 
