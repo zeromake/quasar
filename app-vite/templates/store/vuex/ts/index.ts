@@ -1,4 +1,4 @@
-import { defineStore } from '@quasar/app-vite/wrappers'
+import { defineStore } from '#q-app/wrappers'
 import { InjectionKey } from 'vue'
 import { Router } from 'vue-router'
 import {

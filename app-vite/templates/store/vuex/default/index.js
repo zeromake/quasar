@@ -1,4 +1,4 @@
-import { defineStore } from '@quasar/app-vite/wrappers'
+import { defineStore } from '#q-app/wrappers'
 import { createStore } from 'vuex'
 
 // import example from './module-example'

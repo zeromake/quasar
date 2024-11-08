@@ -1,4 +1,4 @@
-import { defineStore } from '@quasar/app-vite/wrappers'
+import { defineStore } from '#q-app/wrappers'
 import { createPinia } from 'pinia'
 import { Router } from 'vue-router';
 

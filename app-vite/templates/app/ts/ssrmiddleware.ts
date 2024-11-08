@@ -1,4 +1,4 @@
-import { defineSsrMiddleware } from '@quasar/app-vite/wrappers'
+import { defineSsrMiddleware } from '#q-app/wrappers'
 
 // "async" is optional;
 // more info on params: https://v2.quasar.dev/quasar-cli/developing-ssr/ssr-middlewares

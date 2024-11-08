@@ -3,11 +3,11 @@
  *
  * Warnings:
  * 1. Do not remove the import statement below. It is required for the extension to work.
- *    If you don't need createBridge(), leave it as "import '@quasar/app-vite/bex/background'".
+ *    If you don't need createBridge(), leave it as "import '#q-app/bex/background'".
  * 2. Do not import this file in multiple background scripts. Only once!
  * 3. Import it in your background service worker (if available for your target browser).
  */
-import { createBridge } from '@quasar/app-vite/bex/background'
+import { createBridge } from '#q-app/bex/background'
 
 function openExtension () {
   chrome.tabs.create(

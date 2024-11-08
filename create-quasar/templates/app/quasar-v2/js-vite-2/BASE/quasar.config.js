@@ -5,7 +5,7 @@
 
 <% if (preset.lint && lintConfig === 'airbnb') { %>/* eslint func-names: 0 */
 /* eslint global-require: 0 */<% } %>
-import { defineConfig } from '@quasar/app-vite/wrappers'
+import { defineConfig } from '#q-app/wrappers'
 <% if (preset.i18n) { %>import { fileURLToPath } from 'node:url';<% } %>
 
 export default defineConfig((<% if (preset.i18n) { %>ctx<% } else { %>/* ctx */<% } %>) => {

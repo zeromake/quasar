@@ -175,6 +175,7 @@ async function onAddress ({ host, port }, mode) {
 }
 
 export class QuasarConfigFile {
+  /** @type {import('../types/configuration/context').QuasarContext} */
   #ctx
   #opts
   #versions = {}
@@ -255,6 +256,9 @@ export class QuasarConfigFile {
     this.#isWatching = true
   }
 
+  /**
+   * @returns {import('esbuild').BuildOptions}
+   */
   #createEsbuildConfig () {
     const { appPaths } = this.#ctx
 
@@ -267,6 +271,10 @@ export class QuasarConfigFile {
         js: quasarConfigBanner
       },
       define: quasarEsbuildInjectReplacementsDefine,
+      // Define the aliases which have to be usable in the quasar.config file
+      alias: {
+        '#q-app': '@quasar/app-vite'
+      },
       resolveExtensions: [ appPaths.quasarConfigOutputFormat === 'esm' ? '.mjs' : '.cjs', '.js', '.mts', '.ts', '.json' ],
       entryPoints: [ appPaths.quasarConfigFilename ],
       outfile: this.#tempFile,
@@ -738,6 +746,7 @@ export class QuasarConfigFile {
       },
 
       alias: {
+        '#q-app': '@quasar/app-vite',
         src: appPaths.srcDir,
         app: appPaths.appDir,
         components: appPaths.resolve.src('components'),

@@ -1,4 +1,4 @@
-import { defineBoot } from '@quasar/app-vite/wrappers';
+import { defineBoot } from '#q-app/wrappers';
 import axios, { AxiosInstance } from 'axios';
 
 declare module 'vue' {

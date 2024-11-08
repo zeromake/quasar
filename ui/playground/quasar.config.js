@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { mergeConfig } from 'vite'
-import { defineConfig } from '@quasar/app-vite/wrappers'
+import { defineConfig } from '#q-app/wrappers'
 
 const rootFolder = fileURLToPath(new URL('.', import.meta.url))
 const resolve = _path => join(rootFolder, _path)

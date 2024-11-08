@@ -116,7 +116,7 @@ Preparations:
 * Convert your `/quasar.config.js` file to the ESM format (which is recommended, otherwise rename the file extension to `.cjs` and use CommonJs format). Also notice the wrappers import change.
   ```diff /quasar.config.js file
   - const { configure } = require('quasar/wrappers')
-  + import { defineConfig } from '@quasar/app-vite/wrappers'
+  + import { defineConfig } from '#q-app/wrappers'
 
   - module.export = configure((/* ctx */) => {
   + export default defineConfig((/* ctx */) => {
@@ -225,41 +225,41 @@ Preparations:
 
   <br>
 
-* We have deprecated all the imports coming from `quasar/wrappers`. You can still use them, but we highly recommend switching to the new `@quasar/app-vite/wrappers`, as shown below:
+* We have deprecated all the imports coming from `quasar/wrappers`. You can still use them, but we highly recommend switching to the new `#q-app/wrappers`, as shown below:
 
   ```diff The wrapper functions
   - import { configure } from 'quasar/wrappers'
-  + import { defineConfig } from '@quasar/app-vite/wrappers'
+  + import { defineConfig } from '#q-app/wrappers'
 
   - import { boot } from 'quasar/wrappers'
-  + import { defineBoot } from '@quasar/app-vite/wrappers'
+  + import { defineBoot } from '#q-app/wrappers'
 
   - import { preFetch } from 'quasar/wrappers'
-  + import { definePreFetch } from '@quasar/app-vite/wrappers'
+  + import { definePreFetch } from '#q-app/wrappers'
 
   - import { route } from 'quasar/wrappers'
-  + import { defineRouter } from '@quasar/app-vite/wrappers'
+  + import { defineRouter } from '#q-app/wrappers'
 
   - import { store } from 'quasar/wrappers'
-  + import { defineStore } from '@quasar/app-vite/wrappers'
+  + import { defineStore } from '#q-app/wrappers'
 
   - import { ssrMiddleware } from 'quasar/wrappers'
-  + import { defineSsrMiddleware }from '@quasar/app-vite/wrappers'
+  + import { defineSsrMiddleware }from '#q-app/wrappers'
 
   - import { ssrCreate } from 'quasar/wrappers'
-  + import { defineSsrCreate } from '@quasar/app-vite/wrappers'
+  + import { defineSsrCreate } from '#q-app/wrappers'
 
   - import { ssrListen } from 'quasar/wrappers'
-  + import { defineSsrListen } from '@quasar/app-vite/wrappers'
+  + import { defineSsrListen } from '#q-app/wrappers'
 
   - import { ssrClose } from 'quasar/wrappers'
-  + import { defineSsrClose } from '@quasar/app-vite/wrappers'
+  + import { defineSsrClose } from '#q-app/wrappers'
 
   - import { ssrServeStaticContent } from 'quasar/wrappers'
-  + import { defineSsrServeStaticContent } from '@quasar/app-vite/wrappers'
+  + import { defineSsrServeStaticContent } from '#q-app/wrappers'
 
   - import { ssrRenderPreloadTag } from 'quasar/wrappers'
-  + import { defineSsrRenderPreloadTag } from '@quasar/app-vite/wrappers'
+  + import { defineSsrRenderPreloadTag } from '#q-app/wrappers'
   ```
 
 ### Linting (TS or JS)
@@ -587,7 +587,7 @@ Most changes refer to editing your `/src-ssr/server.js` file. Since you can now 
 
 ```diff /src-ssr/server.js > listen
 - import { ssrListen } from 'quasar/wrappers'
-+ import { defineSsrListen } from '@quasar/app-vite/wrappers'
++ import { defineSsrListen } from '#q-app/wrappers'
 
 - export const listen = ssrListen(async ({ app, port, isReady }) => {
 + // notice: devHttpsApp param which will be a Node httpsServer (on DEV only) and if https is enabled
@@ -608,7 +608,7 @@ Most changes refer to editing your `/src-ssr/server.js` file. Since you can now 
 Finally, this is how it should look like now:
 
 ```js /src-ssr/server.js > listen
-import { defineSsrListen } from '@quasar/app-vite/wrappers'
+import { defineSsrListen } from '#q-app/wrappers'
 export const listen = defineSsrListen(({ app, devHttpsApp, port }) => {
   const server = devHttpsApp || app
   return server.listen(port, () => {
@@ -641,7 +641,7 @@ Next, the `serveStaticContent` function has changed:
 
 ```diff /src-ssr/server.js > serveStaticContent
 - import { serveStaticContent }
-+ import { defineSsrServeStaticContent } from '@quasar/app-vite/wrappers'
++ import { defineSsrServeStaticContent } from '#q-app/wrappers'
 
 - export const serveStaticContent = ssrServeStaticContent((path, opts) => {
 -  return express.static(path, { maxAge, ...opts })
@@ -668,7 +668,7 @@ Also, the `renderPreloadTag()` function can now take an additional parameter (`s
 
 ```diff /src-ssr/server.js
 - import { ssrRenderPreloadTag } from 'quasar/wrappers'
-+ import { defineSsrRenderPreloadTag } from '@quasar/app-vite/wrappers'
++ import { defineSsrRenderPreloadTag } from '#q-app/wrappers'
 
 + export const renderPreloadTag = ssrRenderPreloadTag((file, { ssrContext }) => {
 +  // ...
@@ -866,11 +866,11 @@ Notice that the manifest file now contains three root props: `all`, `chrome` & `
  *
  * Warnings:
  * 1. Do NOT remove the import statement below. It is required for the extension to work.
- *    If you don't need createBridge(), leave it as "import '@quasar/app-vite/bex/background'".
+ *    If you don't need createBridge(), leave it as "import '#q-app/bex/background'".
  * 2. Do NOT import this file in multiple background scripts. Only in one!
  * 3. Import it in your background service worker (if available for your target browser).
  */
-import { createBridge } from '@quasar/app-vite/bex/background'
+import { createBridge } from '#q-app/bex/background'
 
 /**
  * Call useBridge() to enable communication with the app & content scripts
@@ -893,9 +893,9 @@ export default bexBackground((bridge /* , allActiveConnections */) => {
  *
  * Warning:
  *   Do not remove the import statement below. It is required for the extension to work.
- *   If you don't need createBridge(), leave it as "import '@quasar/app-vite/bex/content'".
+ *   If you don't need createBridge(), leave it as "import '#q-app/bex/content'".
  */
-import { createBridge } from '@quasar/app-vite/bex/content'
+import { createBridge } from '#q-app/bex/content'
 
 // The use of the bridge is optional.
 const bridge = createBridge({ debug: false })
@@ -1120,7 +1120,7 @@ bridge.warn('Hello', 'world', '!', { some: 'object' })
 The `ctx` from `/quasar.config` file has an additional prop (`appPaths`):
 
 ```js
-import { defineConfig } from '@quasar/app-vite/wrappers'
+import { defineConfig } from '#q-app/wrappers'
 export default defineConfig((ctx) => ({
   // ctx.appPaths is available
 ```

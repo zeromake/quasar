@@ -1,4 +1,4 @@
-import { defineSsrMiddleware } from '@quasar/app-vite/wrappers'
+import { defineSsrMiddleware } from '#q-app/wrappers'
 
 // This middleware should execute as last one
 // since it captures everything and tries to

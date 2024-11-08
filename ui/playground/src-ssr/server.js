@@ -17,7 +17,7 @@ import {
   defineSsrClose,
   defineSsrServeStaticContent,
   defineSsrRenderPreloadTag
-} from '@quasar/app-vite/wrappers'
+} from '#q-app/wrappers'
 
 /**
  * Create your webserver and return its instance.

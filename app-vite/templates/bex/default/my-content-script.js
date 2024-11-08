@@ -3,9 +3,9 @@
  *
  * Warning:
  *   Do not remove the import statement below. It is required for the extension to work.
- *   If you don't need createBridge(), leave it as "import '@quasar/app-vite/bex/content'".
+ *   If you don't need createBridge(), leave it as "import '#q-app/bex/content'".
  */
-import { createBridge } from '@quasar/app-vite/bex/content'
+import { createBridge } from '#q-app/bex/content'
 
 // The use of the bridge is optional.
 const bridge = createBridge({ debug: false })

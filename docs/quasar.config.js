@@ -1,4 +1,4 @@
-import { defineConfig } from '@quasar/app-vite/wrappers'
+import { defineConfig } from '#q-app/wrappers'
 import { fileURLToPath } from 'node:url'
 
 import mdPlugin from './build/md/index.js'

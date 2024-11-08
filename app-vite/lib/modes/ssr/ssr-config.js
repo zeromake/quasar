@@ -80,7 +80,7 @@ export const quasarSsrConfig = {
       },
       ssr: {
         // we don't externalize ourselves because of
-        // the possible imports of '@quasar/app-vite/wrappers'
+        // the possible imports of '#q-app/wrappers'/'@quasar/app-vite/wrappers'
         noExternal: [ cliPkg.name ]
       },
       build: {
@@ -114,7 +114,7 @@ export const quasarSsrConfig = {
     else {
       cfg.external = [
         // we filter out ourselves because of the possible
-        // imports of '@quasar/app-vite/wrappers'
+        // imports of '#q-app/wrappers'/'@quasar/app-vite/wrappers'
         ...cfg.external.filter(dep => dep !== cliPkg.name),
 
         'vue/server-renderer',
