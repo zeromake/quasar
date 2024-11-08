@@ -26,7 +26,7 @@ api.compatibleWith(
 ```
 
 ### Notable breaking changes
-* Minimum Node.js version is now 18 (mainly due to Vite 5)
+* Minimum Node.js version is now 18 (mainly due to Vite 6)
 * We have shifted towards an ESM style for the whole Quasar project folder, so many default project files now require ESM code (although using `.cjs` as an extension for these files is supported, but you will most likely need to rename the extension should you not wish to change anything). One example is the `/quasar.config.js` file which now it's assumed to be ESM too (so change from `.js` to `.cjs` should you still want a CommonJs file).
 * The "test" cmd was removed due to latest updates for @quasar/testing-* packages. See [here](https://testing.quasar.dev/packages/testing/)
 * The "clean" cmd has been re-designed. Type "quasar clean -h" in your upgraded Quasar project folder for more info.
@@ -40,10 +40,10 @@ api.compatibleWith(
 ### Highlights on what's new
 Some of the work below has already been backported to the old @quasar/app-vite v1, but posting here for reader's awareness.
 
-* feat(app-vite): upgrade to Vite 5
+* feat(app-vite): upgrade to Vite 6
 * feat(app-vite): ability to run multiple quasar dev/build commands simultaneously (example: can run "quasar dev -m capacitor" and "quasar dev -m ssr" and "quasar dev -m capacitor -T ios" simultaneously)
 * feat(app-vite): Better TS typings overall
-* refactor(app-vite): port CLI to ESM format (major effort! especially to support Vite 5 and SSR)
+* refactor(app-vite): port CLI to ESM format (major effort! especially to support Vite 6 and SSR)
 * feat(app-vite): support for quasar.config file in multiple formats (.js, .mjs, .ts, .cjs)
 * feat(app-vite): Improve quasarConfOptions, generate types for it, improve docs (fix: #14069) (#15945)
 * feat(app-vite): reload app if one of the imports from quasar.config file changes
@@ -94,7 +94,7 @@ $ pnpm create quasar
 $ bun create quasar
 ```
 <br>
-When asked to "Pick Quasar App CLI variant", answer with: "Quasar App CLI with Vite 5 (BETA | next major version - v2)".
+When asked to "Pick Quasar App CLI variant", answer with: "Quasar App CLI with Vite 6 (BETA | next major version - v2)".
 :::
 
 Preparations:
@@ -113,14 +113,17 @@ Preparations:
   Then yarn/npm/pnpm/bun install.
   <br><br>
 
-* Convert your `/quasar.config.js` file to the ESM format (which is recommended, otherwise rename the file extension to `.cjs` and use CommonJs format).
-  ```js /quasar.config.js file
-  import { configure } from 'quasar/wrappers'
-  export default configure((/* ctx */) => {
-    return {
-      // ...
-    }
-  })
+* Convert your `/quasar.config.js` file to the ESM format (which is recommended, otherwise rename the file extension to `.cjs` and use CommonJs format). Also notice the wrappers import change.
+  ```diff /quasar.config.js file
+  - const { configure } = require('quasar/wrappers')
+  + import { defineConfig } from '@quasar/app-vite/wrappers'
+
+  - module.export = configure((/* ctx */) => {
+  + export default defineConfig((/* ctx */) => {
+      return {
+        // ...
+      }
+    })
   ```
 
   ::: tip Tip on Typescript
@@ -218,6 +221,45 @@ Preparations:
   # in project folder root:
   $ Remove-Item -Recurse -Filter *-flag.d.ts
   $ quasar build # or dev
+  ```
+
+  <br>
+
+* We have deprecated all the imports coming from `quasar/wrappers`. You can still use them, but we highly recommend switching to the new `@quasar/app-vite/wrappers`, as shown below:
+
+  ```diff The wrapper functions
+  - import { configure } from 'quasar/wrappers'
+  + import { defineConfig } from '@quasar/app-vite/wrappers'
+
+  - import { boot } from 'quasar/wrappers'
+  + import { defineBoot } from '@quasar/app-vite/wrappers'
+
+  - import { preFetch } from 'quasar/wrappers'
+  + import { definePreFetch } from '@quasar/app-vite/wrappers'
+
+  - import { route } from 'quasar/wrappers'
+  + import { defineRouter } from '@quasar/app-vite/wrappers'
+
+  - import { store } from 'quasar/wrappers'
+  + import { defineStore } from '@quasar/app-vite/wrappers'
+
+  - import { ssrMiddleware } from 'quasar/wrappers'
+  + import { defineSsrMiddleware }from '@quasar/app-vite/wrappers'
+
+  - import { ssrCreate } from 'quasar/wrappers'
+  + import { defineSsrCreate } from '@quasar/app-vite/wrappers'
+
+  - import { ssrListen } from 'quasar/wrappers'
+  + import { defineSsrListen } from '@quasar/app-vite/wrappers'
+
+  - import { ssrClose } from 'quasar/wrappers'
+  + import { defineSsrClose } from '@quasar/app-vite/wrappers'
+
+  - import { ssrServeStaticContent } from 'quasar/wrappers'
+  + import { defineSsrServeStaticContent } from '@quasar/app-vite/wrappers'
+
+  - import { ssrRenderPreloadTag } from 'quasar/wrappers'
+  + import { defineSsrRenderPreloadTag } from '@quasar/app-vite/wrappers'
   ```
 
 ### Linting (TS or JS)
@@ -544,11 +586,14 @@ The distributables (your production code) will be compiled to ESM form.
 Most changes refer to editing your `/src-ssr/server.js` file. Since you can now use HTTPS while developing your app too, you need to make the following changes to the file:
 
 ```diff /src-ssr/server.js > listen
+- import { ssrListen } from 'quasar/wrappers'
++ import { defineSsrListen } from '@quasar/app-vite/wrappers'
+
 - export const listen = ssrListen(async ({ app, port, isReady }) => {
 + // notice: devHttpsApp param which will be a Node httpsServer (on DEV only) and if https is enabled
 + // notice: no "isReady" param (starting with 2.0.0-beta.16+)
-+ // notice: ssrListen() param can still be async (below it isn't)
-+ export const listen = ssrListen(({ app, devHttpsApp, port }) => {
++ // notice: defineSsrListen() param can still be async (below it isn't)
++ export const listen = defineSsrListen(({ app, devHttpsApp, port }) => {
 -   await isReady()
 -   return app.listen(port, () => {
 +   const server = devHttpsApp || app
@@ -563,7 +608,8 @@ Most changes refer to editing your `/src-ssr/server.js` file. Since you can now 
 Finally, this is how it should look like now:
 
 ```js /src-ssr/server.js > listen
-export const listen = ssrListen(({ app, devHttpsApp, port }) => {
+import { defineSsrListen } from '@quasar/app-vite/wrappers'
+export const listen = defineSsrListen(({ app, devHttpsApp, port }) => {
   const server = devHttpsApp || app
   return server.listen(port, () => {
     if (process.env.PROD) {
@@ -576,7 +622,7 @@ export const listen = ssrListen(({ app, devHttpsApp, port }) => {
 For a serverless approach, this is how the "listen" part should look like:
 
 ```js /src-ssr/server.js > listen
-export const listen = ssrListen(({ app, devHttpsApp, port }) => {
+export const listen = defineSsrListen(({ app, devHttpsApp, port }) => {
   if (process.env.DEV) {
     const server = devHttpsApp || app;
     return server.listen(port, () => {
@@ -594,6 +640,9 @@ export const listen = ssrListen(({ app, devHttpsApp, port }) => {
 Next, the `serveStaticContent` function has changed:
 
 ```diff /src-ssr/server.js > serveStaticContent
+- import { serveStaticContent }
++ import { defineSsrServeStaticContent } from '@quasar/app-vite/wrappers'
+
 - export const serveStaticContent = ssrServeStaticContent((path, opts) => {
 -  return express.static(path, { maxAge, ...opts })
 - })
@@ -604,10 +653,10 @@ Next, the `serveStaticContent` function has changed:
 + *
 + * Notice resolve.urlPath(urlPath) and resolve.public(pathToServe) usages.
 + *
-+ * Can be async: ssrServeStaticContent(async ({ app, resolve }) => {
++ * Can be async: defineSsrServeStaticContent(async ({ app, resolve }) => {
 + * Can return an async function: return async ({ urlPath = '/', pathToServe = '.', opts = {} }) => {
 + */
-+ export const serveStaticContent = ssrServeStaticContent(({ app, resolve }) => {
++ export const serveStaticContent = defineSsrServeStaticContent(({ app, resolve }) => {
 +  return ({ urlPath = '/', pathToServe = '.', opts = {} }) => {
 +    const serveFn = express.static(resolve.public(pathToServe), { maxAge, ...opts })
 +    app.use(resolve.urlPath(urlPath), serveFn)
@@ -617,10 +666,13 @@ Next, the `serveStaticContent` function has changed:
 
 Also, the `renderPreloadTag()` function can now take an additional parameter (`ssrContext`):
 
-```js /src-ssr/server.js
-export const renderPreloadTag = ssrRenderPreloadTag((file, { ssrContext }) => {
-  // ...
-})
+```diff /src-ssr/server.js
+- import { ssrRenderPreloadTag } from 'quasar/wrappers'
++ import { defineSsrRenderPreloadTag } from '@quasar/app-vite/wrappers'
+
++ export const renderPreloadTag = ssrRenderPreloadTag((file, { ssrContext }) => {
++  // ...
++ })
 ```
 
 For TS devs, you should also make a small change to your /src-ssr/middlewares files, like this:
@@ -846,7 +898,7 @@ export default bexBackground((bridge /* , allActiveConnections */) => {
 import { createBridge } from '@quasar/app-vite/bex/content'
 
 // The use of the bridge is optional.
-const bridge = createBridge({ name: 'my-content-script', debug: false })
+const bridge = createBridge({ debug: false })
 /**
  * bridge.portName is 'content@<path>-<number>'
  *   where <path> is the relative path of this content script
