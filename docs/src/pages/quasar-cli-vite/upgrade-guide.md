@@ -1120,8 +1120,8 @@ bridge.warn('Hello', 'world', '!', { some: 'object' })
 The `ctx` from `/quasar.config` file has an additional prop (`appPaths`):
 
 ```js
-import { configure } from 'quasar/wrappers'
-export default configure((ctx) => ({
+import { defineConfig } from '@quasar/app-vite/wrappers'
+export default defineConfig((ctx) => ({
   // ctx.appPaths is available
 ```
 
@@ -1263,7 +1263,7 @@ After removing the old package and installing the new one then update your `/qua
 - import path from 'node:path'
 + import { fileURLToPath } from 'node:url'
 
-export default configure((ctx) => {
+export default defineConfig((ctx) => {
   return {
     build: {
       vitePlugins: [
