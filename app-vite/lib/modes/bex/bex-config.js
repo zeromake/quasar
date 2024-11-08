@@ -1,5 +1,7 @@
 import { join } from 'node:path'
 
+import { mergeConfig as mergeViteConfig } from 'vite'
+
 import {
   createViteConfig, extendViteConfig,
   createBrowserEsbuildConfig, extendEsbuildConfig
@@ -17,7 +19,22 @@ function generateDefaultEntry (quasarConf) {
 
 export const quasarBexConfig = {
   vite: async quasarConf => {
-    const cfg = await createViteConfig(quasarConf, { compileId: 'vite-bex' })
+    let cfg = await createViteConfig(quasarConf, { compileId: 'vite-bex' })
+
+    cfg = mergeViteConfig(cfg, {
+      server: {
+        // Vite will fail to infer the @vite/client
+        // configuration for the client (will guess hostname and protocol wrong,
+        // due to it being chrome-extension://<runtime-id>/) and it will output an error
+        // that Websocket couldn't connect then: "Direct websocket connection fallback."
+        // --- So we avoid that by enforcing the correct values:
+        hmr: {
+          protocol: 'ws',
+          host: 'localhost',
+          port: quasarConf.devServer.port
+        }
+      }
+    })
 
     if (quasarConf.ctx.target.firefox) {
       cfg.build.outDir = join(quasarConf.build.distDir, 'www')
