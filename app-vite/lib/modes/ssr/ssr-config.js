@@ -70,6 +70,7 @@ export const quasarSsrConfig = {
       }),
       appType: 'custom',
       server: {
+        ws: false, // let client config deal with it
         hmr: false, // let client config deal with it
         middlewareMode: true
       },
