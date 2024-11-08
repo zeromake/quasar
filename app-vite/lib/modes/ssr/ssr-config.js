@@ -6,6 +6,7 @@ import {
   createNodeEsbuildConfig, extendEsbuildConfig
 } from '../../config-tools.js'
 
+import { cliPkg } from '../../utils/cli-runtime.js'
 import { getBuildSystemDefine } from '../../utils/env.js'
 
 import { quasarPwaConfig } from '../pwa/pwa-config.js'
@@ -72,6 +73,11 @@ export const quasarSsrConfig = {
         hmr: false, // let client config deal with it
         middlewareMode: true
       },
+      ssr: {
+        // we don't externalize ourselves because of
+        // the possible imports of '@quasar/app-vite/wrappers'
+        noExternal: [ cliPkg.name ]
+      },
       build: {
         ssr: true,
         outDir: join(quasarConf.build.distDir, 'server'),
@@ -102,7 +108,10 @@ export const quasarSsrConfig = {
     }
     else {
       cfg.external = [
-        ...(cfg.external || []),
+        // we filter out ourselves because of the possible
+        // imports of '@quasar/app-vite/wrappers'
+        ...cfg.external.filter(dep => dep !== cliPkg.name),
+
         'vue/server-renderer',
         'vue/compiler-sfc',
         './render-template.js',
