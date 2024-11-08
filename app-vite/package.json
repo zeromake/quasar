@@ -25,9 +25,9 @@
     },
     "./wrappers": {
       "types": "./types/app-wrappers.d.ts",
-      "require": "./exports/wrappers.cjs",
-      "node": "./exports/wrappers.js",
-      "import": "./exports/wrappers.js"
+      "require": "./exports/wrappers/wrappers.cjs",
+      "node": "./exports/wrappers/wrappers.js",
+      "import": "./exports/wrappers/wrappers.js"
     },
     "./bex/background": {
       "types": "./types/bex/entrypoints/background.d.ts",
