@@ -6,6 +6,16 @@
 //  but they are useful only for Quasar CLI projects
 // They are typed via module augmentation by `@quasar/app-webpack` / `@quasar/app-vite`
 
+/*******************************************************
+ * Warning!
+ * All these are deprecated starting with
+ *    @quasar/app-vite v2
+ *    @quasar/app-webpack v4
+ *
+ * Use the new wrappers from @quasar/app-vite/wrappers
+ *    and @quasar/app-webpack/wrappers
+ *******************************************************/
+
 export function boot (callback) {
   return callback
 }
@@ -39,7 +49,7 @@ export function ssrProductionExport (callback) {
 }
 
 /**
- * Below only for @quasar/app-vite & @quasar/app-webpack v4+
+ * Below only for @quasar/app-vite v1
  */
 
 export function ssrCreate (callback) {

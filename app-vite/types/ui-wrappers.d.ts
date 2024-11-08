@@ -1,3 +1,9 @@
+/*******************************************************
+ * Warning!
+ *
+ * LEGACY way of doing it. Use the app-wrappers instead.
+ *******************************************************/
+
 // These wrappers are into `app`, instead of `ui`, because they are only relevant to people
 //  using a Quasar CLI project: TS devs using `quasar` package via Vue CLI plugin don't have
 //  boot files or `quasar.config` file where to use them.

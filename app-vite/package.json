@@ -7,8 +7,8 @@
   },
   "type": "module",
   "files": [
+    "exports",
     "assets",
-    "bex",
     "bin",
     "lib",
     "templates",
@@ -20,17 +20,26 @@
     ".": {
       "types": "./types/index.d.ts"
     },
+    "./bin/quasar": {
+      "node": "./bin/quasar.js"
+    },
+    "./wrappers": {
+      "types": "./types/app-wrappers.d.ts",
+      "require": "./exports/wrappers.cjs",
+      "node": "./exports/wrappers.js",
+      "import": "./exports/wrappers.js"
+    },
     "./bex/background": {
-      "import": "./bex/background.js",
-      "types": "./types/bex/entrypoints/background.d.ts"
+      "types": "./types/bex/entrypoints/background.d.ts",
+      "import": "./exports/bex/background.js"
     },
     "./bex/content": {
-      "import": "./bex/content.js",
-      "types": "./types/bex/entrypoints/content.d.ts"
+      "types": "./types/bex/entrypoints/content.d.ts",
+      "import": "./exports/bex/content.js"
     },
     "./bex/private/bex-bridge": {
-      "import": "./bex/private/bex-bridge.js",
-      "types": "./types/bex/bex-bridge.d.ts"
+      "types": "./types/bex/bex-bridge.d.ts",
+      "import": "./exports/bex/private/bex-bridge.js"
     },
     "./tsconfig-preset": {
       "default": "./tsconfig-preset.json"
@@ -39,7 +48,7 @@
       "default": "./stricter-tsconfig-preset.json"
     },
     "./lib/testing.js": {
-      "import": "./lib/testing.js"
+      "import": "./exports/testing/testing.js"
     }
   },
   "keywords": [

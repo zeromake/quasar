@@ -2,9 +2,9 @@
  * This endpoint is used exclusively by @quasar/testing AEs
  */
 
-import { getCtx } from './utils/get-ctx.js'
-import { QuasarConfigFile } from './quasar-config-file.js'
-import { quasarSpaConfig } from './modes/spa/spa-config.js'
+import { getCtx } from '../../lib/utils/get-ctx.js'
+import { QuasarConfigFile } from '../../lib/quasar-config-file.js'
+import { quasarSpaConfig } from '../../lib/modes/spa/spa-config.js'
 
 /**
  * Retrieve the vite config (SPA only) for @quasar/testing AE

@@ -6,6 +6,16 @@
 //  but they are useful only for Quasar CLI projects
 // They are typed via module augmentation by `@quasar/app-webpack` / `@quasar/app-vite`
 
+/*******************************************************
+ * Warning!
+ * All these are deprecated starting with
+ *    @quasar/app-vite v2
+ *    @quasar/app-webpack v4
+ *
+ * Use the new wrappers from @quasar/app-vite/wrappers
+ *    and @quasar/app-webpack/wrappers
+ *******************************************************/
+
 module.exports.boot = function (callback) {
   return callback
 }
