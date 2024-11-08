@@ -11,12 +11,12 @@
  */
 import express from 'express'
 import {
-  ssrClose,
-  ssrCreate,
-  ssrListen,
-  ssrServeStaticContent,
-  ssrRenderPreloadTag
-} from 'quasar/wrappers'
+  defineSsrCreate,
+  defineSsrListen,
+  defineSsrClose,
+  defineSsrServeStaticContent,
+  defineSsrRenderPreloadTag
+} from '@quasar/app-vite/wrappers'
 
 /**
  * Create your webserver and return its instance.
@@ -25,7 +25,7 @@ import {
  *
  * Should NOT be async!
  */
-export const create = ssrCreate((/* { ... } */) => {
+export const create = defineSsrCreate((/* { ... } */) => {
   const app = express()
 
   // attackers can use this header to detect apps running Express
@@ -46,7 +46,7 @@ export const create = ssrCreate((/* { ... } */) => {
  * For production, you can instead export your
  * handler for serverless use or whatever else fits your needs.
  */
-export const listen = ssrListen(({ app, devHttpsApp, port }) => {
+export const listen = defineSsrListen(({ app, devHttpsApp, port }) => {
   const server = devHttpsApp || app
   return server.listen(port, () => {
     if (process.env.PROD) {
@@ -66,7 +66,7 @@ export const listen = ssrListen(({ app, devHttpsApp, port }) => {
  *
  * Can be async.
  */
-export const close = ssrClose(({ listenResult }) => {
+export const close = defineSsrClose(({ listenResult }) => {
   return listenResult.close()
 })
 
@@ -80,7 +80,7 @@ const maxAge = process.env.DEV
  *
  * Notice resolve.urlPath(urlPath) and resolve.public(pathToServe) usages.
  */
-export const serveStaticContent = ssrServeStaticContent(({ app, resolve }) => {
+export const serveStaticContent = defineSsrServeStaticContent(({ app, resolve }) => {
   return ({ urlPath = '/', pathToServe = '.', opts = {} }) => {
     const serveFn = express.static(resolve.public(pathToServe), { maxAge, ...opts })
     app.use(resolve.urlPath(urlPath), serveFn)
@@ -99,7 +99,7 @@ const pngRE = /\.png$/
  * Should return a String with HTML output
  * (if any) for preloading indicated file
  */
-export const renderPreloadTag = ssrRenderPreloadTag((file/* , { ssrContext } */) => {
+export const renderPreloadTag = defineSsrRenderPreloadTag((file/* , { ssrContext } */) => {
   if (jsRE.test(file) === true) {
     return `<link rel="modulepreload" href="${ file }" crossorigin>`
   }

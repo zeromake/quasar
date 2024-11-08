@@ -1,10 +1,11 @@
+import { defineConfig } from '@quasar/app-vite/wrappers'
 import { fileURLToPath } from 'node:url'
 
 import mdPlugin from './build/md/index.js'
 import examplesPlugin from './build/examples.js'
 import manualChunks from './build/chunks.js'
 
-export default ctx => ({
+export default defineConfig(ctx => ({
   boot: [
     { path: 'gdpr', server: false }
   ],
@@ -95,7 +96,7 @@ export default ctx => ({
   animations: [ 'fadeIn', 'fadeOut' ],
 
   ssr: {
-    pwa: ctx.prod,
+    // pwa: ctx.prod,
     prodPort: 3111,
     middlewares: [
       'render'
@@ -121,4 +122,4 @@ export default ctx => ({
       })
     }
   }
-})
+}))
