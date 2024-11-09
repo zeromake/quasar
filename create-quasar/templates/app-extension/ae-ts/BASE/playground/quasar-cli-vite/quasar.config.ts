@@ -3,20 +3,10 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
-import { configure } from 'quasar/wrappers';
+import { defineConfig } from '@quasar/app-vite/wrappers';
 
-export default configure((/* ctx */) => {
+export default defineConfig((/* ctx */) => {
   return {
-    eslint: {
-      // fix: true,
-      // include: [],
-      // exclude: [],
-      // cache: false,
-      // rawOptions: {},
-      warnings: true,
-      errors: true,
-    },
-
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
 
@@ -45,7 +35,7 @@ export default configure((/* ctx */) => {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
     build: {
       target: {
-        browser: ['es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
+        browser: [ 'es2022', 'firefox115', 'chrome115', 'safari14' ],
         node: 'node20',
       },
 
@@ -134,7 +124,6 @@ export default configure((/* ctx */) => {
       pwa: false,
 
       // pwaOfflineHtmlFilename: 'offline.html', // do NOT use index.html as name!
-      // will mess up SSR
 
       // pwaExtendGenerateSWOptions (cfg) {},
       // pwaExtendInjectManifestOptions (cfg) {}
@@ -201,7 +190,7 @@ export default configure((/* ctx */) => {
       // extendBexScriptsConf (esbuildConf) {},
       // extendBexManifestJson (json) {},
 
-      contentScripts: ['my-content-script'],
+      extraScripts: []
     },
   };
 });
