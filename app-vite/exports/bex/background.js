@@ -67,7 +67,7 @@ function connectToDevServer (devServerPort) {
 
   // Listen for messages
   socket.addEventListener('message', ({ data }) => {
-    const { type } = JSON.parse(data)
+    const { type, event } = JSON.parse(data)
 
     if (type === 'connected') {
       console.log('[QBex|HMR] Connected')
@@ -77,7 +77,7 @@ function connectToDevServer (devServerPort) {
       return
     }
 
-    if (type === 'qbex:hmr:reload') {
+    if (type === 'custom' && event === 'qbex:hmr:reload') {
       reloadExtension()
     }
   })

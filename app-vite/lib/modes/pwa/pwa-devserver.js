@@ -113,11 +113,7 @@ export class QuasarModeDevserver extends AppDevserver {
       { ignoreInitial: true }
     ).on('change', debounce(() => {
       inject()
-
-      this.#server?.ws.send({
-        type: 'full-reload',
-        path: '*'
-      })
+      this.#server?.ws.send({ type: 'full-reload' })
     }, 550))
 
     inject()

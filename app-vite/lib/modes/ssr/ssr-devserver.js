@@ -390,11 +390,7 @@ export class QuasarModeDevserver extends AppDevserver {
     done('Webserver is ready')
 
     this.printBanner(quasarConf)
-
-    this.#viteClient?.ws.send({
-      type: 'full-reload',
-      path: '*'
-    })
+    this.#viteClient?.ws.send({ type: 'full-reload' })
   }
 
   // also update pwa-devserver.js when changing here
@@ -413,11 +409,7 @@ export class QuasarModeDevserver extends AppDevserver {
       { ignoreInitial: true }
     ).on('change', debounce(() => {
       inject()
-
-      this.#viteClient?.ws.send({
-        type: 'full-reload',
-        path: '*'
-      })
+      this.#viteClient?.ws.send({ type: 'full-reload' })
     }, 550))
 
     inject()

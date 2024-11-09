@@ -94,7 +94,7 @@ export class QuasarModeDevserver extends AppDevserver {
     let scriptSnapshot = setScripts(scriptList)
     const updateClient = () => {
       this.printBanner(quasarConf)
-      this.#viteServer?.ws.send({ type: 'qbex:hmr:reload' })
+      this.#viteServer?.ws.send({ type: 'custom', event: 'qbex:hmr:reload' })
     }
 
     this.#manifestWatcher = chokidar.watch(quasarConf.metaConf.bexManifestFile, { ignoreInitial: true })
@@ -121,7 +121,7 @@ export class QuasarModeDevserver extends AppDevserver {
 
     const onRebuild = () => {
       this.printBanner(quasarConf)
-      this.#viteServer?.ws.send({ type: 'qbex:hmr:reload' })
+      this.#viteServer?.ws.send({ type: 'custom', event: 'qbex:hmr:reload' })
     }
 
     for (const entry of this.#scriptList) {
