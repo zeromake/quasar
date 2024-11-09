@@ -45,18 +45,7 @@ export class QuasarModeDevserver extends AppDevserver {
     const { diff, queue } = super.run(quasarConf, __isRetry)
 
     if (diff('distDir', quasarConf)) {
-      this.#viteWatchers.forEach(watcher => { watcher.close() })
-      this.#viteWatchers = []
-
-      if (this.#manifestWatcher !== null) {
-        this.#manifestWatcher.close()
-        this.#manifestWatcher = null
-      }
-
-      this.#scriptWatchers.forEach(watcher => { watcher.close() })
-      this.#scriptWatchers = []
-
-      this.cleanArtifacts(quasarConf.build.distDir)
+      return queue(() => this.#stopWatchers(quasarConf))
     }
 
     if (diff('bex-manifest', quasarConf)) {
@@ -70,6 +59,23 @@ export class QuasarModeDevserver extends AppDevserver {
     if (diff('vite', quasarConf)) {
       return queue(() => this.#runVite(quasarConf, queue))
     }
+  }
+
+  async #stopWatchers (quasarConf) {
+    while (this.#viteWatchers.length !== 0) {
+      await this.#viteWatchers.pop().close()
+    }
+
+    if (this.#manifestWatcher !== null) {
+      this.#manifestWatcher.close()
+      this.#manifestWatcher = null
+    }
+
+    while (this.#scriptWatchers.length !== 0) {
+      await this.#scriptWatchers.pop().close()
+    }
+
+    this.cleanArtifacts(quasarConf.build.distDir)
   }
 
   async #compileBexManifest (quasarConf, queue) {
@@ -109,8 +115,9 @@ export class QuasarModeDevserver extends AppDevserver {
   }
 
   async #compileBexScripts (quasarConf) {
-    this.#scriptWatchers.forEach(watcher => { watcher.close() })
-    this.#scriptWatchers = []
+    while (this.#scriptWatchers.length !== 0) {
+      await this.#scriptWatchers.pop().close()
+    }
 
     const onRebuild = () => {
       this.printBanner(quasarConf)
@@ -126,8 +133,9 @@ export class QuasarModeDevserver extends AppDevserver {
   }
 
   async #runVite (quasarConf, queue) {
-    this.#viteWatchers.forEach(watcher => { watcher.close() })
-    this.#viteWatchers = []
+    while (this.#viteWatchers.length !== 0) {
+      await this.#viteWatchers.pop().close()
+    }
 
     if (this.ctx.target.firefox) {
       const viteConfig = await quasarBexConfig.vite(quasarConf)
@@ -147,10 +155,12 @@ export class QuasarModeDevserver extends AppDevserver {
       this.#viteWatchers.push(
         {
           close: () => {
-            this.#viteServer.close()
+            const server = this.#viteServer
             this.#viteServer = null
+            return server.close()
           }
         },
+
         this.#getIndexHtmlWatcher(quasarConf, this.#viteServer)
       )
     }
@@ -173,7 +183,6 @@ export class QuasarModeDevserver extends AppDevserver {
       const template = fse.readFileSync(templatePath, 'utf-8')
       viteServer.transformIndexHtml('/', template).then(html => {
         fse.writeFileSync(htmlPath, html, 'utf-8')
-        viteServer.ws.send({ type: 'full-reload' })
       })
     }
 
