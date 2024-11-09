@@ -10,7 +10,7 @@ import { quasarCapacitorConfig } from './capacitor-config.js'
 
 export class QuasarModeDevserver extends AppDevserver {
   #pid = 0
-  #server
+  #server = null
   #target
   #capacitorConfigFile = new CapacitorConfigFile()
 
@@ -42,8 +42,8 @@ export class QuasarModeDevserver extends AppDevserver {
   }
 
   async #runVite (quasarConf) {
-    if (this.#server) {
-      this.#server.close()
+    if (this.#server !== null) {
+      await this.#server.close()
     }
 
     const viteConfig = await quasarCapacitorConfig.vite(quasarConf)

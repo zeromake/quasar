@@ -9,7 +9,7 @@ import { injectPwaManifest, buildPwaServiceWorker } from './utils.js'
 import { log } from '../../utils/logger.js'
 
 export class QuasarModeDevserver extends AppDevserver {
-  #server
+  #server = null
 
   // also update ssr-devserver.js when changing here
   #pwaManifestWatcher
@@ -77,8 +77,8 @@ export class QuasarModeDevserver extends AppDevserver {
   }
 
   async #runVite (quasarConf, urlDiffers) {
-    if (this.#server !== void 0) {
-      this.#server.close()
+    if (this.#server !== null) {
+      await this.#server.close()
     }
 
     injectPwaManifest(quasarConf, true)
@@ -114,12 +114,10 @@ export class QuasarModeDevserver extends AppDevserver {
     ).on('change', debounce(() => {
       inject()
 
-      if (this.#server !== void 0) {
-        this.#server.hot.send({
-          type: 'full-reload',
-          path: '*'
-        })
-      }
+      this.#server?.ws.send({
+        type: 'full-reload',
+        path: '*'
+      })
     }, 550))
 
     inject()

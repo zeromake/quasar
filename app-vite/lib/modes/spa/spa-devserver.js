@@ -5,7 +5,7 @@ import { openBrowser } from '../../utils/open-browser.js'
 import { quasarSpaConfig } from './spa-config.js'
 
 export class QuasarModeDevserver extends AppDevserver {
-  #server
+  #server = null
 
   run (quasarConf, __isRetry) {
     const { diff, queue } = super.run(quasarConf, __isRetry)
@@ -16,8 +16,8 @@ export class QuasarModeDevserver extends AppDevserver {
   }
 
   async #runVite (quasarConf, urlDiffers) {
-    if (this.#server !== void 0) {
-      this.#server.close()
+    if (this.#server !== null) {
+      await this.#server.close()
     }
 
     const viteConfig = await quasarSpaConfig.vite(quasarConf)
