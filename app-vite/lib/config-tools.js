@@ -204,9 +204,17 @@ export async function createViteConfig (quasarConf, { compileId }) {
   }
 
   if (ctx.dev) {
+    const warmup = compileId !== 'vite-ssr-server'
+      ? {
+          clientFiles: [
+            quasarConf.metaConf.entryScript.absolutePath
+          ]
+        }
+      : {}
+
     // protect against Vite (or a Vite plugin) mutating the original
     // and triggering endless cfg diff loop
-    viteConf.server = merge({}, quasarConf.devServer)
+    viteConf.server = merge({ warmup }, quasarConf.devServer)
   }
   else {
     viteConf.build.outDir = build.distDir
