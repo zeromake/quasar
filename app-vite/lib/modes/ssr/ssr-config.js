@@ -56,6 +56,7 @@ export const quasarSsrConfig = {
   viteServer: async quasarConf => {
     let cfg = await createViteConfig(quasarConf, { compileId: 'vite-ssr-server' })
     const { appPaths } = quasarConf.ctx
+    const ssrEntryFile = appPaths.resolve.entry('server-entry.mjs')
 
     cfg = mergeViteConfig(cfg, {
       target: quasarConf.build.target.node,
@@ -72,7 +73,10 @@ export const quasarSsrConfig = {
       server: {
         ws: false, // let client config deal with it
         hmr: false, // let client config deal with it
-        middlewareMode: true
+        middlewareMode: true,
+        warmup: {
+          ssrFiles: [ ssrEntryFile ]
+        }
       },
       ssr: {
         // we don't externalize ourselves because of
@@ -83,7 +87,7 @@ export const quasarSsrConfig = {
         ssr: true,
         outDir: join(quasarConf.build.distDir, 'server'),
         rollupOptions: {
-          input: appPaths.resolve.entry('server-entry.mjs')
+          input: ssrEntryFile
         }
       }
     })
