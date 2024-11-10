@@ -12,6 +12,22 @@ const { UninstallAPI } = require('./api-classes/UninstallAPI.js')
 const { PromptsAPI } = require('./api-classes/PromptsAPI.js')
 const { getPackagePath } = require('../utils/get-package-path.js')
 
+const scriptsExtensionList = [ '', '.js', '.mjs', '.cjs' ]
+const scriptsTargetFolderList = [ 'dist', 'src' ]
+
+function getPackageScriptPath (packageFullName, scriptName, dir) {
+  for (const ext of scriptsExtensionList) {
+    for (const folder of scriptsTargetFolderList) {
+      const path = getPackagePath(
+        join(packageFullName, folder, `${ scriptName }${ ext }`),
+        dir
+      )
+
+      if (path !== void 0) return path
+    }
+  }
+}
+
 async function promptOverwrite ({ targetPath, options, ctx }) {
   const choices = [
     { name: 'Overwrite', value: 'overwrite' },
@@ -138,28 +154,31 @@ module.exports.AppExtensionInstance = class AppExtensionInstance {
   }
 
   get isInstalled () {
-    if (this.#isInstalled !== null) {
-      return this.#isInstalled
+    if (this.#isInstalled === null) {
+      this.#loadPackageInfo()
     }
 
-    this.#loadPackageInfo()
     return this.#isInstalled
   }
 
-  get packagePath () {
-    if (this.#packagePath !== null) {
-      return this.#packagePath || void 0
-    }
-
-    this.#loadPackageInfo()
-    return this.#packagePath || void 0
-  }
-
   #loadPackageInfo () {
+    const { appDir } = this.#ctx.appPaths
+
     try {
-      const packagePath = getPackagePath(
-        join(this.packageFullName, 'package.json'),
-        this.#ctx.appPaths.appDir
+      const packagePath = (
+        getPackagePath(
+          join(this.packageFullName, 'package.json'),
+          appDir
+        )
+        || getPackagePath(
+          this.packageFullName,
+          appDir
+        )
+        || getPackageScriptPath(
+          this.packageFullName,
+          'index',
+          appDir
+        )
       )
 
       if (packagePath !== void 0) {
@@ -341,17 +360,13 @@ module.exports.AppExtensionInstance = class AppExtensionInstance {
    * as long as the corresponding file isn't available into the `src` folder, making the feature opt-in
    */
   #getScriptFile (scriptName) {
-    const { packagePath } = this
+    if (this.isInstalled === false) return
 
-    let scriptFile = join(packagePath, `dist/${ scriptName }.js`)
-    if (fse.existsSync(scriptFile)) {
-      return scriptFile
-    }
-
-    scriptFile = join(packagePath, `src/${ scriptName }.js`)
-    if (fse.existsSync(scriptFile)) {
-      return scriptFile
-    }
+    return getPackageScriptPath(
+      this.packageFullName,
+      scriptName,
+      this.#packagePath
+    )
   }
 
   async #getScript (scriptName, fatalError) {

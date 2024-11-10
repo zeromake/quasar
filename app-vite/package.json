@@ -20,6 +20,7 @@
     ".": {
       "types": "./types/index.d.ts"
     },
+    "./package.json": "./package.json",
     "./bin/quasar": {
       "node": "./bin/quasar.js"
     },
