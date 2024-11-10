@@ -19,11 +19,12 @@
       "types": "./dist/runtime/index.d.ts",
       "import": "./dist/runtime/index.js"
     },
-    "./boot/register": {
-      "types": "./dist/runtime/boot/register.d.ts",
-      "import": "./dist/runtime/boot/register.js"
-    },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    <% if (preset.prompts) { %>"./dist/prompts": "./dist/prompts.js",<% } %>
+    <% if (preset.install) { %>"./dist/install": "./dist/install.js",<% } %>
+    <% if (preset.uninstall) { %>"./dist/uninstall": "./dist/uninstall.js",<% } %>
+    "./dist/index": "./dist/index.js",
+    "./*": "./dist/runtime/*"
   },
   "scripts": {
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",

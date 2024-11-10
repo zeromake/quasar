@@ -305,9 +305,7 @@ export class AppExtensionInstance {
   async #getScriptPrompts () {
     const getPromptsObject = await this.#getScript('prompts')
 
-    if (typeof getPromptsObject !== 'function') {
-      return {}
-    }
+    if (typeof getPromptsObject !== 'function') return {}
 
     const api = new PromptsAPI({
       ctx: this.#ctx,
@@ -392,9 +390,7 @@ export class AppExtensionInstance {
   async #runInstallScript (prompts) {
     const script = await this.#getScript('install')
 
-    if (typeof script !== 'function') {
-      return
-    }
+    if (typeof script !== 'function') return
 
     log('Running App Extension install script...')
 
@@ -431,9 +427,7 @@ export class AppExtensionInstance {
   async #runUninstallScript (prompts) {
     const script = await this.#getScript('uninstall')
 
-    if (typeof script !== 'function') {
-      return
-    }
+    if (typeof script !== 'function') return
 
     log('Running App Extension uninstall script...')
 
