@@ -4,10 +4,6 @@ const fse = require('fs-extra')
 const { log, warn } = require('../../utils/logger.js')
 const { generateTypesFeatureFlag } = require('../../utils/types-feature-flags.js')
 
-const bexDeps = {
-  events: '^3.3.0'
-}
-
 function isModeInstalled (appPaths) {
   return fs.existsSync(appPaths.bexDir)
 }
@@ -24,24 +20,7 @@ module.exports.addMode = async function addMode ({
     return
   }
 
-  const nodePackager = cacheProxy.getModule('nodePackager')
-  nodePackager.installPackage(
-    Object.entries(bexDeps).map(([ name, version ]) => `${ name }@${ version }`),
-    { displayName: 'BEX dependencies' }
-  )
-
   console.log()
-  const { default: inquirer } = await import('inquirer')
-  const answer = await inquirer.prompt([ {
-    name: 'manifestVersion',
-    type: 'list',
-    choices: [
-      { name: 'Manifest v2 (works with both Chrome and FF)', value: 'manifest-v2' },
-      { name: 'Manifest v3 (works with Chrome only currently)', value: 'manifest-v3' }
-    ],
-    message: 'What version of manifest would you like?'
-  } ])
-
   log('Creating Browser Extension source folder...')
 
   fse.copySync(appPaths.resolve.cli('templates/bex/common'), appPaths.bexDir)
@@ -49,13 +28,13 @@ module.exports.addMode = async function addMode ({
 
   const hasTypescript = cacheProxy.getModule('hasTypescript')
   const format = hasTypescript ? 'ts' : 'default'
-  fse.copySync(appPaths.resolve.cli(`templates/bex/${ format }/${ answer.manifestVersion }`), appPaths.bexDir)
+  fse.copySync(appPaths.resolve.cli(`templates/bex/${ format }`), appPaths.bexDir)
 
   log('Browser Extension support was added')
 }
 
 module.exports.removeMode = function removeMode ({
-  ctx: { appPaths, cacheProxy }
+  ctx: { appPaths }
 }) {
   if (!isModeInstalled(appPaths)) {
     warn('No Browser Extension support detected. Aborting.')
@@ -64,12 +43,6 @@ module.exports.removeMode = function removeMode ({
 
   log('Removing Browser Extension source folder')
   fse.removeSync(appPaths.bexDir)
-
-  const nodePackager = cacheProxy.getModule('nodePackager')
-  nodePackager.uninstallPackage(
-    Object.keys(bexDeps),
-    { displayName: 'BEX dependencies' }
-  )
 
   log('Browser Extension support was removed')
 }

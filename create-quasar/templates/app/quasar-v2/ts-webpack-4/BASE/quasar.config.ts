@@ -10,9 +10,9 @@
 /* eslint global-require: 0 */
 <% } %>
 <% } %>
-import { configure } from 'quasar/wrappers';
+import { defineConfig } from '#q-app/wrappers';
 
-export default configure((/* ctx */) => {
+export default defineConfig((/* ctx */) => {
   return {
     <% if (preset.lint) { %>eslint: {
       // fix: true,

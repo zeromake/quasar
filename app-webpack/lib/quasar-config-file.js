@@ -26,7 +26,8 @@ const defaultPortMapping = {
   pwa: 9200,
   electron: 9300,
   cordova: 9400,
-  capacitor: 9500
+  capacitor: 9500,
+  bex: 9600
 }
 
 const quasarComponentRE = /^(Q[A-Z]|q-)/
@@ -543,7 +544,7 @@ module.exports.QuasarConfigFile = class QuasarConfigFile {
         capacitorCliPreparationParams: []
       },
       bex: {
-        contentScripts: []
+        extraScripts: []
       }
     }, userCfg)
 
@@ -593,8 +594,7 @@ module.exports.QuasarConfigFile = class QuasarConfigFile {
       }, cfg.ssr)
     }
 
-    // if DEV and not BEX mode (BEX does not use a regular devserver)
-    if (this.#ctx.dev && this.#ctx.mode.bex !== true) {
+    if (this.#ctx.dev) {
       if (this.#opts.host) {
         cfg.devServer.host = this.#opts.host
       }
@@ -868,7 +868,7 @@ module.exports.QuasarConfigFile = class QuasarConfigFile {
       })
     }
 
-    if (this.#ctx.dev === true && this.#ctx.mode.bex) {
+    if (this.#ctx.mode.bex) {
       // we want to differentiate the folder
       // otherwise we can't run dev and build simultaneously;
       // it's better regardless because it's easier to select the dev folder
@@ -878,7 +878,7 @@ module.exports.QuasarConfigFile = class QuasarConfigFile {
 
       cfg.build.distDir = join(
         dirname(cfg.build.distDir),
-        name === 'bex' ? 'bex--dev' : `bex-dev--${ name }`
+        `bex-${ this.#ctx.targetName }${ name !== 'bex' ? `-${ name }` : '' }${ this.#ctx.dev ? '--dev' : '' }`
       )
     }
 
@@ -887,9 +887,13 @@ module.exports.QuasarConfigFile = class QuasarConfigFile {
     }
 
     cfg.build.publicPath
-      = cfg.build.publicPath && [ 'spa', 'pwa', 'ssr' ].includes(this.#ctx.modeName)
-        ? formatPublicPath(cfg.build.publicPath)
-        : ([ 'capacitor', 'cordova', 'electron', 'bex' ].includes(this.#ctx.modeName) ? '' : '/')
+      = this.#ctx.mode.bex
+        ? '/www'
+        : (
+            cfg.build.publicPath && [ 'spa', 'pwa', 'ssr' ].includes(this.#ctx.modeName)
+              ? formatPublicPath(cfg.build.publicPath)
+              : ([ 'capacitor', 'cordova', 'electron', 'bex' ].includes(this.#ctx.modeName) ? '' : '/')
+          )
 
     /* careful if you configure the following; make sure that you really know what you are doing */
     cfg.build.vueRouterBase = cfg.build.vueRouterBase !== void 0
@@ -933,6 +937,28 @@ module.exports.QuasarConfigFile = class QuasarConfigFile {
       cfg.capacitor.capacitorCliPreparationParams = [ 'sync', this.#ctx.targetName ]
     }
 
+    if (this.#ctx.mode.ssr) {
+      if (cfg.ssr.manualPostHydrationTrigger !== true) {
+        cfg.metaConf.needsAppMountHook = true
+      }
+
+      if (cfg.ssr.middlewares.length > 0) {
+        cfg.ssr.middlewares = cfg.ssr.middlewares.filter(_ => _)
+          .map(parseAssetProperty('app/src-ssr/middlewares'))
+          .filter(asset => asset.path)
+          .filter(uniquePathFilter)
+      }
+
+      if (cfg.ssr.pwa === true) {
+        // install pwa mode if it's missing
+        const { addMode } = require('../lib/modes/pwa/pwa-installation.js')
+        await addMode({ ctx: this.#ctx, silent: true })
+        cfg.build.rawDefine.__QUASAR_SSR_PWA__ = true
+      }
+
+      this.#ctx.mode.pwa = cfg.ctx.mode.pwa = cfg.ssr.pwa === true
+    }
+
     // (backward compatibility for upstream)
     // webpack-dev-server 4.5.0 / 5.0.0 introduced a change in behavior
     // along with deprecation notices; so we transform it automatically
@@ -958,67 +984,9 @@ module.exports.QuasarConfigFile = class QuasarConfigFile {
       }
     }
 
-    if (this.#ctx.dev && cfg.devServer.server.type === 'https') {
-      const { options } = cfg.devServer.server
-
-      if (options === void 0) {
-        const { getCertificate } = await import('@quasar/ssl-certificate')
-        const sslCertificate = getCertificate({ log, fatal })
-        cfg.devServer.server.options = {
-          key: sslCertificate,
-          cert: sslCertificate
-        }
-      }
-      else {
-        // we now check if config is specifying a file path
-        // and we actually read the contents so we can later supply correct
-        // params to the node HTTPS server
-        [ 'ca', 'pfx', 'key', 'cert' ].forEach(prop => {
-          if (typeof options[ prop ] === 'string') {
-            try {
-              options[ prop ] = readFileSync(options[ prop ])
-            }
-            catch (e) {
-              console.error(e)
-              console.log()
-              delete options[ prop ]
-              warn(`The devServer.server.options.${ prop } file could not be read. Removed the config.`)
-            }
-          }
-        })
-      }
-    }
-
-    if (this.#ctx.mode.ssr) {
-      if (cfg.ssr.manualPostHydrationTrigger !== true) {
-        cfg.metaConf.needsAppMountHook = true
-      }
-
-      if (cfg.ssr.middlewares.length > 0) {
-        cfg.ssr.middlewares = cfg.ssr.middlewares.filter(_ => _)
-          .map(parseAssetProperty('app/src-ssr/middlewares'))
-          .filter(asset => asset.path)
-          .filter(uniquePathFilter)
-      }
-
-      if (cfg.ssr.pwa === true) {
-        // install pwa mode if it's missing
-        const { addMode } = require('../lib/modes/pwa/pwa-installation.js')
-        await addMode({ ctx: this.#ctx, silent: true })
-        cfg.build.rawDefine.__QUASAR_SSR_PWA__ = true
-      }
-
-      this.#ctx.mode.pwa = cfg.ctx.mode.pwa = cfg.ssr.pwa === true
-    }
-
     if (this.#ctx.dev) {
       const originalSetup = cfg.devServer.setupMiddlewares
       const openInEditor = require('launch-editor-middleware')
-
-      if (this.#ctx.mode.bex === true) {
-        cfg.devServer.devMiddleware = cfg.devServer.devMiddleware || {}
-        cfg.devServer.devMiddleware.writeToDisk = true
-      }
 
       cfg.devServer = merge({
         hot: true,
@@ -1098,18 +1066,52 @@ module.exports.QuasarConfigFile = class QuasarConfigFile {
         cfg.metaConf.vueDevtools = { ...this.#vueDevtools }
       }
 
-      if (this.#ctx.mode.cordova || this.#ctx.mode.capacitor || this.#ctx.mode.electron) {
-        if (this.#ctx.mode.electron) {
-          cfg.devServer.server.type = 'http'
-        }
+      if (this.#ctx.mode.electron || this.#ctx.mode.bex) {
+        cfg.devServer.server.type = 'http'
       }
-      else if (cfg.devServer.open) {
+      else if (cfg.devServer.open && !this.#ctx.mode.cordova && !this.#ctx.mode.capacitor) {
         cfg.metaConf.openBrowser = !isMinimalTerminal
           ? cfg.devServer.open
           : false
       }
 
       delete cfg.devServer.open
+
+      if (this.#ctx.mode.bex === true && this.#ctx.target.firefox === true) {
+        cfg.devServer.devMiddleware = cfg.devServer.devMiddleware || {}
+        cfg.devServer.devMiddleware.writeToDisk = true
+      }
+
+      if (cfg.devServer.server.type === 'https') {
+        const { options } = cfg.devServer.server
+
+        if (options === void 0) {
+          const { getCertificate } = await import('@quasar/ssl-certificate')
+          const sslCertificate = getCertificate({ log, fatal })
+          cfg.devServer.server.options = {
+            key: sslCertificate,
+            cert: sslCertificate
+          }
+        }
+        else {
+          // we now check if config is specifying a file path
+          // and we actually read the contents so we can later supply correct
+          // params to the node HTTPS server
+          [ 'ca', 'pfx', 'key', 'cert' ].forEach(prop => {
+            if (typeof options[ prop ] === 'string') {
+              try {
+                options[ prop ] = readFileSync(options[ prop ])
+              }
+              catch (e) {
+                console.error(e)
+                console.log()
+                delete options[ prop ]
+                warn(`The devServer.server.options.${ prop } file could not be read. Removed the config.`)
+              }
+            }
+          })
+        }
+      }
     }
 
     if (cfg.build.gzip) {
@@ -1169,7 +1171,7 @@ module.exports.QuasarConfigFile = class QuasarConfigFile {
         ? 'localhost'
         : cfg.devServer.host
 
-      cfg.metaConf.APP_URL = getUrl(hostname)
+      cfg.metaConf.APP_URL = this.#ctx.mode.bex ? 'index.html' : getUrl(hostname)
       cfg.metaConf.getUrl = getUrl
     }
     else if (this.#ctx.mode.cordova || this.#ctx.mode.capacitor || this.#ctx.mode.bex) {
@@ -1187,6 +1189,10 @@ module.exports.QuasarConfigFile = class QuasarConfigFile {
       VUE_ROUTER_MODE: cfg.build.vueRouterMode,
       VUE_ROUTER_BASE: cfg.build.vueRouterBase
     })
+
+    if (this.#ctx.mode.bex || this.#ctx.mode.capacitor || this.#ctx.mode.cordova) {
+      cfg.build.env.TARGET = this.#ctx.targetName
+    }
 
     if (cfg.metaConf.APP_URL) {
       cfg.build.env.APP_URL = cfg.metaConf.APP_URL

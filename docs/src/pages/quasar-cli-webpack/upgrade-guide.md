@@ -112,7 +112,7 @@ api.compatibleWith(
 * Webpack will now only compile the contents of `/src` folder, while the rest (/src-pwa, /src-electron, etc) are now handled by Esbuild. This translates to a superior build speed and handling of Node.js formats.
 * The "test" cmd was removed due to latest updates for @quasar/testing-* packages. See [here](https://testing.quasar.dev/packages/testing/)
 * The "clean" cmd has been re-designed. Type "quasar clean -h" in your upgraded Quasar project folder for more info.
-* Typescript detection is based on the quasar.config file being in TS form (quasar.config.ts) and tsconfig.json file presence.
+* Typescript detection is based on the quasar.config file being in TS form (quasar.config.ts), tsconfig.json file presence and typescript & ts-loader being installed.
 * **We will detail more breaking changes for each of the Quasar modes below**.
 
 ### Highlights on what's new
@@ -1148,7 +1148,7 @@ export interface QuasarAppPaths {
 }
 ```
 
-The Typescript detection is based on the quasar.config file being in TS form (quasar.config.ts) and tsconfig.json file presence, so please remove the following:
+The Typescript detection is based on the quasar.config file being in TS form (quasar.config.ts), tsconfig.json file presence and typescript & ts-loader being installed, so please remove the following:
 
 ```diff /quasar.config
 - /**

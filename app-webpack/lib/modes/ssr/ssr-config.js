@@ -8,6 +8,7 @@ const {
   createNodeEsbuildConfig, extendEsbuildConfig
 } = require('../../config-tools.js')
 
+const { cliPkg } = require('../../utils/cli-runtime.js')
 const { getBuildSystemDefine } = require('../../utils/env.js')
 const { injectWebpackHtml } = require('../../utils/html-template.js')
 
@@ -133,7 +134,7 @@ const quasarSsrConfig = {
       //  5. Quasar icon sets files
       //  6. Quasar extras
       allowlist: [
-        /(\.(vue|css|styl|scss|sass|less)$|\?vue&type=style|^quasar[\\/]lang[\\/]|^quasar[\\/]icon-set[\\/]|^@quasar[\\/]extras[\\/])/,
+        /(\.(vue|css|styl|scss|sass|less)$|\?vue&type=style|^quasar[\\/]lang[\\/]|^quasar[\\/]icon-set[\\/]|^@quasar[\\/]extras[\\/]|@quasar[\\/]app-webpack[\\/])/,
         ...quasarConf.build.webpackTranspileDependencies
       ],
       additionalModuleDirs
@@ -174,7 +175,10 @@ const quasarSsrConfig = {
     }
     else {
       cfg.external = [
-        ...(cfg.external || []),
+        // we filter out ourselves because of the possible
+        // imports of '#q-app/wrappers' / '@quasar/app-webpack/wrappers'
+        ...cfg.external.filter(dep => dep !== cliPkg.name),
+
         'vue/server-renderer',
         'vue/compiler-sfc',
         './render-template.js',

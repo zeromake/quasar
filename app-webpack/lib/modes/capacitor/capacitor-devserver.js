@@ -11,7 +11,7 @@ const { quasarCapacitorConfig } = require('./capacitor-config.js')
 
 module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevserver {
   #pid = 0
-  #server
+  #server = null
   #target
   #capacitorConfigFile = new CapacitorConfigFile()
 
@@ -43,7 +43,7 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
   }
 
   async #runWebpack (quasarConf) {
-    if (this.#server) {
+    if (this.#server !== null) {
       await this.#server.stop()
       this.#server = null
     }

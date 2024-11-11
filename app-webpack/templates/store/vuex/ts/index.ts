@@ -1,4 +1,4 @@
-import { store } from 'quasar/wrappers'
+import { defineStore } from '#q-app/wrappers'
 import { InjectionKey } from 'vue'
 import { Router } from 'vue-router'
 import {
@@ -43,7 +43,7 @@ export const storeKey: InjectionKey<VuexStore<StateInterface>> = Symbol('vuex-ke
    }
  }
 
-export default store(function (/* { ssrContext } */) {
+export default defineStore(function (/* { ssrContext } */) {
   const Store = createStore<StateInterface>({
     modules: {
       // example

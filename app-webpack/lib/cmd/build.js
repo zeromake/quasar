@@ -7,7 +7,7 @@ const parseArgs = require('minimist')
 const argv = parseArgs(process.argv.slice(2), {
   alias: {
     m: 'mode',
-    T: 'target',
+    T: 'target', // cordova/capacitor/bex mode only
     A: 'arch',
     b: 'bundler',
     s: 'skip-pkg',
@@ -57,6 +57,8 @@ if (argv.help) {
                         [darwin|win32|linux|mas|all]
                       - Electron with "electron-builder" bundler (default: yours)
                         [darwin|mac|win32|win|linux|all]
+                      - Bex
+                        [chrome|firefox]
     --publish, -P   Also trigger publishing hooks (if any are specified)
                       - Has special meaning when building with Electron mode and using
                         electron-builder as bundler
@@ -83,6 +85,9 @@ if (argv.help) {
     ONLY for electron-builder (when using "publish" parameter):
     --publish, -P  Publish options [onTag|onTagOrDraft|always|never]
                      - see https://www.electron.build/configuration/publish
+
+    Only for BEX mode:
+    --target, -T     (required) Browser family target [chrome|firefox]
 
   `)
   process.exit(0)

@@ -25,7 +25,9 @@ function logServerMessage (title, msg, additional) {
   info(`${ msg }${ additional !== void 0 ? ` ${ green(dot) } ${ additional }` : '' }`, title)
 }
 
-let renderSSRError
+let renderSSRError = null
+let vueRenderToString = null
+
 function renderError ({ err, req, res }) {
   log()
   warn(req.url, 'Render failed')
@@ -84,7 +86,6 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
   #appOptions = {}
 
   #pathMap = {}
-  #vueRenderToString = null
 
   constructor (opts) {
     super(opts)
@@ -198,6 +199,16 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
       await this.#closeWebserver()
     }
 
+    if (renderSSRError === null) {
+      const { default: render } = await import('@quasar/render-ssr-error')
+      renderSSRError = render
+    }
+
+    if (vueRenderToString === null) {
+      const { renderToString } = await getPackage('vue/server-renderer', quasarConf.ctx.appPaths.appDir)
+      vueRenderToString = renderToString
+    }
+
     const { appPaths } = quasarConf.ctx
 
     this.#appOptions.port = quasarConf.devServer.port
@@ -208,18 +219,8 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
       ? url => url || '/'
       : url => (url ? (publicPath + url).replace(doubleSlashRE, '/') : publicPath)
 
-    if (this.#vueRenderToString === null) {
-      const { renderToString } = getPackage('vue/server-renderer', quasarConf.ctx.appPaths.appDir)
-      this.#vueRenderToString = renderToString
-    }
-
-    if (renderSSRError === void 0) {
-      const { default: render } = await import('@quasar/render-ssr-error')
-      renderSSRError = render
-    }
-
     const renderer = createDevRenderer({
-      vueRenderToString: this.#vueRenderToString,
+      vueRenderToString,
       basedir: appPaths.appDir,
       manualStoreSerialization: quasarConf.ssr.manualStoreSerialization === true,
       onReadyForTemplate () {
@@ -357,7 +358,7 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
       port: this.#appOptions.port,
       resolve: {
         urlPath: resolveUrlPath,
-        root () { return join(this.#pathMap.rootFolder, ...arguments) },
+        root: (...args) => join(this.#pathMap.rootFolder, ...args),
         public: resolvePublicFolder
       },
       publicPath,

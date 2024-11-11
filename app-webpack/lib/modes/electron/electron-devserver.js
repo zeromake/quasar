@@ -17,7 +17,7 @@ function wait (time) {
 
 module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevserver {
   #pid = 0
-  #server
+  #server = null
   #watcherList = []
   #killedPid = false
   #electronExecutable
@@ -58,7 +58,7 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
   }
 
   async #runWebpack (quasarConf) {
-    if (this.#server) {
+    if (this.#server !== null) {
       await this.#server.stop()
       this.#server = null
     }
@@ -89,8 +89,9 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
   }
 
   async #runElectronFiles (quasarConf) {
-    this.#watcherList.forEach(watcher => { watcher.close() })
-    this.#watcherList = []
+    while (this.#watcherList.length !== 0) {
+      await this.#watcherList.pop().close()
+    }
 
     let isReady = false
 

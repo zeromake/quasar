@@ -22,9 +22,7 @@ module.exports.ensureArgv = function ensureArgv (argv, cmd) {
     fatal(`Unknown mode "${ argv.mode }"`)
   }
 
-  if (cmd === 'inspect') {
-    return
-  }
+  if (cmd === 'inspect') return
 
   if (argv.mode === 'capacitor') {
     const targets = [ 'android', 'ios' ]
@@ -43,6 +41,16 @@ module.exports.ensureArgv = function ensureArgv (argv, cmd) {
     }
     if (!targets.includes(argv.target)) {
       fatal(`Unknown target "${ argv.target }" for Cordova\n`)
+    }
+  }
+
+  if (argv.mode === 'bex') {
+    const targets = [ 'chrome', 'firefox' ]
+    if (!argv.target) {
+      fatal(`Please also specify a target (-T <${ targets.join('|') }>)`)
+    }
+    if (!targets.includes(argv.target)) {
+      fatal(`Unknown target "${ argv.target }" for BEX`)
     }
   }
 

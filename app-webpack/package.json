@@ -5,8 +5,8 @@
   "bin": {
     "quasar": "./bin/quasar"
   },
-  "typings": "types/index.d.ts",
   "files": [
+    "exports",
     "assets",
     "bin",
     "lib",
@@ -15,6 +15,43 @@
     "stricter-tsconfig-preset.json",
     "tsconfig-preset.json"
   ],
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts"
+    },
+    "./package.json": "./package.json",
+    "./bin/quasar": {
+      "node": "./bin/quasar"
+    },
+    "./wrappers": {
+      "types": "./types/app-wrappers.d.ts",
+      "require": "./exports/wrappers/wrappers.js",
+      "node": "./exports/wrappers/wrappers.js",
+      "import": "./exports/wrappers/wrappers.mjs"
+    },
+    "./bex/background": {
+      "types": "./types/bex/entrypoints/background.d.ts",
+      "import": "./exports/bex/background.mjs"
+    },
+    "./bex/content": {
+      "types": "./types/bex/entrypoints/content.d.ts",
+      "import": "./exports/bex/content.mjs"
+    },
+    "./bex/private/bex-bridge": {
+      "types": "./types/bex/bex-bridge.d.ts",
+      "import": "./exports/bex/private/bex-bridge.mjs"
+    },
+    "./tsconfig-preset": {
+      "default": "./tsconfig-preset.json"
+    },
+    "./stricter-tsconfig-preset": {
+      "default": "./stricter-tsconfig-preset.json"
+    },
+    "./lib/testing.js": {
+      "import": "./exports/testing/testing.js"
+    }
+  },
   "keywords": [
     "quasar",
     "vue",
