@@ -2,6 +2,18 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "#q-app": [
+        "node_modules/@quasar/app-vite"
+      ],
+      "#q-app/wrappers": [
+        "node_modules/@quasar/app-vite/types/app-wrappers.d.ts"
+      ],
+      "#q-app/bex/background": [
+        "node_modules/@quasar/app-vite/types/bex/entrypoints/background.d.ts"
+      ],
+      "#q-app/bex/content": [
+        "node_modules/@quasar/app-vite/types/bex/entrypoints/content.d.ts"
+      ],
       "src/*": [
         "src/*"
       ],
@@ -25,9 +37,6 @@
       ],
       "stores/*": [
         "src/stores/*"
-      ],
-      "vue$": [
-        "node_modules/vue/dist/vue.runtime.esm-bundler.js"
       ]
     }
   },

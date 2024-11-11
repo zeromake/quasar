@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "rootDir": ".",
     "jsx": "preserve",
     "allowJs": true,
     "target": "esnext",

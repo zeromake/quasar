@@ -16,6 +16,7 @@
     "stricter-tsconfig-preset.json",
     "tsconfig-preset.json"
   ],
+  "types": "./types/index.d.ts",
   "exports": {
     ".": {
       "types": "./types/index.d.ts"
