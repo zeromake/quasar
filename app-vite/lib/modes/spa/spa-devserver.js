@@ -18,6 +18,7 @@ export class QuasarModeDevserver extends AppDevserver {
   async #runVite (quasarConf, urlDiffers) {
     if (this.#server !== null) {
       await this.#server.close()
+      this.#server = null
     }
 
     const viteConfig = await quasarSpaConfig.vite(quasarConf)

@@ -80,7 +80,7 @@ export const quasarSsrConfig = {
       },
       ssr: {
         // we don't externalize ourselves because of
-        // the possible imports of '#q-app/wrappers'/'@quasar/app-vite/wrappers'
+        // the possible imports of '#q-app/wrappers' / '@quasar/app-vite/wrappers'
         noExternal: [ cliPkg.name ]
       },
       build: {

@@ -49,6 +49,7 @@ export class QuasarModeDevserver extends AppDevserver {
   async #runVite (quasarConf) {
     if (this.#server !== null) {
       await this.#server.close()
+      this.#server = null
     }
 
     const viteConfig = await quasarCordovaConfig.vite(quasarConf)

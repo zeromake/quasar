@@ -57,6 +57,8 @@ if (argv.help) {
                         [darwin|win32|linux|mas|all]
                       - Electron with "electron-builder" bundler (default: yours)
                         [darwin|mac|win32|win|linux|all]
+                      - Bex
+                        [chrome|firefox]
     --publish, -P   Also trigger publishing hooks (if any are specified)
                       - Has special meaning when building with Electron mode and using
                         electron-builder as bundler

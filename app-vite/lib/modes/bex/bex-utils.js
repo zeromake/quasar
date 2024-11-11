@@ -19,7 +19,7 @@ export function createManifest (quasarConf) {
     return { err }
   }
 
-  json = merge({}, json.all, json[ quasarConf.ctx.targetName ])
+  json = merge({}, json.all || {}, json[ quasarConf.ctx.targetName ] || {})
 
   if (json.manifest_version === void 0) {
     warn('The BEX manifest requires a "manifest_version" prop, which is currently missing.')

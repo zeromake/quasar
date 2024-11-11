@@ -23,13 +23,13 @@ export class QuasarModeDevserver extends AppDevserver {
       quasarConf.build.distDir
     ])
 
-    this.registerDiff('bex-manifest', quasarConf => [
+    this.registerDiff('bexManifest', quasarConf => [
       quasarConf.sourceFiles.bexManifestFile,
       quasarConf.bex.extendBexManifestJson,
       quasarConf.build.distDir
     ])
 
-    this.registerDiff('bex-scripts', (quasarConf, diffMap) => [
+    this.registerDiff('bexScripts', (quasarConf, diffMap) => [
       quasarConf.build.distDir,
       quasarConf.devServer.port,
 
@@ -48,11 +48,11 @@ export class QuasarModeDevserver extends AppDevserver {
       return queue(() => this.#stopWatchers(quasarConf))
     }
 
-    if (diff('bex-manifest', quasarConf)) {
+    if (diff('bexManifest', quasarConf)) {
       return queue(() => this.#compileBexManifest(quasarConf, queue))
     }
 
-    if (diff('bex-scripts', quasarConf)) {
+    if (diff('bexScripts', quasarConf)) {
       return queue(() => this.#compileBexScripts(quasarConf))
     }
 
