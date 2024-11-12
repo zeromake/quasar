@@ -14,12 +14,12 @@ Compatible with:
 # Development
 
 ```bash
-$ pnpm i # install the dependencies
+$ <%= packageManager?.name ?? 'pnpm' %> i # install the dependencies
 
-$ pnpm build # build the app-extension. Run this after making any change in ./app-extension
+$ <%= packageManager?.name ?? 'pnpm' %> build # build the app-extension. Run this after making any change in ./app-extension
 
-$ pnpm dev:vite # start the app-vite playground
-$ pnpm dev:webpack # start the app-webpack playground
+$ <%= packageManager?.name ?? 'pnpm' %> dev:vite # start the app-vite playground
+$ <%= packageManager?.name ?? 'pnpm' %> dev:webpack # start the app-webpack playground
 ```
 
 For more development-related explanation, see:
