@@ -1,5 +1,6 @@
 import { quasar as quasarVitePlugin } from '@quasar/vite-plugin'
 import vueVitePlugin from '@vitejs/plugin-vue'
+import { mergeConfig } from 'vite'
 import { merge } from 'webpack-merge'
 
 import { cliPkg } from './utils/cli-runtime.js'
@@ -243,7 +244,10 @@ export function extendViteConfig (viteConf, quasarConf, invokeParams) {
   }
 
   if (typeof quasarConf.build.extendViteConf === 'function') {
-    quasarConf.build.extendViteConf(viteConf, opts)
+    const overrides = quasarConf.build.extendViteConf(viteConf, opts)
+    if (overrides) {
+      viteConf = mergeConfig(viteConf, overrides)
+    }
   }
 
   const { appExt } = quasarConf.ctx

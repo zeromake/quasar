@@ -15,6 +15,7 @@ All other docs pages will refer to the old @quasar/app-vite version (v1) specs. 
 :::
 
 ### A note to App Extensions owners
+
 You might want to release new versions of your Quasar App Extensions with support for the new @quasar/app-vite. If you are not touching the quasar.config configuration, then it will be as easy as just changing the following:
 
 ```diff
@@ -26,6 +27,7 @@ api.compatibleWith(
 ```
 
 ### Notable breaking changes
+
 * Minimum Node.js version is now 18 (mainly due to Vite 6)
 * We have shifted towards an ESM style for the whole Quasar project folder, so many default project files now require ESM code (although using `.cjs` as an extension for these files is supported, but you will most likely need to rename the extension should you not wish to change anything). One example is the `/quasar.config.js` file which now it's assumed to be ESM too (so change from `.js` to `.cjs` should you still want a CommonJs file).
 * The "test" cmd was removed due to latest updates for @quasar/testing-* packages. See [here](https://testing.quasar.dev/packages/testing/)
@@ -38,6 +40,7 @@ api.compatibleWith(
 * **We will detail more breaking changes for each of the Quasar modes below**.
 
 ### Highlights on what's new
+
 Some of the work below has already been backported to the old @quasar/app-vite v1, but posting here for reader's awareness.
 
 * feat(app-vite): upgrade to Vite 6
@@ -76,6 +79,7 @@ Some of the work below has already been backported to the old @quasar/app-vite v
 * feat(app-vite): extend build > vitePlugins form (additional { server?: boolean, client?: boolean } param
 * feat+refactor(app-vite): BEX -> Completely rewrote & redesigned the Quasar Bridge (with a ton of new features); Automatically infer the background script file & the content script files from the bex manifest itself; Ability to compile other js/ts files as well that you might need to dynamically load/inject; No more 3s delay when opening the popup; No more "dom" script (use content script directly); The bridge is available globally in App (/src) through the $q object or window.QBexBridge
 * feat(app-vite): BEX with HMR (hot module reload) for Chrome
+* feat(app-vite): support returning overrides from build > extendViteConf
 
 ### Beginning of the upgrade process
 
