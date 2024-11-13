@@ -191,11 +191,7 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
 
   async #runWebpack (quasarConf, urlDiffers) {
     if (this.#closeWebserver !== void 0) {
-      for (const fn of this.#webpackWatcherList) {
-        await fn()
-      }
-
-      this.#webpackWatcherList = []
+      await this.clearWatcherList(this.#webpackWatcherList, () => { this.#webpackWatcherList = [] })
       await this.#closeWebserver()
     }
 

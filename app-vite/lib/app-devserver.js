@@ -124,6 +124,15 @@ export class AppDevserver extends AppTool {
     return false
   }
 
+  async clearWatcherList (watcherList, clearFn) {
+    const list = watcherList.slice()
+    clearFn()
+
+    for (const watcher of list) {
+      await watcher.close()
+    }
+  }
+
   printBanner (quasarConf) {
     printDevRunningBanner(quasarConf)
   }

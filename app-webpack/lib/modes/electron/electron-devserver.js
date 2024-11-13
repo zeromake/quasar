@@ -89,9 +89,7 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
   }
 
   async #runElectronFiles (quasarConf) {
-    while (this.#watcherList.length !== 0) {
-      await this.#watcherList.pop().close()
-    }
+    await this.clearWatcherList(this.#watcherList, () => { this.#watcherList = [] })
 
     let isReady = false
 

@@ -9,9 +9,9 @@ import { quasarBexConfig } from './bex-config.js'
 import { createManifest, copyBexAssets } from './bex-utils.js'
 
 export class QuasarModeDevserver extends AppDevserver {
-  #viteWatchers = []
+  #viteWatcherList = []
   #manifestWatcher = null
-  #scriptWatchers = []
+  #scriptWatcherList = []
 
   #viteServer = null
   #scriptList = []
@@ -62,18 +62,13 @@ export class QuasarModeDevserver extends AppDevserver {
   }
 
   async #stopWatchers (quasarConf) {
-    while (this.#viteWatchers.length !== 0) {
-      await this.#viteWatchers.pop().close()
-    }
-
     if (this.#manifestWatcher !== null) {
       this.#manifestWatcher.close()
       this.#manifestWatcher = null
     }
 
-    while (this.#scriptWatchers.length !== 0) {
-      await this.#scriptWatchers.pop().close()
-    }
+    await this.clearWatcherList(this.#viteWatcherList, () => { this.#viteWatcherList = [] })
+    await this.clearWatcherList(this.#scriptWatcherList, () => { this.#scriptWatcherList = [] })
 
     this.cleanArtifacts(quasarConf.build.distDir)
   }
@@ -115,9 +110,7 @@ export class QuasarModeDevserver extends AppDevserver {
   }
 
   async #compileBexScripts (quasarConf) {
-    while (this.#scriptWatchers.length !== 0) {
-      await this.#scriptWatchers.pop().close()
-    }
+    await this.clearWatcherList(this.#scriptWatcherList, () => { this.#scriptWatcherList = [] })
 
     const onRebuild = () => {
       this.printBanner(quasarConf)
@@ -128,20 +121,18 @@ export class QuasarModeDevserver extends AppDevserver {
       const contentConfig = await quasarBexConfig.bexScript(quasarConf, entry)
 
       await this.watchWithEsbuild(`Bex Script (${ entry.name })`, contentConfig, onRebuild)
-        .then(esbuildCtx => { this.#scriptWatchers.push({ close: esbuildCtx.dispose }) })
+        .then(esbuildCtx => { this.#scriptWatcherList.push({ close: esbuildCtx.dispose }) })
     }
   }
 
   async #runVite (quasarConf, queue) {
-    while (this.#viteWatchers.length !== 0) {
-      await this.#viteWatchers.pop().close()
-    }
+    await this.clearWatcherList(this.#viteWatcherList, () => { this.#viteWatcherList = [] })
 
     if (this.ctx.target.firefox) {
       const viteConfig = await quasarBexConfig.vite(quasarConf)
       await this.buildWithVite('BEX UI', viteConfig)
 
-      this.#viteWatchers.push(
+      this.#viteWatcherList.push(
         this.#getAppSourceWatcher(quasarConf, viteConfig, queue),
         this.#getPublicDirWatcher(quasarConf)
       )
@@ -152,7 +143,7 @@ export class QuasarModeDevserver extends AppDevserver {
 
       await this.#viteServer.listen()
 
-      this.#viteWatchers.push(
+      this.#viteWatcherList.push(
         {
           close: () => {
             const server = this.#viteServer
@@ -165,7 +156,7 @@ export class QuasarModeDevserver extends AppDevserver {
       )
     }
 
-    this.#viteWatchers.push(
+    this.#viteWatcherList.push(
       this.#getBexAssetsDirWatcher(quasarConf)
     )
 

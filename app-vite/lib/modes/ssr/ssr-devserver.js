@@ -169,9 +169,7 @@ export class QuasarModeDevserver extends AppDevserver {
   }
 
   async #runVite (quasarConf, urlDiffers) {
-    while (this.#viteWatcherList.length !== 0) {
-      await this.#viteWatcherList.pop().close()
-    }
+    await this.clearWatcherList(this.#viteWatcherList, () => { this.#viteWatcherList = [] })
 
     if (renderSSRError === null) {
       const { default: render } = await import('@quasar/render-ssr-error')
@@ -279,7 +277,7 @@ export class QuasarModeDevserver extends AppDevserver {
   }
 
   async #bootWebserver (quasarConf) {
-    const done = progress(`Booting Webserver...`)
+    const done = progress('Booting Webserver...')
 
     if (this.#webserver !== null) {
       await this.#webserver.close()

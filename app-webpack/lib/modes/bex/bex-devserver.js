@@ -12,9 +12,9 @@ const { createManifest, copyBexAssets } = require('./bex-utils.js')
 const reloadPayload = JSON.stringify({ type: 'custom', event: 'qbex:hmr:reload' })
 
 module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevserver {
-  #webpackWatchers = []
+  #webpackWatcherList = []
   #manifestWatcher = null
-  #scriptWatchers = []
+  #scriptWatcherList = []
 
   #webpackServer = null
   #scriptList = []
@@ -65,18 +65,13 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
   }
 
   async #stopWatchers (quasarConf) {
-    while (this.#webpackWatchers.length !== 0) {
-      await this.#webpackWatchers.pop().close()
-    }
-
     if (this.#manifestWatcher !== null) {
       this.#manifestWatcher.close()
       this.#manifestWatcher = null
     }
 
-    while (this.#scriptWatchers.length !== 0) {
-      await this.#scriptWatchers.pop().close()
-    }
+    await this.clearWatcherList(this.#webpackWatcherList, () => { this.#webpackWatcherList = [] })
+    await this.clearWatcherList(this.#scriptWatcherList, () => { this.#scriptWatcherList = [] })
 
     this.cleanArtifacts(quasarConf.build.distDir)
   }
@@ -118,9 +113,7 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
   }
 
   async #compileBexScripts (quasarConf) {
-    while (this.#scriptWatchers.length !== 0) {
-      await this.#scriptWatchers.pop().close()
-    }
+    await this.clearWatcherList(this.#scriptWatcherList, () => { this.#scriptWatcherList = [] })
 
     const onRebuild = () => {
       this.printBanner(quasarConf)
@@ -131,7 +124,7 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
       const contentConfig = await quasarBexConfig.bexScript(quasarConf, entry)
 
       await this.watchWithEsbuild(`Bex Script (${ entry.name })`, contentConfig, onRebuild)
-        .then(esbuildCtx => { this.#scriptWatchers.push({ close: esbuildCtx.dispose }) })
+        .then(esbuildCtx => { this.#scriptWatcherList.push({ close: esbuildCtx.dispose }) })
     }
   }
 
@@ -142,15 +135,13 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
   }
 
   async #runWebpack (quasarConf) {
-    while (this.#webpackWatchers.length !== 0) {
-      await this.#webpackWatchers.pop().close()
-    }
+    await this.clearWatcherList(this.#webpackWatcherList, () => { this.#webpackWatcherList = [] })
 
     const webpackConf = await quasarBexConfig.webpack(quasarConf)
 
     let started = false
 
-    this.#webpackWatchers.push(
+    this.#webpackWatcherList.push(
       this.#getBexAssetsDirWatcher(quasarConf)
     )
 
@@ -173,7 +164,7 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
       this.#webpackServer = new WebpackDevServer(quasarConf.devServer, compiler)
       this.#webpackServer.start()
 
-      this.#webpackWatchers.push(
+      this.#webpackWatcherList.push(
         {
           close: () => {
             const server = this.#webpackServer
@@ -184,7 +175,7 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
       )
 
       if (this.ctx.target.firefox) {
-        this.#webpackWatchers.push(
+        this.#webpackWatcherList.push(
           this.#getAppSourceWatcher(quasarConf, viteConfig, queue),
           this.#getPublicDirWatcher(quasarConf)
         )
