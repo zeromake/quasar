@@ -143,17 +143,13 @@ export class QuasarModeDevserver extends AppDevserver {
 
       await this.#viteServer.listen()
 
-      this.#viteWatcherList.push(
-        {
-          close: () => {
-            const server = this.#viteServer
-            this.#viteServer = null
-            return server.close()
-          }
-        },
-
-        this.#getIndexHtmlWatcher(quasarConf, this.#viteServer)
-      )
+      this.#viteWatcherList.push({
+        close: () => {
+          const server = this.#viteServer
+          this.#viteServer = null
+          return server.close()
+        }
+      })
     }
 
     this.#viteWatcherList.push(
@@ -161,26 +157,6 @@ export class QuasarModeDevserver extends AppDevserver {
     )
 
     this.printBanner(quasarConf)
-  }
-
-  // chrome only
-  #getIndexHtmlWatcher (quasarConf, viteServer) {
-    fse.ensureDirSync(join(quasarConf.build.distDir, 'www'))
-
-    const templatePath = this.ctx.appPaths.resolve.app('index.html')
-    const htmlPath = join(quasarConf.build.distDir, 'www/index.html')
-
-    const updateTemplate = () => {
-      const template = fse.readFileSync(templatePath, 'utf-8')
-      viteServer.transformIndexHtml('/', template).then(html => {
-        fse.writeFileSync(htmlPath, html, 'utf-8')
-      })
-    }
-
-    const htmlWatcher = chokidar.watch(templatePath).on('change', updateTemplate)
-
-    updateTemplate()
-    return htmlWatcher
   }
 
   // chrome & firefox
