@@ -1,3 +1,4 @@
+import { join } from 'node:path'
 import fse from 'fs-extra'
 import debounce from 'lodash/debounce.js'
 import chokidar from 'chokidar'
@@ -15,8 +16,14 @@ export class QuasarModeDevserver extends AppDevserver {
   #viteServer = null
   #scriptList = []
 
+  #reloadExtension = () => {}
+
   constructor (opts) {
     super(opts)
+
+    this.#reloadExtension = debounce(() => {
+      this.#viteServer?.ws.send({ type: 'custom', event: 'qbex:hmr:reload' })
+    }, 200)
 
     this.registerDiff('distDir', quasarConf => [
       quasarConf.build.distDir
@@ -44,7 +51,7 @@ export class QuasarModeDevserver extends AppDevserver {
     const { diff, queue } = super.run(quasarConf, __isRetry)
 
     if (diff('distDir', quasarConf)) {
-      return queue(() => this.#stopWatchers(quasarConf))
+      return queue(() => this.#onDistDir(quasarConf))
     }
 
     if (diff('bexManifest', quasarConf)) {
@@ -60,7 +67,7 @@ export class QuasarModeDevserver extends AppDevserver {
     }
   }
 
-  async #stopWatchers (quasarConf) {
+  async #onDistDir (quasarConf) {
     if (this.#manifestWatcher !== null) {
       this.#manifestWatcher.close()
       this.#manifestWatcher = null
@@ -70,6 +77,12 @@ export class QuasarModeDevserver extends AppDevserver {
     await this.clearWatcherList(this.#scriptWatcherList, () => { this.#scriptWatcherList = [] })
 
     this.cleanArtifacts(quasarConf.build.distDir)
+
+    // ensure we have a stub www/index.html file otherwise the browser
+    // will complain about it not being found
+    const indexHtmlDir = join(quasarConf.build.distDir, 'www')
+    fse.ensureDirSync(indexHtmlDir)
+    fse.writeFileSync(join(indexHtmlDir, 'index.html'), '', 'utf-8')
   }
 
   async #compileBexManifest (quasarConf, queue) {
@@ -80,15 +93,15 @@ export class QuasarModeDevserver extends AppDevserver {
     const { err, scriptList } = createManifest(quasarConf)
     if (err !== void 0) process.exit(1)
 
-    const setScripts = list => {
-      this.#scriptList = list
-      return JSON.stringify(list)
+    const setScripts = jsList => {
+      this.#scriptList = jsList
+      return JSON.stringify(jsList)
     }
 
     let scriptSnapshot = setScripts(scriptList)
     const updateClient = () => {
       this.printBanner(quasarConf)
-      this.#viteServer?.ws.send({ type: 'custom', event: 'qbex:hmr:reload' })
+      this.#reloadExtension()
     }
 
     this.#manifestWatcher = chokidar.watch(quasarConf.metaConf.bexManifestFile, { ignoreInitial: true })
@@ -105,7 +118,7 @@ export class QuasarModeDevserver extends AppDevserver {
 
       scriptSnapshot = newSnapshot
       queue(() => this.#compileBexScripts(quasarConf).then(updateClient))
-    }, 1000))
+    }, 500))
   }
 
   async #compileBexScripts (quasarConf) {
@@ -113,7 +126,7 @@ export class QuasarModeDevserver extends AppDevserver {
 
     const onRebuild = () => {
       this.printBanner(quasarConf)
-      this.#viteServer?.ws.send({ type: 'custom', event: 'qbex:hmr:reload' })
+      this.#reloadExtension()
     }
 
     for (const entry of this.#scriptList) {
@@ -166,7 +179,11 @@ export class QuasarModeDevserver extends AppDevserver {
     const copy = debounce(() => {
       copyBexAssets(quasarConf)
       this.printBanner(quasarConf)
-    }, 1000)
+
+      if (this.ctx.target.chrome) {
+        this.#reloadExtension()
+      }
+    }, 500)
 
     watcher.on('add', copy)
     watcher.on('change', copy)
@@ -188,7 +205,7 @@ export class QuasarModeDevserver extends AppDevserver {
         return this.buildWithVite('BEX UI', viteConfig)
           .then(() => { this.printBanner(quasarConf) })
       })
-    }, 1000)
+    }, 500)
 
     watcher.on('add', rebuild)
     watcher.on('change', rebuild)
@@ -204,7 +221,7 @@ export class QuasarModeDevserver extends AppDevserver {
     const copy = debounce(() => {
       fse.copySync(this.ctx.appPaths.publicDir, quasarConf.build.distDir)
       this.printBanner(quasarConf)
-    }, 1000)
+    }, 500)
 
     watcher.on('add', copy)
     watcher.on('change', copy)
