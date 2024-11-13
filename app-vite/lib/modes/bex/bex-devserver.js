@@ -140,8 +140,9 @@ export class QuasarModeDevserver extends AppDevserver {
   async #runVite (quasarConf, queue) {
     await this.clearWatcherList(this.#viteWatcherList, () => { this.#viteWatcherList = [] })
 
+    const viteConfig = await quasarBexConfig.vite(quasarConf)
+
     if (this.ctx.target.firefox) {
-      const viteConfig = await quasarBexConfig.vite(quasarConf)
       await this.buildWithVite('BEX UI', viteConfig)
 
       this.#viteWatcherList.push(
@@ -150,7 +151,6 @@ export class QuasarModeDevserver extends AppDevserver {
       )
     }
     else {
-      const viteConfig = await quasarBexConfig.vite(quasarConf)
       this.#viteServer = await createServer(viteConfig)
 
       await this.#viteServer.listen()

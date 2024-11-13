@@ -273,6 +273,10 @@ module.exports.QuasarConfigFile = class QuasarConfigFile {
         js: quasarConfigBanner
       },
       define: quasarEsbuildInjectReplacementsDefine,
+      // Define the aliases which have to be usable in the quasar.config file
+      alias: {
+        '#q-app': '@quasar/app-webpack'
+      },
       resolveExtensions: [ appPaths.quasarConfigOutputFormat === 'esm' ? '.mjs' : '.cjs', '.js', '.mts', '.ts', '.json' ],
       entryPoints: [ appPaths.quasarConfigFilename ],
       outfile: this.#tempFile,
@@ -820,6 +824,7 @@ module.exports.QuasarConfigFile = class QuasarConfigFile {
       },
 
       alias: {
+        '#q-app': appPaths.cliDir,
         src: appPaths.srcDir,
         app: appPaths.appDir,
         components: appPaths.resolve.src('components'),
