@@ -175,9 +175,7 @@ const quasarSsrConfig = {
     }
     else {
       cfg.external = [
-        // we filter out ourselves because of the possible
-        // imports of '#q-app/wrappers' / '@quasar/app-webpack/wrappers'
-        ...cfg.external.filter(dep => dep !== cliPkg.name),
+        ...cfg.external,
 
         'vue/server-renderer',
         'vue/compiler-sfc',

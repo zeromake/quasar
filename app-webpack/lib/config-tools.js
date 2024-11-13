@@ -469,7 +469,10 @@ module.exports.createNodeEsbuildConfig = async function createNodeEsbuildConfig 
     ...cliPkgDependencies,
     ...Object.keys(appPkg.dependencies || {}),
     ...Object.keys(appPkg.devDependencies || {})
-  ])
+  ].filter(
+    // the possible imports of '#q-app/wrappers' / '@quasar/app-webpack/wrappers'
+    dep => dep !== cliPkg.name
+  ))
 
   const esbuildConfig = {
     platform: 'node',

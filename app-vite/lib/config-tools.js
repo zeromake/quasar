@@ -271,7 +271,10 @@ export function createNodeEsbuildConfig (quasarConf, { format }) {
     ...cliPkgDependencies,
     ...Object.keys(appPkg.dependencies || {}),
     ...Object.keys(appPkg.devDependencies || {})
-  ])
+  ].filter(
+    // the possible imports of '#q-app/wrappers' / '@quasar/app-vite/wrappers'
+    dep => dep !== cliPkg.name
+  ))
 
   return {
     platform: 'node',
