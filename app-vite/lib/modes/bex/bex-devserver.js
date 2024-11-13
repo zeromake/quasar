@@ -1,4 +1,3 @@
-import { join } from 'node:path'
 import fse from 'fs-extra'
 import debounce from 'lodash/debounce.js'
 import chokidar from 'chokidar'
