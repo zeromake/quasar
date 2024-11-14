@@ -32,7 +32,8 @@ api.compatibleWith(
 * We have shifted towards an ESM style for the whole Quasar project folder, so many default project files now require ESM code (although using `.cjs` as an extension for these files is supported, but you will most likely need to rename the extension should you not wish to change anything). One example is the `/quasar.config.js` file which now it's assumed to be ESM too (so change from `.js` to `.cjs` should you still want a CommonJs file).
 * The "test" cmd was removed due to latest updates for @quasar/testing-* packages. See [here](https://testing.quasar.dev/packages/testing/)
 * The "clean" cmd has been re-designed. Type "quasar clean -h" in your upgraded Quasar project folder for more info.
-* Typescript detection is based on the quasar.config file being in TS form (quasar.config.ts) and tsconfig.json file presence.
+* TypeScript detection is based on the quasar.config file being in TS form (quasar.config.ts) and tsconfig.json file presence.
+* TypeScript `tsconfig.json` presets have been replaced by an auto-generated `.quasar/tsconfig.json` file. This is more flexible and brings new features, more on this below.
 * feat+refactor(app-vite): ability to run multiple modes + dev/build simultaneously (huge effort!)
 * SSR and Electron modes now build in ESM format.
 * New BEX mode with significant new capabilities and ease of use (includes HMR for Chrome now!).
@@ -130,7 +131,7 @@ Preparations:
     })
   ```
 
-  ::: tip Tip on Typescript
+  ::: tip Tip on TypeScript
   You can now write this file in TS too should you wish (rename `/quasar.config.js` to `/quasar.config.ts` -- notice the `.ts` file extension).
   :::
 
@@ -185,28 +186,108 @@ Preparations:
 
   <br>
 
-* If using Typescript, then ensure that your `/tsconfig.json` file looks like this:
+* If using TypeScript: `@quasar/app-vite/tsconfig-preset` has been dropped, so update your `/tsconfig.json` file to extend the new auto-generated `.quasar/tsconfig.json` file. The underlying configuration is different, so also review the new options in the generated file to see if you need to adjust the rest of your `tsconfig.json` file.
 
-  ```json [highlight=6-13]
+  ```json /tsconfig.json
   {
-    "extends": "@quasar/app-vite/tsconfig-preset",
-    "compilerOptions": {
-      "baseUrl": "."
-    },
-    "exclude": [
-      "./dist",
-      "./.quasar",
-      "./node_modules",
-      "./src-capacitor",
-      "./src-cordova",
-      "./quasar.config.*.temporary.compiled*"
-    ]
+    "extends": "./.quasar/tsconfig.json"
   }
   ```
 
-  <br>
+  Here is an example of the generated tsconfig (non-`strict`):
 
-* The feature flag files must be deleted from your project folder. They need to be generated again (will happen automatically).
+  ```json /.quasar/tsconfig.json
+  {
+    "compilerOptions": {
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "target": "esnext",
+      "allowJs": true,
+      "resolveJsonModule": true,
+      "moduleDetection": "force",
+      "isolatedModules": true,
+      "verbatimModuleSyntax": true,
+      "module": "preserve",
+      "noEmit": true,
+      "lib": [
+        "esnext",
+        "dom",
+        "dom.iterable"
+      ],
+      "paths": { ... }
+    },
+    "exclude": [ ... ]
+  }
+  ```
+
+  The most impactful change would be the `verbatimModuleSyntax` option being `true`. So, you need to update all your type-only imports to use the `import type { X }`/`import { type X }` syntax. To understand what this option does and the difference between the two syntaxes, please check [TypeScript Docs](https://www.typescriptlang.org/tsconfig/#verbatimModuleSyntax). Example:
+
+  ```diff /src/router/routes.ts
+  - import { RouteRecordRaw } from 'vue-router'
+  + import type { RouteRecordRaw } from 'vue-router'
+  // or
+  + import { type RouteRecordRaw } from 'vue-router'
+  ```
+
+  Here is another example:
+
+  ```diff
+  - import defaultImport, { namedImport, NamedTypeImport } from 'module'
+  + import defaultImport, { namedImport, type NamedTypeImport } from 'module'
+  ```
+
+  If you don't update your imports accordingly, you will get runtime errors similar to this:
+
+  ```
+  Uncaught SyntaxError: The requested module '/node_modules/.q-cache/dev-spa/vite-spa/deps/vue-router.js?v=4b500381' does not provide an export named 'RouteRecordRaw' (at routes.ts:1:10)
+  ```
+
+  You can use `quasar.config file > build > typescript` to control the TypeScript-related behavior. Add this section into your configuration:
+
+  ```diff /quasar.config.ts
+  build: {
+  +  typescript: {
+  +    strict: true, // (recommended) enables strict settings for TypeScript
+  +    extendTsConfig(tsConfig) {
+  +      // You can use this hook to extend tsConfig dynamically
+  +      // For basic use cases, you can still update the usual tsconfig.json file to override some settings
+  +    },
+  +    vueShim: true, // required when using ESLint with type-checked rules, will generate a shim file for `*.vue` files
+  +  }
+  }
+  ```
+
+  Most of the strict options were already enabled in the previous preset. So,
+  you should be able to set the `strict` option to `true` without facing much trouble. But, if you face any issues, you can either update your code to satisfy the stricter rules or set the "problematic" options to `false` in your `tsconfig.json` file, at least until you can fix them.
+
+  `src/quasar.d.ts` and `src/shims-vue.d.ts` files will now be auto-generated in the `.quasar` folder. So, you must delete those files:
+
+  ```tabs
+  <<| bash rimraf through npx |>>
+  # in project folder root:
+  $ npx rimraf src/quasar.d.ts src/shims-vue.d.ts
+  <<| bash Unix-like (Linux, macOS) |>>
+  # in project folder root:
+  $ rm src/quasar.d.ts src/shims-vue.d.ts
+  <<| bash Windows (CMD) |>>
+  # in project folder root:
+  $ del src\quasar.d.ts src\shims-vue.d.ts
+  <<| bash Windows (PowerShell) |>>
+  # in project folder root:
+  $ Remove-Item src/quasar.d.ts, src/shims-vue.d.ts
+  ```
+
+  If you are using ESLint with type-check rules, enable the `vueShim` option to preserve the previous behavior with the shim file. If your project is working fine without that option, you don't need to enable it.
+
+  ```diff /quasar.config.ts
+  build: {
+    typescript: {
+  +    vueShim: true // required when using ESLint with type-checked rules, will generate a shim file for `*.vue` files
+    }
+  }
+  ```
+
+  The types feature flag files will now be auto-generated in the `.quasar` folder. So, you must delete them:
 
   ```tabs
   <<| bash rimraf through npx |>>
@@ -225,6 +306,24 @@ Preparations:
   # in project folder root:
   $ Remove-Item -Recurse -Filter *-flag.d.ts
   $ quasar build # or dev
+  ```
+
+  Thanks to this change, Capacitor dependencies are now properly linked to the project's TypeScript configuration. That means you won't have to install dependencies twice, once in `/src-capacitor` and once in the root folder. So, you can remove the Capacitor dependencies from the root `package.json` file. From now on, installing Capacitor dependencies only in the `/src-capacitor` folder will be enough.
+
+  Properly running typechecking and linting requires the `.quasar/tsconfig.json` to be present. The file will be auto-generated when running `quasar dev` or `quasar build` commands. But, as a lightweight alternative, there is a new CLI command `quasar prepare` that will generate the `.quasar/tsconfig.json` file and some types files. It is especially useful for CI/CD pipelines.
+
+  ```bash
+  $ quasar prepare
+  ```
+
+  You can add it as a `postinstall` script to make sure it's run after installing the dependencies. This would be helpful when pulling the project for the first time or when upgrading the Quasar CLI which may have new TypeScript features.
+
+  ```json /package.json
+  {
+    "scripts": {
+      "postinstall": "quasar prepare"
+    }
+  }
   ```
 
   <br>
@@ -270,7 +369,7 @@ Preparations:
 
 We dropped support for our internal linting (quasar.config file > eslint) in favor of the [vite-plugin-checker](https://vite-plugin-checker.netlify.app/) package. We will detail below the changes that you need to make based on if you use TS or not.
 
-#### Typescript projects linting
+#### TypeScript projects linting
 
 ```tabs
 <<| bash Yarn |>>
@@ -293,17 +392,6 @@ $ bun add --dev vite-plugin-checker vue-tsc@2 typescript
 /quasar.config.*.temporary.compiled*
 ```
 
-Create a new file called `tsconfig.vue-tsc.json` in the root of your project folder:
-
-```json /tsconfig.vue-tsc.json
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "skipLibCheck": true
-  }
-}
-```
-
 ```diff /quasar.config file
 - eslint: {
 -   // ...
@@ -312,9 +400,7 @@ Create a new file called `tsconfig.vue-tsc.json` in the root of your project fol
   build: {
     vitePlugins: [
 +    ['vite-plugin-checker', {
-+       vueTsc: {
-+         tsconfigPath: 'tsconfig.vue-tsc.json'
-+       },
++       vueTsc: true,
 +       eslint: {
 +         lintCommand: 'eslint "./**/*.{js,ts,mjs,cjs,vue}"'
 +       }
@@ -323,7 +409,7 @@ Create a new file called `tsconfig.vue-tsc.json` in the root of your project fol
   }
 ```
 
-#### Javascript projects linting
+#### JavaScript projects linting
 
 ```tabs
 <<| bash Yarn |>>
@@ -1259,6 +1345,7 @@ build: {
 ```
 
 ### Other considerations
+
 You might want to upgrade/switch from `@intlify/vite-plugin-vue-i18n` to the newer `@intlify/unplugin-vue-i18n`.
 
 After removing the old package and installing the new one then update your `/quasar.config` file as follows:
@@ -1284,6 +1371,7 @@ export default defineConfig((ctx) => {
 ```
 
 ### The env dotfiles support
+
 Expanding a bit on the env dotfiles support. These files will be detected and used (the order matters):
 
 ```
