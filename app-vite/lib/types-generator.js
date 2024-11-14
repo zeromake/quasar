@@ -1,4 +1,4 @@
-import { isAbsolute, join, relative, resolve } from 'node:path'
+import { isAbsolute, join, relative } from 'node:path'
 import { statSync } from 'node:fs'
 import fse from 'fs-extra'
 
