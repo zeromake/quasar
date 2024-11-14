@@ -41,12 +41,6 @@
       "types": "./types/bex/bex-bridge.d.ts",
       "import": "./exports/bex/private/bex-bridge.js"
     },
-    "./tsconfig-preset": {
-      "default": "./tsconfig-preset.json"
-    },
-    "./stricter-tsconfig-preset": {
-      "default": "./stricter-tsconfig-preset.json"
-    },
     "./lib/testing.js": {
       "import": "./exports/testing/testing.js"
     }
