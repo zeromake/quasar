@@ -824,7 +824,7 @@ module.exports.QuasarConfigFile = class QuasarConfigFile {
       },
 
       alias: {
-        '#q-app': appPaths.cliDir,
+        '#q-app': '@quasar/app-webpack',
         src: appPaths.srcDir,
         app: appPaths.appDir,
         components: appPaths.resolve.src('components'),

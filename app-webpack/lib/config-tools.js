@@ -84,16 +84,7 @@ module.exports.createWebpackChain = async function createWebpackChain (quasarCon
     .merge(resolveModules)
 
   chain.resolve.alias
-    .merge({
-      src: appPaths.srcDir,
-      app: appPaths.appDir,
-      components: appPaths.resolve.src('components'),
-      layouts: appPaths.resolve.src('layouts'),
-      pages: appPaths.resolve.src('pages'),
-      assets: appPaths.resolve.src('assets'),
-      boot: appPaths.resolve.src('boot'),
-      stores: appPaths.resolve.src('stores')
-    })
+    .merge(quasarConf.build.alias)
 
   const extrasPath = cacheProxy.getModule('extrasPath')
   if (extrasPath) {
@@ -518,7 +509,9 @@ module.exports.createBrowserEsbuildConfig = async function createBrowserEsbuildC
     bundle: true,
     sourcemap: quasarConf.metaConf.debugging === true ? 'inline' : false,
     minify: quasarConf.build.minify !== false,
-    alias: quasarConf.build.alias,
+    alias: {
+      ...quasarConf.build.alias
+    },
     define: getBuildSystemDefine({
       buildEnv: quasarConf.build.env,
       buildRawDefine: quasarConf.build.rawDefine,
