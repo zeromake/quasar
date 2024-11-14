@@ -70,7 +70,7 @@ export class AppDevserver extends AppTool {
     }
 
     if (this.#diff('types', quasarConf)) {
-      this.#queue(this.#runId, quasarConf, () => generateTypes(quasarConf))
+      generateTypes(quasarConf)
     }
 
     if (__isRetry !== true) {

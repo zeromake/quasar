@@ -96,7 +96,7 @@ async function run () {
   })
   await quasarConfFile.init()
   const quasarConf = await quasarConfFile.read()
-  await generateTypes(quasarConf)
+  generateTypes(quasarConf)
 }
 
 async function displayModes () {

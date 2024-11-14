@@ -56,7 +56,7 @@ await quasarConfFile.init()
 const quasarConf = await quasarConfFile.read()
 
 const { generateTypes } = await import('../types-generator.js')
-await generateTypes(quasarConf)
+generateTypes(quasarConf)
 
 log('Generated tsconfig.json and types files in .quasar directory')
 log('The app is now prepared for linting, type-checking, IDE integration, etc.')

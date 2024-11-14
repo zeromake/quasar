@@ -149,7 +149,7 @@ const entryFiles = new EntryFilesGenerator(ctx)
 entryFiles.generate(quasarConf)
 
 const { generateTypes } = await import('../types-generator.js')
-await generateTypes(quasarConf)
+generateTypes(quasarConf)
 
 if (typeof quasarConf.build.beforeBuild === 'function') {
   await quasarConf.build.beforeBuild({ quasarConf })
