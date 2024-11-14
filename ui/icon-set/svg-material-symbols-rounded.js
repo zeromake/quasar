@@ -61,7 +61,7 @@ import {
   symRoundedKeyboardArrowLeft,
   symRoundedKeyboardArrowRight,
   symRoundedLastPage,
-  symRoundedGrade,
+  symRoundedStar,
   symRoundedEdit,
   symRoundedPlayArrow,
   symRoundedAddBox,
@@ -165,7 +165,7 @@ export default {
     last: symRoundedLastPage
   },
   rating: {
-    icon: symRoundedGrade
+    icon: symRoundedStar
   },
   stepper: {
     done: symRoundedCheck,
