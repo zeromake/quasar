@@ -34,15 +34,12 @@ const qAppPaths = (() => {
 // better autocomplete and type checking in the IDE.
 export function generateTypes (quasarConf) {
   const { appPaths } = quasarConf.ctx
-
   const tsConfigDir = appPaths.resolve.app('.quasar')
-  const resolvePath = _path => join(tsConfigDir, _path)
 
   const fsUtils = {
     tsConfigDir,
-    resolvePath,
     writeFileSync (filename, content) {
-      const file = resolvePath(filename)
+      const file = join(tsConfigDir, filename)
 
       // Avoid unnecessary writes which will trigger esbuild
       // to recompile & apply quasar.config file changes
@@ -72,7 +69,7 @@ function generateTsConfig (quasarConf, fsUtils) {
     const relativePath = relative(
       fsUtils.tsConfigDir,
       isAbsolute(_path) === false ? join('node_modules', _path) : _path
-    )
+    ).replaceAll('\\', '/')
 
     if (relativePath.length === 0) return '.'
     if (relativePath.startsWith('./') === false) return ('./' + relativePath)
