@@ -56,7 +56,7 @@ export const quasarElectronConfig = {
     const { appPaths } = quasarConf.ctx
     const ext = quasarConf.metaConf.packageTypeBasedExtension
 
-    cfg.entryPoints = [ quasarConf.sourceFiles.electronMain ]
+    cfg.entryPoints = [ appPaths.resolve.app(quasarConf.sourceFiles.electronMain) ]
     cfg.outfile = quasarConf.ctx.dev === true
       ? appPaths.resolve.entry(`electron-main.${ ext }`)
       : join(quasarConf.build.distDir, `UnPackaged/electron-main.${ ext }`)
