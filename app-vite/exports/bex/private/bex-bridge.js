@@ -181,6 +181,7 @@ export class BexBridge {
     }
 
     this.portMap.background.disconnect()
+    delete this.portMap.background
     this.isConnected = false
     return Promise.resolve()
   }

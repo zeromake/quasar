@@ -101,11 +101,11 @@ export class BexBridge {
         port.onMessage.removeListener(onPacket)
         this.#cleanupPort(port.name)
         this.log(`Closed connection with ${ port.name }.`)
-        this.#updatePortList({ removed: port.name })
+        this.#onPortChange({ removed: port.name })
       })
 
       this.log(`Opened connection with ${ port.name }.`)
-      this.#updatePortList({ added: port.name })
+      this.#onPortChange({ added: port.name })
     })
   }
 
@@ -368,9 +368,10 @@ export class BexBridge {
   }
 
   /**
+   * Should be used only by the background script
    * @param {{ added?: string } | { removed?: string }} reason
    */
-  #updatePortList (reason) {
+  #onPortChange (reason) {
     this.portList = Object.keys(this.portMap)
     const list = [ 'background', ...this.portList ]
 
