@@ -51,7 +51,7 @@ export default defineConfig((<% if (preset.i18n) { %>ctx<% } else { %>/* ctx */<
       typescript: {
         strict: true,
         vueShim: true
-        // extendTsConfig(tsConfig) {}
+        // extendTsConfig (tsConfig) {}
       },
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'

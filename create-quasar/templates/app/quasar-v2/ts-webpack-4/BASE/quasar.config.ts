@@ -71,6 +71,12 @@ export default defineConfig((/* ctx */) => {
         node: 'node20'
       },
 
+      typescript: {
+        strict: true,
+        vueShim: true
+        // extendTsConfig (tsConfig) {}
+      },
+
       // rtl: true, // https://quasar.dev/options/rtl-support
       // preloadChunks: true,
       // showProgress: false,
