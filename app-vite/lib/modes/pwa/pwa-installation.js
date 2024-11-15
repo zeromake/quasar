@@ -1,7 +1,7 @@
-import fs from 'node:fs'
 import fse from 'fs-extra'
 
 import { log, warn } from '../../utils/logger.js'
+import { isModeInstalled } from '../modes-utils.js'
 
 const defaultVersion = '^7.0.0'
 
@@ -19,15 +19,11 @@ const pwaDeps = {
   'register-service-worker': '^1.7.2'
 }
 
-export function isModeInstalled (appPaths) {
-  return fs.existsSync(appPaths.pwaDir)
-}
-
 export async function addMode ({
   ctx: { appPaths, cacheProxy },
   silent
 }) {
-  if (isModeInstalled(appPaths)) {
+  if (isModeInstalled(appPaths, 'pwa')) {
     if (silent !== true) {
       warn('PWA support detected already. Aborting.')
     }
@@ -70,7 +66,7 @@ export async function addMode ({
 export async function removeMode ({
   ctx: { appPaths, cacheProxy }
 }) {
-  if (!isModeInstalled(appPaths)) {
+  if (isModeInstalled(appPaths, 'pwa') === false) {
     warn('No PWA support detected. Aborting.')
     return
   }

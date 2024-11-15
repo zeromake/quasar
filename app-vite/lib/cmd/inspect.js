@@ -64,9 +64,9 @@ await displayBanner({ argv, ctx, cmd: argv.cmd })
 
 import { log, fatal } from '../utils/logger.js'
 
-const { isModeInstalled } = await import(`../modes/${ argv.mode }/${ argv.mode }-installation.js`)
+import { isModeInstalled } from '../modes/modes-utils.js'
 
-if (isModeInstalled(ctx.appPaths) !== true) {
+if (isModeInstalled(ctx.appPaths, argv.mode) !== true) {
   fatal('Requested mode for inspection is NOT installed.')
 }
 

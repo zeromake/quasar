@@ -45,6 +45,7 @@ import { green, gray } from 'kolorist'
 
 import { getCtx } from '../utils/get-ctx.js'
 import { generateTypes } from '../types-generator.js'
+import { isModeInstalled } from '../modes/modes-utils.js'
 
 async function run () {
   const [ action, mode ] = argv._
@@ -62,10 +63,10 @@ async function run () {
     fatal(`Unknown mode "${ mode }" to ${ action }`)
   }
 
-  const { isModeInstalled, addMode, removeMode } = await import(`../modes/${ mode }/${ mode }-installation.js`)
+  const { addMode, removeMode } = await import(`../modes/${ mode }/${ mode }-installation.js`)
   const actionMap = { add: addMode, remove: removeMode }
 
-  if (action === 'remove' && argv.yes !== true && isModeInstalled(ctx.appPaths)) {
+  if (action === 'remove' && argv.yes !== true && isModeInstalled(ctx.appPaths, mode)) {
     console.log()
 
     const { default: inquirer } = await import('inquirer')
@@ -106,10 +107,9 @@ async function displayModes () {
 
   const info = []
   for (const mode of [ 'pwa', 'ssr', 'cordova', 'capacitor', 'electron', 'bex' ]) {
-    const { isModeInstalled } = await import(`../modes/${ mode }/${ mode }-installation.js`)
     info.push([
       `Mode ${ mode.toUpperCase() }`,
-      isModeInstalled(ctx.appPaths) ? green('yes') : gray('no')
+      isModeInstalled(ctx.appPaths, mode) ? green('yes') : gray('no')
     ])
   }
 

@@ -1,17 +1,13 @@
-import fs from 'node:fs'
 import fse from 'fs-extra'
 
 import { log, warn } from '../../utils/logger.js'
-
-export function isModeInstalled (appPaths) {
-  return fs.existsSync(appPaths.bexDir)
-}
+import { isModeInstalled } from '../modes-utils.js'
 
 export async function addMode ({
   ctx: { appPaths, cacheProxy },
   silent
 }) {
-  if (isModeInstalled(appPaths)) {
+  if (isModeInstalled(appPaths, 'bex')) {
     if (silent !== true) {
       warn('Browser Extension support detected already. Aborting.')
     }
@@ -30,10 +26,10 @@ export async function addMode ({
   log('Browser Extension support was added')
 }
 
-export async function removeMode ({
+export function removeMode ({
   ctx: { appPaths }
 }) {
-  if (!isModeInstalled(appPaths)) {
+  if (isModeInstalled(appPaths, 'bex') === false) {
     warn('No Browser Extension support detected. Aborting.')
     return
   }

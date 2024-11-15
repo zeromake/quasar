@@ -1,21 +1,17 @@
-import fs from 'node:fs'
 import fse from 'fs-extra'
 
 import { log, warn } from '../../utils/logger.js'
+import { isModeInstalled } from '../modes-utils.js'
 
 const electronDeps = {
   electron: 'latest'
-}
-
-export function isModeInstalled (appPaths) {
-  return fs.existsSync(appPaths.electronDir)
 }
 
 export async function addMode ({
   ctx: { appPaths, cacheProxy },
   silent
 }) {
-  if (isModeInstalled(appPaths)) {
+  if (isModeInstalled(appPaths, 'electron')) {
     if (silent !== true) {
       warn('Electron support detected already. Aborting.')
     }
@@ -48,7 +44,7 @@ export async function addMode ({
 export async function removeMode ({
   ctx: { appPaths, cacheProxy }
 }) {
-  if (!isModeInstalled(appPaths)) {
+  if (isModeInstalled(appPaths, 'electron') === false) {
     warn('No Electron support detected. Aborting.')
     return
   }
