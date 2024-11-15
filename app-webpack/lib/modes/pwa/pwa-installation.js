@@ -2,7 +2,7 @@ const fs = require('node:fs')
 const fse = require('fs-extra')
 
 const { log, warn } = require('../../utils/logger.js')
-const { generateTypesFeatureFlag } = require('../../utils/types-feature-flags.js')
+const { isModeInstalled } = require('../modes-utils.js')
 
 const pwaDevDeps = {
   'workbox-webpack-plugin': '^7.0.0'
@@ -12,16 +12,11 @@ const pwaDeps = {
   'register-service-worker': '^1.7.2'
 }
 
-function isModeInstalled (appPaths) {
-  return fs.existsSync(appPaths.pwaDir)
-}
-module.exports.isModeInstalled = isModeInstalled
-
 module.exports.addMode = function addMode ({
   ctx: { appPaths, cacheProxy },
   silent
 }) {
-  if (isModeInstalled(appPaths)) {
+  if (isModeInstalled(appPaths, 'pwa')) {
     if (silent !== true) {
       warn('PWA support detected already. Aborting.')
     }
@@ -51,8 +46,6 @@ module.exports.addMode = function addMode ({
     hasEslint === true ? { filter: src => !src.endsWith('/.eslintrc.cjs') } : void 0
   )
 
-  generateTypesFeatureFlag('pwa', appPaths)
-
   log('Copying PWA icons to /public/icons/ (if they are not already there)...')
   fse.copySync(
     appPaths.resolve.cli('templates/pwa-icons'),
@@ -66,7 +59,7 @@ module.exports.addMode = function addMode ({
 module.exports.removeMode = function removeMode ({
   ctx: { appPaths, cacheProxy }
 }) {
-  if (!isModeInstalled(appPaths)) {
+  if (isModeInstalled(appPaths, 'pwa') === false) {
     warn('No PWA support detected. Aborting.')
     return
   }

@@ -2,18 +2,13 @@ const fs = require('node:fs')
 const fse = require('fs-extra')
 
 const { log, warn } = require('../../utils/logger.js')
-const { generateTypesFeatureFlag } = require('../../utils/types-feature-flags.js')
-
-function isModeInstalled (appPaths) {
-  return fs.existsSync(appPaths.ssrDir)
-}
-module.exports.isModeInstalled = isModeInstalled
+const { isModeInstalled } = require('../modes-utils.js')
 
 module.exports.addMode = function addMode ({
   ctx: { appPaths, cacheProxy },
   silent
 }) {
-  if (isModeInstalled(appPaths)) {
+  if (isModeInstalled(appPaths, 'ssr')) {
     if (silent !== true) {
       warn('SSR support detected already. Aborting.')
     }
@@ -28,15 +23,13 @@ module.exports.addMode = function addMode ({
     appPaths.ssrDir
   )
 
-  generateTypesFeatureFlag('ssr', appPaths)
-
   log('SSR support was added')
 }
 
 module.exports.removeMode = function removeMode ({
   ctx: { appPaths }
 }) {
-  if (!isModeInstalled(appPaths)) {
+  if (isModeInstalled(appPaths, 'ssr') === false) {
     warn('No SSR support detected. Aborting.')
     return
   }

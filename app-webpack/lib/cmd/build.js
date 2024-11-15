@@ -135,9 +135,6 @@ async function runBuild () {
 
   const quasarConf = await quasarConfFile.read()
 
-  const { ensureTypesFeatureFlags } = require('../utils/types-feature-flags.js')
-  ensureTypesFeatureFlags(quasarConf)
-
   const { QuasarModeBuilder } = require(`../modes/${ argv.mode }/${ argv.mode }-builder.js`)
   const appBuilder = new QuasarModeBuilder({ argv, quasarConf })
 
@@ -148,6 +145,9 @@ async function runBuild () {
   const { EntryFilesGenerator } = require('../entry-files-generator.js')
   const entryFiles = new EntryFilesGenerator(ctx)
   entryFiles.generate(quasarConf)
+
+  const { generateTypes } = require('../types-generator.js')
+  generateTypes(quasarConf)
 
   if (typeof quasarConf.build.beforeBuild === 'function') {
     await quasarConf.build.beforeBuild({ quasarConf })

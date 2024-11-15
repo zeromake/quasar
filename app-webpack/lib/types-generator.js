@@ -1,15 +1,15 @@
-import { isAbsolute, join, relative } from 'node:path'
-import { statSync } from 'node:fs'
-import fse from 'fs-extra'
+const { isAbsolute, join, relative } = require('node:path')
+const { statSync } = require('node:fs')
+const fse = require('fs-extra')
 
-import { cliPkg } from './utils/cli-runtime.js'
-import { isModeInstalled } from './modes/modes-utils.js'
+const { cliPkg } = require('./utils/cli-runtime.js')
+const { isModeInstalled } = require('./modes/modes-utils.js')
 
 const { name: cliPackageName } = cliPkg
 
 // We generate all the files for JS projects as well, because they provide
 // better autocomplete and type checking in the IDE.
-export function generateTypes (quasarConf) {
+module.exports.generateTypes = function generateTypes (quasarConf) {
   const { appPaths } = quasarConf.ctx
 
   const tsConfigDir = appPaths.resolve.app('.quasar')

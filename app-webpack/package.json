@@ -11,9 +11,7 @@
     "bin",
     "lib",
     "templates",
-    "types",
-    "stricter-tsconfig-preset.json",
-    "tsconfig-preset.json"
+    "types"
   ],
   "types": "./types/index.d.ts",
   "exports": {
@@ -42,14 +40,9 @@
       "types": "./types/bex/bex-bridge.d.ts",
       "import": "./exports/bex/private/bex-bridge.mjs"
     },
-    "./tsconfig-preset": {
-      "default": "./tsconfig-preset.json"
-    },
-    "./stricter-tsconfig-preset": {
-      "default": "./stricter-tsconfig-preset.json"
-    },
     "./lib/testing.js": {
-      "import": "./exports/testing/testing.js"
+      "require": "./exports/testing/testing.js",
+      "node": "./exports/testing/testing.js"
     }
   },
   "keywords": [
@@ -170,6 +163,7 @@
     "eslint": "^8.57.0",
     "pinia": "^2.0.0",
     "quasar": "^2.16.0",
+    "typescript": ">= 5.4",
     "vue": "^3.2.29",
     "vue-router": "^4.0.12",
     "vuex": "^4.0.0",

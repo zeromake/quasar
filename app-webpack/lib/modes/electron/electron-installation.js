@@ -2,22 +2,17 @@ const fs = require('node:fs')
 const fse = require('fs-extra')
 
 const { log, warn } = require('../../utils/logger.js')
-const { generateTypesFeatureFlag } = require('../../utils/types-feature-flags.js')
+const { isModeInstalled } = require('../modes-utils.js')
 
 const electronDeps = {
   electron: 'latest'
 }
 
-function isModeInstalled (appPaths) {
-  return fs.existsSync(appPaths.electronDir)
-}
-module.exports.isModeInstalled = isModeInstalled
-
 module.exports.addMode = function addMode ({
   ctx: { appPaths, cacheProxy },
   silent
 }) {
-  if (isModeInstalled(appPaths)) {
+  if (isModeInstalled(appPaths, 'electron')) {
     if (silent !== true) {
       warn('Electron support detected already. Aborting.')
     }
@@ -38,8 +33,6 @@ module.exports.addMode = function addMode ({
     appPaths.electronDir
   )
 
-  generateTypesFeatureFlag('electron', appPaths)
-
   log('Creating Electron icons folder...')
   fse.copySync(
     appPaths.resolve.cli('templates/electron/icons'),
@@ -52,7 +45,7 @@ module.exports.addMode = function addMode ({
 module.exports.removeMode = function removeMode ({
   ctx: { appPaths, cacheProxy }
 }) {
-  if (!isModeInstalled(appPaths)) {
+  if (isModeInstalled(appPaths, 'electron') === false) {
     warn('No Electron support detected. Aborting.')
     return
   }

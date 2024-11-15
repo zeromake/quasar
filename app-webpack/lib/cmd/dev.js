@@ -157,9 +157,6 @@ async function runDev () {
 
   const quasarConf = await quasarConfFile.read()
 
-  const { ensureTypesFeatureFlags } = require('../utils/types-feature-flags.js')
-  ensureTypesFeatureFlags(quasarConf)
-
   if (quasarConf.metaConf.vueDevtools !== false) {
     await startVueDevtools(ctx, quasarConf.metaConf.vueDevtools.port)
   }

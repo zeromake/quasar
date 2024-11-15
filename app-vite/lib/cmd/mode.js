@@ -49,7 +49,6 @@ import { isModeInstalled } from '../modes/modes-utils.js'
 
 async function run () {
   const [ action, mode ] = argv._
-
   const ctx = getCtx({ mode })
 
   if (![ 'add', 'remove' ].includes(action)) {
@@ -101,11 +100,11 @@ async function run () {
 }
 
 async function displayModes () {
-  const ctx = getCtx()
-
   log('Detecting installed modes...')
 
+  const ctx = getCtx()
   const info = []
+
   for (const mode of [ 'pwa', 'ssr', 'cordova', 'capacitor', 'electron', 'bex' ]) {
     info.push([
       `Mode ${ mode.toUpperCase() }`,

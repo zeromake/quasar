@@ -61,7 +61,7 @@ const quasarElectronConfig = {
     const cfg = await createNodeEsbuildConfig(quasarConf, { compileId: 'node-electron-main', format: 'esm' })
     const { appPaths } = quasarConf.ctx
 
-    cfg.entryPoints = [ quasarConf.sourceFiles.electronMain ]
+    cfg.entryPoints = [ appPaths.resolve.app(quasarConf.sourceFiles.electronMain) ]
     cfg.outfile = quasarConf.ctx.dev === true
       ? appPaths.resolve.entry('electron-main.mjs')
       : join(quasarConf.build.distDir, 'UnPackaged/electron-main.mjs')

@@ -63,8 +63,8 @@ const { displayBanner } = require('../utils/banner.js')
 displayBanner({ argv, ctx, cmd: argv.cmd }).then(async () => {
   const { log, fatal } = require('../utils/logger.js')
 
-  const { isModeInstalled } = require(`../modes/${ argv.mode }/${ argv.mode }-installation.js`)
-  if (isModeInstalled(ctx.appPaths) !== true) {
+  const { isModeInstalled } = require('../modes/modes-utils.js')
+  if (isModeInstalled(ctx.appPaths, argv.mode) !== true) {
     fatal('Requested mode for inspection is NOT installed.')
   }
 

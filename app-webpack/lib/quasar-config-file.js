@@ -283,7 +283,14 @@ module.exports.QuasarConfigFile = class QuasarConfigFile {
       plugins: [
         quasarEsbuildInjectReplacementsPlugin,
         quasarEsbuildVueShimPlugin
-      ]
+      ],
+      logOverride: {
+        // .quasar/tsconfig.json won't be available for the first time executing dev/build/prepare.
+        // So, esbuild will show a warning saying it can't find the `extends` file.
+        // We need to suppress the warning. Otherwise, it will be noisy and cause a temp file to be created.
+        // tsconfig is not really important for the config file itself anyway.
+        'tsconfig.json': 'silent'
+      }
     }
   }
 
@@ -833,6 +840,11 @@ module.exports.QuasarConfigFile = class QuasarConfigFile {
         assets: appPaths.resolve.src('assets'),
         boot: appPaths.resolve.src('boot'),
         stores: appPaths.resolve.src('stores')
+      },
+
+      typescript: {
+        strict: false,
+        vueShim: false
       }
     }, cfg.build)
 
