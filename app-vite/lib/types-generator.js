@@ -5,7 +5,30 @@ import fse from 'fs-extra'
 import { cliPkg } from './utils/cli-runtime.js'
 import { isModeInstalled } from './modes/modes-utils.js'
 
-const { name: cliPackageName } = cliPkg
+const qAppPaths = (() => {
+  const exportsRE = /^\./
+  const dTsRE = /\.d\.ts$/
+
+  const { name: cliPackageName } = cliPkg
+  const localMap = {}
+
+  for (const key in cliPkg.exports) {
+    const localMapKey = key.replace(exportsRE, '#q-app')
+    const value = cliPkg.exports[ key ]
+    if (Object(value) === value) {
+      if (value.types) {
+        localMap[ localMapKey ] = value.types.replace(exportsRE, cliPackageName + '/')
+      }
+    }
+    else if (typeof value === 'string') {
+      if (dTsRE.test(value)) {
+        localMap[ localMapKey ] = value.replace(exportsRE, cliPackageName + '/')
+      }
+    }
+  }
+
+  return localMap
+})()
 
 // We generate all the files for JS projects as well, because they provide
 // better autocomplete and type checking in the IDE.
@@ -61,10 +84,7 @@ function generateTsConfig (quasarConf, fsUtils) {
   // TS aliases doesn't play well with package.json#exports: https://github.com/microsoft/TypeScript/issues/60460
   // So, we had to specify each entry point separately here
   delete aliasMap[ '#q-app' ] // remove the existing one so that all the added ones are listed under each other
-  aliasMap[ '#q-app' ] = join(cliPackageName, 'types/index.d.ts')
-  aliasMap[ '#q-app/wrappers' ] = join(cliPackageName, 'types/app-wrappers.d.ts')
-  aliasMap[ '#q-app/bex/background' ] = join(cliPackageName, 'types/bex/entrypoints/background.d.ts')
-  aliasMap[ '#q-app/bex/content' ] = join(cliPackageName, 'types/bex/entrypoints/content.d.ts')
+  Object.assign(aliasMap, qAppPaths)
 
   if (mode.capacitor) {
     const target = appPaths.resolve.capacitor('node_modules')
