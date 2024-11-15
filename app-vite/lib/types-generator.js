@@ -17,12 +17,17 @@ export function generateTypes (quasarConf) {
   const fsUtils = {
     tsConfigDir,
     resolvePath,
-    writeFileSync: (filename, content) => {
-      fse.writeFileSync(
-        resolvePath(filename),
-        content,
-        'utf-8'
-      )
+    writeFileSync (filename, content) {
+      const file = resolvePath(filename)
+
+      // Avoid unnecessary writes which will trigger esbuild
+      // to recompile & apply quasar.config file changes
+      if (
+        fse.existsSync(file) === false
+        || fse.readFileSync(file, 'utf-8') !== content
+      ) {
+        fse.writeFileSync(file, content, 'utf-8')
+      }
     }
   }
 
