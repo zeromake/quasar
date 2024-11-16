@@ -44,11 +44,6 @@ scope:
       c:
       - l: content.css
         e: CSS file which is auto injected into the consuming webpage via the manifest.json
-    - l: background.js
-      e: Standard background script BEX file (auto injected via manifest.json)
-    - l: dom.js
-      e: JS file which is injected into the DOM with a hook into the BEX communication
-        layer
     - l: icons
       e: Icons of your app for all platforms
       c:
@@ -60,6 +55,8 @@ scope:
         e: Icon file at 48px x 48px
     - l: _locales/
       e: Optional BEX locales files that you might define in manifest
+    - l: background.js
+      e: Standard background script BEX file (auto injected via manifest.json)
     - l: manifest.json
       e: The browser extension manifest file
     - l: my-content-script.js
@@ -67,15 +64,10 @@ scope:
         have multiple scripts)
 ---
 
-## @quasar/app-webpack v4 (beta)
-
-::: warning CLI is currently in beta
-* Please help test the CLI so we can get it out of the `beta` status. We thank you in advance for your help!
-* Although we do not plan on adding any further breaking changes, there is still a slight change that we will be forced to do one, based on your feedback.
-:::
+## @quasar/app-webpack v4 (RC)
 
 ::: danger
-All other docs pages will refer to the old @quasar/app-webpack version (v3) specs. Only this page mentions (for now) about how to use the v4 beta.
+All other docs pages will refer to the old @quasar/app-webpack version (v3) specs. Only this page mentions (for now) about how to use the v4 beta/rc.
 :::
 
 ### A note to App Extensions owners
@@ -85,7 +77,7 @@ You might want to release new versions of your Quasar App Extensions with suppor
 api.compatibleWith(
   '@quasar/app-webpack',
 - '^3.0.0'
-+ '^3.0.0 || ^4.0.0-beta.1'
++ '^3.0.0 || ^4.0.0-rc.1'
 )
 ```
 
@@ -184,11 +176,11 @@ Preparations:
 * If using the global installation of Quasar CLI (`@quasar/cli`), make sure that you have the latest one. This is due to the support of quasar.config file in multiple formats.
 * Again, we highlight that the minimum supported version of Node.js is now v16 (always use the LTS versions of Node.js - the higher the version the better).
 
-* Edit your `/package.json` on the `@quasar/app-webpack` entry and assign it `^4.0.0-beta.1`:
+* Edit your `/package.json` on the `@quasar/app-webpack` entry and assign it `^4.0.0-rc.1`:
   ```diff /package.json
   "devDependencies": {
   - "@quasar/app-webpack": "^3.0.0",
-  + "@quasar/app-webpack": "^4.0.0-beta.1"
+  + "@quasar/app-webpack": "^4.0.0-rc.1"
   }
   ```
   <br>
@@ -209,7 +201,7 @@ Preparations:
   You can now write this file in TS too should you wish (rename `/quasar.config.js` to `/quasar.config.ts` -- notice the `.ts` file extension).
   :::
 
-* For consistency with @quasar/app-vite (and easy switch between @quasar/app-webpack and it) move `/src/index.template.html` to `/index.html` and do the following changes:
+* For consistency with `@quasar/app-vite` (and easy switch between `@quasar/app-webpack` and it) move `/src/index.template.html` to `/index.html` and do the following changes:
   ```diff /index.html
   <body>
   - <!-- DO NOT touch the following DIV -->
@@ -283,27 +275,6 @@ Preparations:
 
   <br>
 
-* If using Typescript, then ensure that your `/tsconfig.json` file looks like this:
-
-  ```json [highlight=6-13]
-  {
-    "extends": "@quasar/app-webpack/tsconfig-preset",
-    "compilerOptions": {
-      "baseUrl": "."
-    },
-    "exclude": [
-      "./dist",
-      "./.quasar",
-      "./node_modules",
-      "./src-capacitor",
-      "./src-cordova",
-      "./quasar.config.*.temporary.compiled*"
-    ]
-  }
-  ```
-
-  <br>
-
 * The feature flag files must be deleted from your project folder. They need to be generated again (will happen automatically).
 
   ```tabs
@@ -323,6 +294,193 @@ Preparations:
   # in project folder root:
   $ Remove-Item -Recurse -Filter *-flag.d.ts
   $ quasar build # or dev
+  ```
+
+  <br>
+
+* We have deprecated all the imports coming from `quasar/wrappers`. You can still use them, but we highly recommend switching to the new `#q-app/wrappers`, as shown below:
+
+  ```diff The wrapper functions
+  - import { configure } from 'quasar/wrappers'
+  + import { defineConfig } from '#q-app/wrappers'
+
+  - import { boot } from 'quasar/wrappers'
+  + import { defineBoot } from '#q-app/wrappers'
+
+  - import { preFetch } from 'quasar/wrappers'
+  + import { definePreFetch } from '#q-app/wrappers'
+
+  - import { route } from 'quasar/wrappers'
+  + import { defineRouter } from '#q-app/wrappers'
+
+  - import { store } from 'quasar/wrappers'
+  + import { defineStore } from '#q-app/wrappers'
+
+  - import { ssrMiddleware } from 'quasar/wrappers'
+  + import { defineSsrMiddleware }from '#q-app/wrappers'
+
+  - import { ssrCreate } from 'quasar/wrappers'
+  + import { defineSsrCreate } from '#q-app/wrappers'
+
+  - import { ssrListen } from 'quasar/wrappers'
+  + import { defineSsrListen } from '#q-app/wrappers'
+
+  - import { ssrClose } from 'quasar/wrappers'
+  + import { defineSsrClose } from '#q-app/wrappers'
+
+  - import { ssrServeStaticContent } from 'quasar/wrappers'
+  + import { defineSsrServeStaticContent } from '#q-app/wrappers'
+
+  - import { ssrRenderPreloadTag } from 'quasar/wrappers'
+  + import { defineSsrRenderPreloadTag } from '#q-app/wrappers'
+  ```
+
+  <br>
+
+* For **non-TS projects**, update your `/jsconfig.json` file. Yes, it contains `tsconfig` in it and it's correct.
+
+  ```json /jsconfig.json
+  {
+    "extends": "./.quasar/tsconfig.json"
+  }
+  ```
+
+  <br>
+
+* For **TypeScript projects**: `@quasar/app-vite/tsconfig-preset` has been dropped, so update your `/tsconfig.json` file to extend the new auto-generated `.quasar/tsconfig.json` file. The underlying configuration is different, so also review the new options in the generated file to see if you need to adjust the rest of your `tsconfig.json` file.
+
+  ```json /tsconfig.json
+  {
+    "extends": "./.quasar/tsconfig.json"
+  }
+  ```
+  <br>
+
+  Here is an example of the generated tsconfig (non strict):
+  <br>
+
+  ```json /.quasar/tsconfig.json
+  {
+    "compilerOptions": {
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "target": "esnext",
+      "allowJs": true,
+      "resolveJsonModule": true,
+      "moduleDetection": "force",
+      "isolatedModules": true,
+      "verbatimModuleSyntax": true,
+      "module": "preserve",
+      "noEmit": true,
+      "lib": [
+        "esnext",
+        "dom",
+        "dom.iterable"
+      ],
+      "paths": { ... }
+    },
+    "exclude": [ ... ]
+  }
+  ```
+
+  <br>
+
+  The most impactful change would be the `verbatimModuleSyntax` option being `true`. So, you need to update all your type-only imports to use the `import type { X }`/`import { type X }` syntax. To understand what this option does and the difference between the two syntaxes, please check [TypeScript Docs](https://www.typescriptlang.org/tsconfig/#verbatimModuleSyntax). Example:
+  <br>
+
+  ```diff /src/router/routes.ts
+  - import { RouteRecordRaw } from 'vue-router'
+  + import type { RouteRecordRaw } from 'vue-router'
+  // or
+  + import { type RouteRecordRaw } from 'vue-router'
+  ```
+  <br>
+
+  Here is another example:
+  <br>
+
+  ```diff
+  - import defaultImport, { namedImport, NamedTypeImport } from 'module'
+  + import defaultImport, { namedImport, type NamedTypeImport } from 'module'
+  ```
+  <br>
+
+  If you don't update your imports accordingly, you will get runtime errors similar to this:
+  <br>
+
+  > Uncaught SyntaxError: The requested module '/node_modules/.q-cache/dev-spa/vite-spa/deps/vue-router.js?v=4b500381' does not provide an export named 'RouteRecordRaw' (at routes.ts:1:10)
+  <br>
+
+  You can use `quasar.config file > build > typescript` to control the TypeScript-related behavior. Add this section into your configuration:
+  <br>
+
+  ```diff /quasar.config.ts
+  build: {
+  +  typescript: {
+  +    strict: true, // (recommended) enables strict settings for TypeScript
+  +    vueShim: true, // required when using ESLint with type-checked rules, will generate a shim file for `*.vue` files
+  +    extendTsConfig (tsConfig) {
+  +      // You can use this hook to extend tsConfig dynamically
+  +      // For basic use cases, you can still update the usual tsconfig.json file to override some settings
+  +    },
+  +  }
+  }
+  ```
+  <br>
+
+  Most of the strict options were already enabled in the previous preset. So,
+  you should be able to set the `strict` option to `true` without facing much trouble. But, if you face any issues, you can either update your code to satisfy the stricter rules or set the "problematic" options to `false` in your `tsconfig.json` file, at least until you can fix them.
+
+  `src/quasar.d.ts` and `src/shims-vue.d.ts` files will now be auto-generated in the `.quasar` folder. So, you must delete those files:
+  <br>
+
+  ```tabs
+  <<| bash rimraf through npx |>>
+  # in project folder root:
+  $ npx rimraf src/quasar.d.ts src/shims-vue.d.ts
+  <<| bash Unix-like (Linux, macOS) |>>
+  # in project folder root:
+  $ rm src/quasar.d.ts src/shims-vue.d.ts
+  <<| bash Windows (CMD) |>>
+  # in project folder root:
+  $ del src\quasar.d.ts src\shims-vue.d.ts
+  <<| bash Windows (PowerShell) |>>
+  # in project folder root:
+  $ Remove-Item src/quasar.d.ts, src/shims-vue.d.ts
+  ```
+  <br>
+
+  If you are using ESLint with type-check rules, enable the `vueShim` option to preserve the previous behavior with the shim file. If your project is working fine without that option, you don't need to enable it.
+  <br>
+
+  ```diff /quasar.config.ts
+  build: {
+    typescript: {
+  +    vueShim: true // required when using ESLint with type-checked rules, will generate a shim file for `*.vue` files
+    }
+  }
+  ```
+  <br>
+
+  Thanks to this change, Capacitor dependencies are now properly linked to the project's TypeScript configuration. That means you won't have to install dependencies twice, once in `/src-capacitor` and once in the root folder. So, you can remove the Capacitor dependencies from the root `package.json` file. From now on, installing Capacitor dependencies only in the `/src-capacitor` folder will be enough.
+
+  Properly running typechecking and linting requires the `.quasar/tsconfig.json` to be present. The file will be auto-generated when running `quasar dev` or `quasar build` commands. But, as a lightweight alternative, there is a new CLI command `quasar prepare` that will generate the `.quasar/tsconfig.json` file and some types files. It is especially useful for CI/CD pipelines.
+  <br>
+
+  ```bash
+  $ quasar prepare
+  ```
+  <br>
+
+  You can add it as a `postinstall` script to make sure it's run after installing the dependencies. This would be helpful when someone is pulling the project for the first time.
+  <br>
+
+  ```json /package.json
+  {
+    "scripts": {
+      "postinstall": "quasar prepare"
+    }
+  }
   ```
 
 ### SPA / Capacitor / Cordova modes changes
@@ -345,34 +503,35 @@ $ bun add register-service-worker@^1.0.0
 
 Edit your `/src-pwa/custom-service-worker.js` file:
 
-```diff /src-pwa/custom-service-worker.js
-- import { precacheAndRoute } from 'workbox-precaching'
+```tabs /src-pwa/custom-service-worker.js
+<<| js New way |>>
+import { clientsClaim } from 'workbox-core'
+import { precacheAndRoute, cleanupOutdatedCaches, createHandlerBoundToURL } from 'workbox-precaching'
+import { registerRoute, NavigationRoute } from 'workbox-routing'
 
-- // Use with precache injection
-- precacheAndRoute(self.__WB_MANIFEST)
+self.skipWaiting()
+clientsClaim()
 
-+ import { clientsClaim } from 'workbox-core'
-+ import { precacheAndRoute, cleanupOutdatedCaches, createHandlerBoundToURL } from 'workbox-precaching'
-+ import { registerRoute, NavigationRoute } from 'workbox-routing'
+// Use with precache injection
+precacheAndRoute(self.__WB_MANIFEST)
 
-+ self.skipWaiting()
-+ clientsClaim()
+cleanupOutdatedCaches()
 
-+ // Use with precache injection
-+ precacheAndRoute(self.__WB_MANIFEST)
+// Non-SSR fallbacks to index.html
+// Production SSR fallbacks to offline.html (except for dev)
+if (process.env.MODE !== 'ssr' || process.env.PROD) {
+  registerRoute(
+    new NavigationRoute(
+      createHandlerBoundToURL(process.env.PWA_FALLBACK_HTML),
+      { denylist: [new RegExp(process.env.PWA_SERVICE_WORKER_REGEX), /workbox-(.)*\.js$/] }
+    )
+  )
+}
+<<| js Old way |>>
+import { precacheAndRoute } from 'workbox-precaching'
 
-+ cleanupOutdatedCaches()
-
-+ // Non-SSR fallbacks to index.html
-+ // Production SSR fallbacks to offline.html (except for dev)
-+ if (process.env.MODE !== 'ssr' || process.env.PROD) {
-+  registerRoute(
-+    new NavigationRoute(
-+      createHandlerBoundToURL(process.env.PWA_FALLBACK_HTML),
-+      { denylist: [new RegExp(process.env.PWA_SERVICE_WORKER_REGEX), /workbox-(.)*\.js$/] }
-+    )
-+  )
-+ }
+// Use with precache injection
+precacheAndRoute(self.__WB_MANIFEST)
 ```
 
 Create the file `/src-pwa/manifest.json` and move /quasar.config file > pwa > manifest from there to this file. Here's an example of how it can look like:
@@ -747,21 +906,21 @@ The support for `/src-ssr/production-export.js` has been dropped (delete it). Th
 import express from 'express'
 import compression from 'compression'
 import {
-  ssrClose,
-  ssrCreate,
-  ssrListen,
-  ssrServeStaticContent,
-  ssrRenderPreloadTag
-} from 'quasar/wrappers'
+  defineSsrCreate,
+  defineSsrListen,
+  defineSsrClose,
+  defineSsrServeStaticContent,
+  defineSsrRenderPreloadTag
+} from '#q-app/wrappers'
 
 /**
  * Create your webserver and return its instance.
  * If needed, prepare your webserver to receive
  * connect-like middlewares.
  *
- * Can be async: ssrCreate(async ({ ... }) => { ... })
+ * Can be async: defineSsrCreate(async ({ ... }) => { ... })
  */
-export const create = ssrCreate((/* { ... } */) => {
+export const create = defineSsrCreate((/* { ... } */) => {
   const app = express()
 
   // attackers can use this header to detect apps running Express
@@ -788,9 +947,9 @@ export const create = ssrCreate((/* { ... } */) => {
  * For production, you can instead export your
  * handler for serverless use or whatever else fits your needs.
  *
- * Can be async: ssrListen(async ({ app, devHttpsApp, port }) => { ... })
+ * Can be async: defineSsrListen(async ({ app, devHttpsApp, port }) => { ... })
  */
-export const listen = ssrListen(({ app, devHttpsApp, port }) => {
+export const listen = defineSsrListen(({ app, devHttpsApp, port }) => {
   const server = devHttpsApp || app
   return server.listen(port, () => {
     if (process.env.PROD) {
@@ -807,9 +966,9 @@ export const listen = ssrListen(({ app, devHttpsApp, port }) => {
  * Should you need the result of the "listen()" call above,
  * you can use the "listenResult" param.
  *
- * Can be async: ssrClose(async ({ listenResult }) => { ... })
+ * Can be async: defineSsrClose(async ({ listenResult }) => { ... })
  */
-export const close = ssrClose(({ listenResult }) => {
+export const close = defineSsrClose(({ listenResult }) => {
   return listenResult.close()
 })
 
@@ -823,10 +982,10 @@ const maxAge = process.env.DEV
  *
  * Notice resolve.urlPath(urlPath) and resolve.public(pathToServe) usages.
  *
- * Can be async: ssrServeStaticContent(async ({ app, resolve }) => {
+ * Can be async: defineSsrServeStaticContent(async ({ app, resolve }) => {
  * Can return an async function: return async ({ urlPath = '/', pathToServe = '.', opts = {} }) => {
  */
-export const serveStaticContent = ssrServeStaticContent(({ app, resolve }) => {
+export const serveStaticContent = defineSsrServeStaticContent(({ app, resolve }) => {
   return ({ urlPath = '/', pathToServe = '.', opts = {} }) => {
     const serveFn = express.static(resolve.public(pathToServe), { maxAge, ...opts })
     app.use(resolve.urlPath(urlPath), serveFn)
@@ -845,7 +1004,7 @@ const pngRE = /\.png$/
  * Should return a String with HTML output
  * (if any) for preloading indicated file
  */
-export const renderPreloadTag = ssrRenderPreloadTag((file/* , { ssrContext } */) => {
+export const renderPreloadTag = defineSsrRenderPreloadTag((file/* , { ssrContext } */) => {
   if (jsRE.test(file) === true) {
     return `<script src="${file}" defer crossorigin></script>`
   }
@@ -910,13 +1069,13 @@ ssr: {
 Example of `/src-ssr/middlewares/render.js` file content:
 
 ```js /src-ssr/middlewares/render.js
-import { ssrMiddleware } from 'quasar/wrappers'
+import { defineSsrMiddleware } from '#q-app/wrappers'
 
 // This middleware should execute as last one
 // since it captures everything and tries to
 // render the page with Vue
 
-export default ssrMiddleware(({ app, resolve, render, serve }) => {
+export default defineSsrMiddleware(({ app, resolve, render, serve }) => {
   // we capture any other Express route and hand it
   // over to Vue and Vue Router to render our page
   app.get(resolve.urlPath('*'), (req, res) => {
@@ -1050,42 +1209,15 @@ ssr: {
 ```
 
 ### Bex mode changes
-The implementation of the BEX mode has been ported from @quasar/app-vite, so when you spawn this Quasar mode it will now ask you what extension Manifest version you want (v2 or v3).
 
-But this also means that your `/src-bex` folder has suffered significant files and folders structure changes. It would be best to temporarily copy your /src-bex folder to a safe place, then remove and add back the BEX mode:
+The implementation of the BEX mode has been matched with the superior implementation from `@quasar/app-vite`. But this also means that your `/src-bex` folder has suffered significant files and folders structure changes. It would be best to temporarily copy your /src-bex folder to a safe place, then remove and add back the BEX mode:
 
 ```bash
 $ quasar mode remove bex
 $ quasar mode add bex
 ```
 
-And then, try to understand the new structure and port your old /src-bex to it. There is unfortunately no other way to put it.
-
-But first, there are some changes to the `/quasar.config` file that you should be aware of:
-
-```diff /quasar.config file
-sourceFiles: {
-+ bexManifestFile: 'src-bex/manifest.json',
-  // ...
-},
-
-bex: {
-- builder: {
--   directories: {
--     input: cfg.build.distDir,
--     output: path.join(cfg.build.packagedDistDir, 'Packaged')
--   }
-- }
-}
-```
-
-Some of the changes, like moving the background script from `/js/background.js` directly to the root folder, were required by external factors in order for future-proofing the extension structure.
-
-::: tip
-**Temporarily**, until this version of @quasar/app-webpack gets out of beta status, it would be a good idea to check the Quasar CLI with Vite docs on BEX since they will now mostly match.
-:::
-
-Click on the blocks below to expand and see the old and the new folder structure:
+And then, try to understand the new structure and port your old /src-bex to it. There is unfortunately no other way to put it. Click on the blocks below to expand and see the old and the new folder structure:
 
 ::: details The *OLD* folder structure
 <DocTree :def="scope.oldBexTree" />
@@ -1094,6 +1226,391 @@ Click on the blocks below to expand and see the old and the new folder structure
 ::: details The *NEW* folder structure
 <DocTree :def="scope.newBexTree" />
 :::
+
+#### Improvements
+
+There are quite a few improvements:
+* **The BEX mode now has HMR (hot module reload)!!!** (Chrome only)
+* Completely rewrote & redesigned the Quasar Bridge to allow for:
+  * Sending/receiving messages directly between any part of your bex (app, content scripts, background)
+  * Ability to skip using the bridge altogether
+  * Error handling for sending & receiving messages through the bridge
+  * Better handling of internal resources to avoid memory leaks (there were some edge cases in the previous implementation)
+  * Debug mode (where all the bridge communication will be outputted to the browser console)
+  * Breaking changes highlights: background & content scripts initialization of the bridge; bride.on() calls when responding; bridge.send() calls
+  * The bridge is now available throughout the App in `/src/` (regardless of the file used: boot files, router init, App.vue, any Vue component, ...) by accessing the `$q object` or `window.QBexBridge`
+* One single manifest file from which both chrome & firefox ones can be extracted.
+* Automatically infer the background script file & the content script files from the BEX manifest file.
+* Ability to compile other js/ts files as well that you might need to dynamically load/inject.
+* No more 3s delay when opening the popup.
+* The "dom" script support was removed. Simply move your logic from there into one of your content scripts.
+* New, easier API for the background/content scripts.
+
+#### Dependencies
+
+The `events` dependency is no longer required. If you have it installed, uninstall it:
+
+```tabs
+<<| bash Yarn |>>
+$ yarn remove events
+<<| bash NPM |>>
+$ npm uninstall --save events
+<<| bash PNPM |>>
+$ pnpm remove events
+<<| bash Bun |>>
+$ bun remove events
+```
+
+#### CLI commands
+
+The `quasar dev` and `quasar build` commands now require an explicit target (chrome or firefox). Should you wish to develop for both simultaneously, then you can spawn two quasar dev commands.
+
+```bash
+$ quasar dev -m bex -T <chrome|firefox>
+$ quasar dev -m bex --target <chrome|firefox>
+
+$ quasar build -m bex -T <chrome|firefox>
+$ quasar build -m bex --target <chrome|firefox>
+```
+
+Note that the code in `/src` and `/src-bex` can now use `process.env.TARGET` (which will be "chrome" or "firefox").
+
+#### HMR for Chrome
+
+Significant improvements to the DX:
+* Full HMR for popup/page
+* When changing the background script, the extension will automatically reload.
+* When changing a content script, the extension will automatically reload & the tabs using those content scripts will auto-refresh.
+
+#### The quasar.config file
+
+```diff /quasar.config file
+sourceFiles: {
++ bexManifestFile: 'src-bex/manifest.json',
+  // ...
+},
+bex: {
+- contentScripts: [] // no longer needed as scripts are
+-                    // now extracted from the manifest file
++ extraScripts: []
+}
+```
+
+#### The BEX manifest file
+
+We are now supplying a way to differentiate the manifest for each target (chrome and firefox).
+
+Notice that the manifest file now contains three root props: `all`, `chrome` & `firefox`. The manifest for chrome is deeply merged from all+chrome, while the firefox one is generated from all+firefox. You could even have different manifest versions for each target.
+
+```json
+{
+  "all": {
+    "manifest_version": 3,
+
+    "icons": {
+      "16": "icons/icon-16x16.png",
+      "48": "icons/icon-48x48.png",
+      "128": "icons/icon-128x128.png"
+    },
+
+    "permissions": [
+      "storage",
+      "tabs",
+      "activeTab"
+    ],
+
+    "host_permissions": [ "*://*/*" ],
+    "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self';"
+    },
+    "web_accessible_resources": [
+      {
+        "resources": [ "*" ],
+        "matches": [ "*://*/*" ]
+      }
+    ],
+
+    "action": {
+      "default_popup": "www/index.html"
+    },
+
+    "content_scripts": [
+      {
+        "matches": [ "<all_urls>" ],
+        "css": [ "assets/content.css" ],
+        "js": [ "my-content-script.js" ]
+      }
+    ]
+  },
+
+  "chrome": {
+    "background": {
+      "service_worker": "background.js"
+    }
+  },
+
+  "firefox": {
+    "background": {
+      "scripts": [ "background.js" ]
+    }
+  }
+}
+```
+
+#### The script files
+
+```tabs Background script
+<<| js New way |>>
+/**
+ * Importing the file below initializes the extension background.
+ *
+ * Warnings:
+ * 1. Do NOT remove the import statement below. It is required for the extension to work.
+ *    If you don't need createBridge(), leave it as "import '#q-app/bex/background'".
+ * 2. Do NOT import this file in multiple background scripts. Only in one!
+ * 3. Import it in your background service worker (if available for your target browser).
+ */
+import { createBridge } from '#q-app/bex/background'
+
+/**
+ * Call useBridge() to enable communication with the app & content scripts
+ * (and between the app & content scripts), otherwise skip calling
+ * useBridge() and use no bridge.
+ */
+const bridge = createBridge({ debug: false })
+<<| js Old way |>>
+import { bexBackground } from 'quasar/wrappers'
+
+export default bexBackground((bridge /* , allActiveConnections */) => {
+  // ...
+})
+```
+
+```tabs Content script
+<<| js New way |>>
+/**
+ * Importing the file below initializes the content script.
+ *
+ * Warning:
+ *   Do not remove the import statement below. It is required for the extension to work.
+ *   If you don't need createBridge(), leave it as "import '#q-app/bex/content'".
+ */
+import { createBridge } from '#q-app/bex/content'
+
+// The use of the bridge is optional.
+const bridge = createBridge({ debug: false })
+/**
+ * bridge.portName is 'content@<path>-<number>'
+ *   where <path> is the relative path of this content script
+ *   filename (without extension) from /src-bex
+ *   (eg. 'my-content-script', 'subdir/my-script')
+ *   and <number> is a unique instance number (1-10000).
+ */
+
+// Attach initial bridge listeners...
+
+/**
+ * Leave this AFTER you attach your initial listeners
+ * so that the bridge can properly handle them.
+ *
+ * You can also disconnect from the background script
+ * later on by calling bridge.disconnectFromBackground().
+ *
+ * To check connection status, access bridge.isConnected
+ */
+bridge.connectToBackground()
+  .then(() => {
+    console.log('Connected to background')
+  })
+  .catch(err => {
+    console.error('Failed to connect to background:', err)
+  })
+<<| js Old way |>>
+// Content script content goes here or in activatedContentHooks (use activatedContentHooks if you need a variable
+// accessible to both the content script and inside a hook
+```
+
+```tabs App (/src/...) vue components
+<<| html Composition API + script setup |>>
+<template>
+  <div />
+</template>
+
+<script setup>
+import { useQuasar } from 'quasar'
+const $q = useQuasar()
+
+// Use $q.bex (the bridge)
+// $q.bex.portName is "app"
+</script>
+<<| html Composition API + script |>>
+<template>
+  <div />
+</template>
+
+<script>
+import { useQuasar } from 'quasar'
+
+export default {
+  setup () {
+    const $q = useQuasar()
+    // Use $q.bex (the bridge)
+    // $q.bex.portName is "app"
+  }
+}
+</script>
+<<| html Options API |>>
+<template>
+  <div />
+</template>
+
+<script>
+export default {
+  // Use this.$q.bex (the bridge)
+  // this.$q.bex.portName is "app"
+}
+</script>
+```
+
+Please note that the popup/page portName will be `app`.
+
+#### The new BEX bridge
+
+```js Bex Bridge messaging
+// Listen to a message from the client
+bridge.on('test', message => {
+  console.log(message)
+  console.log(message.payload)
+  console.log(message.from)
+})
+
+// Send a message and split payload into chunks
+// to avoid max size limit of BEX messages.
+// Warning! This happens automatically when the payload is an array.
+// If you actually want to send an Array, wrap it in an object.
+bridge.send({
+  event: 'test',
+  to: 'app',
+  payload: [ 'chunk1', 'chunk2', 'chunk3', ... ]
+}).then(responsePayload => { ... }).catch(err => { ... })
+
+// Send a message and wait for a response
+bridge.send({
+  event: 'test',
+  to: 'background',
+  payload: { banner: 'Hello from content-script' }
+}).then(responsePayload => { ... }).catch(err => { ... })
+
+// Listen to a message from the client and respond synchronously
+bridge.on('test', message => {
+  console.log(message)
+  return { banner: 'Hello from a content-script!' }
+})
+
+// Listen to a message from the client and respond asynchronously
+bridge.on('test', async message => {
+  console.log(message)
+  const result = await someAsyncFunction()
+  return result
+})
+bridge.on('test', message => {
+  console.log(message)
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve({ banner: 'Hello from a content-script!' })
+    }, 1000)
+  })
+})
+
+// Broadcast a message to app & content scripts
+bridge.portList.forEach(portName => {
+  bridge.send({ event: 'test', to: portName, payload: 'Hello from background!' })
+})
+
+// Find any connected content script and send a message to it
+const contentPort = bridge.portList.find(portName => portName.startsWith('content@'))
+if (contentPort) {
+  bridge.send({ event: 'test', to: contentPort, payload: 'Hello from background!' })
+}
+
+// Send a message to a certain content script
+bridge
+  .send({ event: 'test', to: 'content@my-content-script-2345', payload: 'Hello from a content-script!' })
+  .then(responsePayload => { ... })
+  .catch(err => { ... })
+
+// Listen for connection events
+// (the "@quasar:ports" is an internal event name registered automatically by the bridge)
+// --> ({ portList: string[], added?: string } | { portList: string[], removed?: string })
+bridge.on('@quasar:ports', ({ portList, added, removed }) => {
+  console.log('Ports:', portList)
+  if (added) {
+    console.log('New connection:', added)
+  } else if (removed) {
+    console.log('Connection removed:', removed)
+  }
+})
+
+// Current bridge port name (can be 'background', 'app', or 'content@<name>-<xxxxx>')
+console.log(bridge.portName)
+```
+
+::: warning Warning! Sending large amounts of data
+All browser extensions have a hard limit on the amount of data that can be passed as communication messages (example: 50MB). If you exceed that amount on your payload, you can send chunks (**`payload` param should be an Array**).
+
+<br>
+
+```js
+bridge.send({
+  event: 'some.event',
+  to: 'app',
+  payload: [ chunk1, chunk2, ...chunkN ]
+})
+```
+
+<br>
+
+When calculating the payload size, have in mind that the payload is wrapped in a message built by the Bridge that contains some other properties too. That takes a few bytes as well. So your chunks' size should be with a few bytes below the browser's threshold.
+:::
+
+::: warning Warning! Performance on sending an Array
+Like we've seen on the warning above, if `payload` is Array then the bridge will send a message for each of the Array's elements.
+When you actually want to send an Array (not split the payload into chunks), this will be **VERY** inefficient.
+
+<br>
+
+The solution is to wrap your Array in an Object (so only one message will be sent):
+
+<br>
+
+```js
+bridge.send({
+  event: 'some.event',
+  to: 'background',
+  payload: {
+    myArray: [ /*...*/ ]
+  }
+})
+```
+:::
+
+If you encounter problems with sending messages between the BEX parts, you could enable the debug mode for the bridges that interest you. In doing so, the communication will also be outputted to the browser console:
+
+```js Bridge debug mode
+// Dynamically set debug mode
+bridge.setDebug(true) // boolean
+
+// Log a message on the console (if debug is enabled)
+bridge.log('Hello world!')
+bridge.log('Hello', 'world!')
+bridge.log('Hello world!', { some: 'data' })
+bridge.log('Hello', 'world', '!', { some: 'object' })
+// Log a warning on the console (regardless of the debug setting)
+bridge.warn('Hello world!')
+bridge.warn('Hello', 'world!')
+bridge.warn('Hello world!', { some: 'data' })
+bridge.warn('Hello', 'world', '!', { some: 'object' })
+```
 
 ### Other /quasar.config file changes
 
