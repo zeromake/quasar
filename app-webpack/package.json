@@ -170,6 +170,9 @@
     "workbox-webpack-plugin": ">= 6"
   },
   "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    },
     "electron-builder": {
       "optional": true
     },
