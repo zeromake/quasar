@@ -9,7 +9,7 @@ import { CapacitorConfigFile } from './config-file.js'
 import { spawn, spawnSync } from '../../utils/spawn.js'
 import { openIDE } from '../../utils/open-ide.js'
 import { onShutdown } from '../../utils/on-shutdown.js'
-import { SIGNAL__BUILD_SHOULD_EXIT } from '../../utils/signals.js'
+import { SIGNALS } from '../../utils/signals.js'
 
 export class QuasarModeBuilder extends AppBuilder {
   #capacitorConfigFile = new CapacitorConfigFile()
@@ -54,7 +54,7 @@ export class QuasarModeBuilder extends AppBuilder {
           appPaths
         })
 
-        return SIGNAL__BUILD_SHOULD_EXIT
+        return SIGNALS.BUILD_EXTERNAL_TOOL_SPAWNED
       }
 
       if (target === 'ios') {

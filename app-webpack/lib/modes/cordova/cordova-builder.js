@@ -10,7 +10,7 @@ const { spawn } = require('../../utils/spawn.js')
 const { openIDE } = require('../../utils/open-ide.js')
 const { onShutdown } = require('../../utils/on-shutdown.js')
 const { fixAndroidCleartext } = require('./android-cleartext.js')
-const { SIGNAL__BUILD_SHOULD_EXIT } = require('../../utils/signals.js')
+const { SIGNALS } = require('../../utils/signals.js')
 
 const cordovaOutputFolders = {
   ios: [
@@ -97,7 +97,7 @@ module.exports.QuasarModeBuilder = class QuasarModeBuilder extends AppBuilder {
           appPaths
         })
 
-        return SIGNAL__BUILD_SHOULD_EXIT
+        return SIGNALS.BUILD_EXTERNAL_TOOL_SPAWNED
       }
 
       const targetFolder = join(this.quasarConf.build.distDir, this.quasarConf.ctx.targetName)

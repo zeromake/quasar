@@ -168,8 +168,17 @@ appBuilder.build()
   })
   .then(async signal => {
     if (signal !== void 0) {
-      const { SIGNAL__BUILD_SHOULD_EXIT } = await import('../utils/signals.js')
-      if (signal === SIGNAL__BUILD_SHOULD_EXIT) return
+      const { SIGNALS } = await import('../utils/signals.js')
+      if (signal === SIGNALS.BUILD_EXTERNAL_TOOL_SPAWNED) {
+        const { platform } = await import('node:process')
+
+        // We simply return and let Windows be able to
+        // spawn the external tool (requires extra time)
+        if (platform === 'win32') return
+        // Otherwise, we force exit the process.
+        // See process.exit(0) at the end of this then() for the explanation.
+        else process.exit(0)
+      }
     }
 
     if (argv.mode === 'cordova') {
@@ -213,4 +222,11 @@ appBuilder.build()
         await hook.fn(hook.api, opts)
       })
     }
+
+    /**
+     * We're done, but there may be some underlying tools which
+     * haven't freed up the Node's JS execution stack yet (like esbuild or Vite).
+     * So, we're forcing the process to exit to avoid losing time.
+     */
+    process.exit(0)
   })
