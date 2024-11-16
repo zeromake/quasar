@@ -27,6 +27,7 @@ if (argv.help) {
 }
 
 const { readFileSync } = require('node:fs')
+const { join } = require('node:path')
 
 console.log(
   readFileSync(
@@ -35,7 +36,7 @@ console.log(
   )
 )
 
-const { getCtx } = await import('../utils/get-ctx.js')
+const { getCtx } = require('../utils/get-ctx.js')
 // ctx doesn't matter for this command
 const ctx = getCtx({
   mode: 'spa',
@@ -43,7 +44,7 @@ const ctx = getCtx({
   prod: true
 })
 
-const { QuasarConfigFile } = await import('../quasar-config-file.js')
+const { QuasarConfigFile } = require('../quasar-config-file.js')
 const quasarConfFile = new QuasarConfigFile({
   ctx,
   // host and port don't matter for this command
@@ -51,12 +52,15 @@ const quasarConfFile = new QuasarConfigFile({
   host: 'localhost'
 })
 
-await quasarConfFile.init()
+async function runPrepare () {
+  await quasarConfFile.init()
+  const quasarConf = await quasarConfFile.read()
 
-const quasarConf = await quasarConfFile.read()
+  const { generateTypes } = require('../types-generator.js')
+  generateTypes(quasarConf)
 
-const { generateTypes } = await import('../types-generator.js')
-generateTypes(quasarConf)
+  log('Generated tsconfig.json and types files in .quasar directory')
+  log('The app is now prepared for linting, type-checking, IDE integration, etc.')
+}
 
-log('Generated tsconfig.json and types files in .quasar directory')
-log('The app is now prepared for linting, type-checking, IDE integration, etc.')
+runPrepare()
