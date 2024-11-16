@@ -61,7 +61,7 @@ import {
   symOutlinedKeyboardArrowLeft,
   symOutlinedKeyboardArrowRight,
   symOutlinedLastPage,
-  symOutlinedStar,
+  symOutlinedGrade,
   symOutlinedEdit,
   symOutlinedPlayArrow,
   symOutlinedAddBox,
@@ -165,7 +165,7 @@ export default {
     last: symOutlinedLastPage
   },
   rating: {
-    icon: symOutlinedStar
+    icon: symOutlinedGrade
   },
   stepper: {
     done: symOutlinedCheck,
