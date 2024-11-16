@@ -917,9 +917,12 @@ module.exports.QuasarConfigFile = class QuasarConfigFile {
       ? cfg.build.vueRouterBase
       : formatRouterBase(cfg.build.publicPath)
 
-    // when adding new props here be sure to update
+    // When adding new props here be sure to update
     // all impacted devserver diffs (look for this.registerDiff() calls)
     cfg.sourceFiles = merge({
+      // For esbuild JS/TS entry points, make sure this
+      // gets appPaths.resolve.app() applied to it further down the line
+
       rootComponent: 'src/App.vue',
       router: 'src/router/index',
       store: `src/${ this.#storeProvider.pathKey }/index`,
@@ -1173,10 +1176,7 @@ module.exports.QuasarConfigFile = class QuasarConfigFile {
 
       cfg.build.env.SERVICE_WORKER_FILE = `${ cfg.build.publicPath }${ cfg.pwa.swFilename }`
       cfg.metaConf.pwaManifestFile = appPaths.resolve.app(cfg.sourceFiles.pwaManifestFile)
-
-      // resolve extension
-      const swPath = appPaths.resolve.app(cfg.sourceFiles.pwaServiceWorker)
-      cfg.sourceFiles.pwaServiceWorker = resolveExtension(swPath) || cfg.sourceFiles.pwaServiceWorker
+      cfg.sourceFiles.pwaServiceWorker = appPaths.resolve.app(cfg.sourceFiles.pwaServiceWorker)
     }
     else if (this.#ctx.mode.bex) {
       cfg.metaConf.bexManifestFile = appPaths.resolve.app(cfg.sourceFiles.bexManifestFile)
@@ -1228,6 +1228,8 @@ module.exports.QuasarConfigFile = class QuasarConfigFile {
     }
 
     if (this.#ctx.mode.electron) {
+      cfg.sourceFiles.electronMain = appPaths.resolve.app(cfg.sourceFiles.electronMain)
+
       if (!userCfg.electron?.preloadScripts) {
         cfg.electron.preloadScripts = [ 'electron-preload' ]
       }

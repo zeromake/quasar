@@ -1,4 +1,4 @@
-const { join, resolve, basename } = require('node:path')
+const { join, basename } = require('node:path')
 
 const { createWebpackChain, extendWebpackChain, extendEsbuildConfig, createNodeEsbuildConfig } = require('../../config-tools.js')
 const { getBuildSystemDefine } = require('../../utils/env.js')
@@ -18,7 +18,7 @@ async function preloadScript (quasarConf, name) {
   const cfg = await createNodeEsbuildConfig(quasarConf, { compileId: `node-electron-preload-${ scriptName }`, format: 'cjs' })
   const { appPaths } = quasarConf.ctx
 
-  cfg.entryPoints = [ resolve('src-electron', name) ]
+  cfg.entryPoints = [ appPaths.resolve.electron(name) ]
   cfg.outfile = quasarConf.ctx.dev === true
     ? appPaths.resolve.entry(`preload/${ scriptName }.cjs`)
     : join(quasarConf.build.distDir, `UnPackaged/preload/${ scriptName }.cjs`)
@@ -61,7 +61,7 @@ const quasarElectronConfig = {
     const cfg = await createNodeEsbuildConfig(quasarConf, { compileId: 'node-electron-main', format: 'esm' })
     const { appPaths } = quasarConf.ctx
 
-    cfg.entryPoints = [ appPaths.resolve.app(quasarConf.sourceFiles.electronMain) ]
+    cfg.entryPoints = [ quasarConf.sourceFiles.electronMain ]
     cfg.outfile = quasarConf.ctx.dev === true
       ? appPaths.resolve.entry('electron-main.mjs')
       : join(quasarConf.build.distDir, 'UnPackaged/electron-main.mjs')

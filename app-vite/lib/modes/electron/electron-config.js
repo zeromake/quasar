@@ -1,4 +1,4 @@
-import { join, resolve, basename } from 'node:path'
+import { join, basename } from 'node:path'
 
 import { createViteConfig, extendViteConfig, extendEsbuildConfig, createNodeEsbuildConfig } from '../../config-tools.js'
 import { getBuildSystemDefine } from '../../utils/env.js'
@@ -17,7 +17,7 @@ async function preloadScript (quasarConf, name) {
   const cfg = createNodeEsbuildConfig(quasarConf, { compileId: `node-electron-preload-${ scriptName }`, format: 'cjs' })
   const { appPaths } = quasarConf.ctx
 
-  cfg.entryPoints = [ resolve('src-electron', name) ]
+  cfg.entryPoints = [ appPaths.resolve.electron(name) ]
   cfg.outfile = quasarConf.ctx.dev === true
     ? appPaths.resolve.entry(`preload/${ scriptName }.cjs`)
     : join(quasarConf.build.distDir, `UnPackaged/preload/${ scriptName }.cjs`)
@@ -56,7 +56,7 @@ export const quasarElectronConfig = {
     const { appPaths } = quasarConf.ctx
     const ext = quasarConf.metaConf.packageTypeBasedExtension
 
-    cfg.entryPoints = [ appPaths.resolve.app(quasarConf.sourceFiles.electronMain) ]
+    cfg.entryPoints = [ quasarConf.sourceFiles.electronMain ]
     cfg.outfile = quasarConf.ctx.dev === true
       ? appPaths.resolve.entry(`electron-main.${ ext }`)
       : join(quasarConf.build.distDir, `UnPackaged/electron-main.${ ext }`)
