@@ -20,7 +20,7 @@
     "<%= pkgName %>": <% if (!packageManager || ['pnpm', 'bun'].includes(packageManager.name)) { %>"workspace:*"<% } else { %>"*"<% } %>
   },
   "devDependencies": {
-    "@quasar/app-vite": "^2.0.0-beta.18",
+    "@quasar/app-vite": "^2.0.0-rc.1",
     "autoprefixer": "^10.4.20"
   },
   "engines": {

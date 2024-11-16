@@ -14,11 +14,11 @@ export default function (api: InstallAPI) {
   api.compatibleWith('quasar', '^2.0.0');
 
   if (api.hasVite) {
-    api.compatibleWith('@quasar/app-vite', '^2.0.0-beta.1');
+    api.compatibleWith('@quasar/app-vite', '^2.0.0-rc.1');
   }
 
   if (api.hasWebpack) {
-    api.compatibleWith('@quasar/app-webpack', '^4.0.0-beta.1');
+    api.compatibleWith('@quasar/app-webpack', '^4.0.0-rc.1');
   }
 
   api.render('./templates/base', api.prompts);
