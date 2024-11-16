@@ -187,19 +187,19 @@ Preparations:
   <<| bash rimraf through npx |>>
   # in project folder root:
   $ npx rimraf -g ./**/*-flag.d.ts
-  $ quasar build # or dev
+  $ quasar prepare
   <<| bash Unix-like (Linux, macOS) |>>
   # in project folder root:
   $ rm ./**/*-flag.d.ts
-  $ quasar build # or dev
+  $ quasar prepare
   <<| bash Windows (CMD) |>>
   # in project folder root:
   $ del /s *-flag.d.ts
-  $ quasar build &:: or dev
+  $ quasar prepare
   <<| bash Windows (PowerShell) |>>
   # in project folder root:
   $ Remove-Item -Recurse -Filter *-flag.d.ts
-  $ quasar build # or dev
+  $ quasar prepare
   ```
 
   <br>
@@ -970,6 +970,10 @@ Notice that the manifest file now contains three root props: `all`, `chrome` & `
   }
 }
 ```
+
+::: warning For TS devs
+Your background and content scripts have the `.ts` extension. Use that extension in the manifest.json file as well! Examples: "background.ts", "my-content-script.ts". While the browser vendors do support only the `.js` extension, Quasar CLI will convert the file extensions automatically.
+:::
 
 #### The script files
 

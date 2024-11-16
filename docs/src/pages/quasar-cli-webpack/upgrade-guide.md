@@ -275,25 +275,25 @@ Preparations:
 
   <br>
 
-* The feature flag files must be deleted from your project folder. They need to be generated again (will happen automatically).
+* The types feature flag files will now be auto-generated in the `.quasar` folder. So, you must delete them:
 
   ```tabs
   <<| bash rimraf through npx |>>
   # in project folder root:
   $ npx rimraf -g ./**/*-flag.d.ts
-  $ quasar build # or dev
+  $ quasar prepare
   <<| bash Unix-like (Linux, macOS) |>>
   # in project folder root:
   $ rm ./**/*-flag.d.ts
-  $ quasar build # or dev
+  $ quasar prepare
   <<| bash Windows (CMD) |>>
   # in project folder root:
   $ del /s *-flag.d.ts
-  $ quasar build &:: or dev
+  $ quasar prepare
   <<| bash Windows (PowerShell) |>>
   # in project folder root:
   $ Remove-Item -Recurse -Filter *-flag.d.ts
-  $ quasar build # or dev
+  $ quasar prepare
   ```
 
   <br>
@@ -1357,6 +1357,10 @@ Notice that the manifest file now contains three root props: `all`, `chrome` & `
 }
 ```
 
+::: warning For TS devs
+Your background and content scripts have the `.ts` extension. Use that extension in the manifest.json file as well! Examples: "background.ts", "my-content-script.ts". While the browser vendors do support only the `.js` extension, Quasar CLI will convert the file extensions automatically.
+:::
+
 #### The script files
 
 ```tabs Background script
@@ -1426,8 +1430,11 @@ bridge.connectToBackground()
     console.error('Failed to connect to background:', err)
   })
 <<| js Old way |>>
-// Content script content goes here or in activatedContentHooks (use activatedContentHooks if you need a variable
-// accessible to both the content script and inside a hook
+import { bexContent } from 'quasar/wrappers'
+
+export default bexContent((/* bridge */) => {
+  // ...
+})
 ```
 
 ```tabs App (/src/...) vue components
