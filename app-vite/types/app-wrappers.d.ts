@@ -18,7 +18,7 @@ import type {
 
 export function defineConfig(callback: ConfigureCallback): ConfigureCallback;
 
-export function defineBootFile<TState = any>(
+export function defineBoot<TState = any>(
   callback: BootCallback<TState>
 ): BootCallback<TState>;
 
