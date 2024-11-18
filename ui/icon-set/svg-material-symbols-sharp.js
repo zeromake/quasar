@@ -61,7 +61,7 @@ import {
   symSharpKeyboardArrowLeft,
   symSharpKeyboardArrowRight,
   symSharpLastPage,
-  symSharpGrade,
+  symSharpStar,
   symSharpEdit,
   symSharpPlayArrow,
   symSharpAddBox,
@@ -165,7 +165,7 @@ export default {
     last: symSharpLastPage
   },
   rating: {
-    icon: symSharpGrade
+    icon: symSharpStar
   },
   stepper: {
     done: symSharpCheck,

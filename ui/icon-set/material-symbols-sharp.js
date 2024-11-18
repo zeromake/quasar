@@ -93,7 +93,7 @@ export default {
     last: 'sym_s_last_page'
   },
   rating: {
-    icon: 'sym_s_grade'
+    icon: 'sym_s_star'
   },
   stepper: {
     done: 'sym_s_check',
