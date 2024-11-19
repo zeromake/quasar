@@ -2,14 +2,14 @@ import { isAbsolute, join, relative } from 'node:path'
 import { statSync } from 'node:fs'
 import fse from 'fs-extra'
 
-import { cliPkg } from './utils/cli-runtime.js'
+import { cliPkg, resolveToCliDir } from './utils/cli-runtime.js'
 import { isModeInstalled } from './modes/modes-utils.js'
+import { getPackagePath } from './utils/get-package-path.js'
 
 const qAppPaths = (() => {
   const exportsRE = /^\./
   const dTsRE = /\.d\.ts$/
 
-  const { name: cliPackageName } = cliPkg
   const localMap = {}
 
   for (const key in cliPkg.exports) {
@@ -17,12 +17,12 @@ const qAppPaths = (() => {
     const value = cliPkg.exports[ key ]
     if (Object(value) === value) {
       if (value.types) {
-        localMap[ localMapKey ] = value.types.replace(exportsRE, cliPackageName + '/')
+        localMap[ localMapKey ] = resolveToCliDir(value.types)
       }
     }
     else if (typeof value === 'string') {
       if (dTsRE.test(value)) {
-        localMap[ localMapKey ] = value.replace(exportsRE, cliPackageName + '/')
+        localMap[ localMapKey ] = resolveToCliDir(value)
       }
     }
   }
@@ -65,11 +65,16 @@ export function generateTypes (quasarConf) {
 function generateTsConfig (quasarConf, fsUtils) {
   const { appPaths, mode } = quasarConf.ctx
 
+  /** Returns the path relative to the tsconfig.json file, in POSIX format */
   const toTsPath = _path => {
-    const relativePath = relative(
-      fsUtils.tsConfigDir,
-      isAbsolute(_path) === false ? join('node_modules', _path) : _path
-    ).replaceAll('\\', '/')
+    // Folder aliases are defined as absolute paths.
+    // So, the rest, e.g. `'some-pkg': 'another-pkg'`, is not absolute and must be resolved as a package.
+    const path = isAbsolute(_path) === false
+      // Try to resolve the package path first, it's crucial to some monorepo setups like npm/yarn/bun workspaces
+      ? (getPackagePath(_path, appPaths.appDir) ?? join('node_modules', _path))
+      : _path
+
+    const relativePath = relative(fsUtils.tsConfigDir, path).replaceAll('\\', '/')
 
     if (relativePath.length === 0) return '.'
     if (relativePath.startsWith('./') === false) return ('./' + relativePath)
@@ -150,8 +155,8 @@ function generateTsConfig (quasarConf, fsUtils) {
       paths
     },
     exclude: [
-      './../dist',
       './*/*.js',
+      './../dist',
       './../node_modules',
       './../src-capacitor',
       './../src-cordova',
