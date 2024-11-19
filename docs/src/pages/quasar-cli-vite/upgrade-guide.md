@@ -1281,22 +1281,6 @@ export interface QuasarAppPaths {
 }
 ```
 
-```diff /quasar.config > eslint
-eslint: {
-  /**
-   * Enable or disable caching of the linting results.
-   * @default true
-   */
-+ cache?: boolean;
-
-  /**
-   * Formatter to use
-   * @default 'stylish'
-   */
-+ formatter?: ESLint.Formatter;
-}
-```
-
 ```diff /quasar.config > sourceFiles
 sourceFiles: {
 + bexManifestFile?: string;
