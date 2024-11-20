@@ -1134,7 +1134,7 @@ export default defineSsrMiddleware(({ app, resolve, render, serve }) => {
 For TS devs, you should also make a small change to your /src-ssr/middlewares files, like this:
 
 ```diff For TS devs
-+ import { Request, Response } from 'express';
++ import { type Request, type Response } from 'express';
 // ...
 - app.get(resolve.urlPath('*'), (req, res) => {
 + app.get(resolve.urlPath('*'), (req: Request, res: Response) => {
