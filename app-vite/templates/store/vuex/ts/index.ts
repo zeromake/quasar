@@ -1,14 +1,14 @@
 import { defineStore } from '#q-app/wrappers'
-import { InjectionKey } from 'vue'
-import { Router } from 'vue-router'
+import { type InjectionKey } from 'vue'
+import { type Router } from 'vue-router'
 import {
   createStore,
-  Store as VuexStore,
+  type Store as VuexStore,
   useStore as vuexUseStore,
 } from 'vuex'
 
 // import example from './module-example'
-// import { ExampleStateInterface } from './module-example/state';
+// import { type ExampleStateInterface } from './module-example/state';
 
 /*
  * If not building with SSR mode, you can
@@ -31,17 +31,17 @@ declare module 'vue' {
   interface ComponentCustomProperties {
     $store: VuexStore<StateInterface>
   }
-}
+}<% /* TODO: move this under .quasar */ %>
 
 // provide typings for `useStore` helper
 export const storeKey: InjectionKey<VuexStore<StateInterface>> = Symbol('vuex-key')
 
 // Provide typings for `this.$router` inside Vuex store
- declare module "vuex" {
-   export interface Store<S> {
-     readonly $router: Router;
-   }
- }
+declare module "vuex" {
+ export interface Store<S> {
+    readonly $router: Router;
+  }
+}<% /* TODO: move this under .quasar */ %>
 
 export default defineStore(function (/* { ssrContext } */) {
   const Store = createStore<StateInterface>({
