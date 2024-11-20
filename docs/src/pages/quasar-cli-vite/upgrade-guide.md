@@ -113,7 +113,7 @@ Preparations:
   Then yarn/npm/pnpm/bun install.
   <br><br>
 
-* Convert your `/quasar.config.js` file to the ESM format (which is recommended, otherwise rename the file extension to `.cjs` and use CommonJs format). Also notice the wrappers import change.
+* Convert your `/quasar.config.js` file to the ESM format (which is recommended, otherwise rename the file extension to `.cjs` and use CommonJs format). Also notice the wrappers import change, more on that later.
   ```diff /quasar.config.js file
   - const { configure } = require('quasar/wrappers')
   + import { defineConfig } from '#q-app/wrappers'
