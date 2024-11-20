@@ -278,6 +278,17 @@ Preparations:
 
   <br>
 
+  Update `/quasar.config file > bex` section to satisfy the types, regardless if you use BEX or not. If you are using BEX, please see the [BEX section below](#bex-mode-changes) for more details.
+
+  ```diff /quasar.config file
+  bex: {
+  - contentScripts: []
+  + extraScripts: []
+  }
+  ```
+
+  <br>
+
 * The types feature flag files will now be auto-generated in the `.quasar` folder. So, you must delete them:
 
   ```tabs
