@@ -284,6 +284,7 @@ Preparations:
   $ quasar prepare
   <<| bash Unix-like (Linux, macOS) |>>
   # in project folder root:
+  $ shopt -s globstar # enable the ** glob temporarily, if not already enabled
   $ rm ./**/*-flag.d.ts
   $ quasar prepare
   <<| bash Windows (CMD) |>>
