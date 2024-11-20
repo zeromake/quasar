@@ -120,6 +120,7 @@ function generateTsConfig (quasarConf, fsUtils) {
 
   // See https://www.totaltypescript.com/tsconfig-cheat-sheet
   // We use ESNext since we are transpiling and pretty much everything should work
+  // We recommend `@typescript-eslint/consistent-type-imports` instead of `verbatimModuleSyntax`, if using linting (using both can cause conflicts)
   const tsConfig = {
     compilerOptions: {
       esModuleInterop: true,
@@ -129,8 +130,6 @@ function generateTsConfig (quasarConf, fsUtils) {
       resolveJsonModule: true,
       moduleDetection: 'force',
       isolatedModules: true,
-      // force using `import type`/`export type`
-      verbatimModuleSyntax: true,
 
       // We are not transpiling with tsc, so leave it to the bundler
       module: 'preserve', // implies `moduleResolution: 'bundler'`
