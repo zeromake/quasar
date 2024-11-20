@@ -154,8 +154,12 @@ function generateTsConfig (quasarConf, fsUtils) {
 
       paths
     },
+    // include and exclude are relative to .quasar
+    include: [
+      './**/*.d.ts', // Since .quasar starts with a dot, it won't be included by default
+      './../**/*'
+    ],
     exclude: [
-      './*/*.js',
       './../dist',
       './../node_modules',
       './../src-capacitor',
