@@ -43,7 +43,7 @@
   "homepage": "https://quasar.dev/icongenie/introduction",
   "dependencies": {
     "joi": "^17.13.0",
-    "cross-spawn": "^7.0.2",
+    "cross-spawn": "^7.0.6",
     "elementtree": "^0.1.7",
     "fast-glob": "^3.3.2",
     "fs-extra": "^11.2.0",
