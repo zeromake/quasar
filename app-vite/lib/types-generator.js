@@ -66,15 +66,15 @@ function generateTsConfig (quasarConf, fsUtils) {
   const { appPaths, mode } = quasarConf.ctx
 
   /** Returns the path relative to the tsconfig.json file, in POSIX format */
-  const toTsPath = _path => {
+  const toTsPath = pathToTransform => {
     // Folder aliases are defined as absolute paths.
     // So, the rest, e.g. `'some-pkg': 'another-pkg'`, is not absolute and must be resolved as a package.
-    const path = isAbsolute(_path) === false
+    const itemPath = isAbsolute(pathToTransform) === false
       // Try to resolve the package path first, it's crucial to some monorepo setups like npm/yarn/bun workspaces
-      ? (getPackagePath(_path, appPaths.appDir) ?? join('node_modules', _path))
-      : _path
+      ? (getPackagePath(pathToTransform, appPaths.appDir) || join('node_modules', pathToTransform))
+      : pathToTransform
 
-    const relativePath = relative(fsUtils.tsConfigDir, path).replaceAll('\\', '/')
+    const relativePath = relative(fsUtils.tsConfigDir, itemPath).replaceAll('\\', '/')
 
     if (relativePath.length === 0) return '.'
     if (relativePath.startsWith('./') === false) return ('./' + relativePath)
