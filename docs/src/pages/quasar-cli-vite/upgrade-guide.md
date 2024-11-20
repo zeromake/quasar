@@ -301,7 +301,6 @@ Preparations:
       "resolveJsonModule": true,
       "moduleDetection": "force",
       "isolatedModules": true,
-      "verbatimModuleSyntax": true,
       "module": "preserve",
       "noEmit": true,
       "lib": [
@@ -317,30 +316,19 @@ Preparations:
 
   <br>
 
-  The most impactful change would be the `verbatimModuleSyntax` option being `true`. So, you need to update all your type-only imports to use the `import type { X }`/`import { type X }` syntax. To understand what this option does and the difference between the two syntaxes, please check [TypeScript Docs](https://www.typescriptlang.org/tsconfig/#verbatimModuleSyntax). Example:
-  <br>
+  If you are using ESLint, we recommend enabling `@typescript-eslint/consistent-type-imports` rules in your ESLint configuration. If you don't have linting set up, we recommend using `verbatimModuleSyntax` in your `tsconfig.json` file as an alternative (_unlike ESLint rules, it's not auto-fixable_). These changes will help you unify your imports regarding regular and type-only imports. Please read [typescript-eslint Blog - Consistent Type Imports and Exports: Why and How](https://typescript-eslint.io/blog/consistent-type-imports-and-exports-why-and-how) for more information about this and how to set it up. Here is an example:
 
-  ```diff /src/router/routes.ts
-  - import { RouteRecordRaw } from 'vue-router'
-  + import type { RouteRecordRaw } from 'vue-router'
-  // or
-  + import { type RouteRecordRaw } from 'vue-router'
+  ```js /.eslintrc.cjs
+  rules: {
+    // ...
+    '@typescript-eslint/consistent-type-imports': [
+      'error',
+      { prefer: 'type-imports' },
+    ],
+    // ...
+  }
   ```
-  <br>
 
-  Here is another example:
-  <br>
-
-  ```diff
-  - import defaultImport, { namedImport, NamedTypeImport } from 'module'
-  + import defaultImport, { namedImport, type NamedTypeImport } from 'module'
-  ```
-  <br>
-
-  If you don't update your imports accordingly, you will get runtime errors similar to this:
-  <br>
-
-  > Uncaught SyntaxError: The requested module '/node_modules/.q-cache/dev-spa/vite-spa/deps/vue-router.js?v=4b500381' does not provide an export named 'RouteRecordRaw' (at routes.ts:1:10)
   <br>
 
   You can use `quasar.config file > build > typescript` to control the TypeScript-related behavior. Add this section into your configuration:
