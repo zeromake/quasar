@@ -138,7 +138,9 @@ Preparations:
   ```
   <br>
 
-  Remember to convert to ESM the `postcss.config.js` file should you use it. Also, rename `.eslintrc.js` to `.eslintrc.cjs` (with no change to its content).
+  Rename `postcss.config.js` to `postcss.config.mjs` and convert it to ESM, if it's not already in ESM format.
+  Rename `.eslintrc.js` to `.eslintrc.cjs`, if it's not already have the `.cjs` extension.
+
   <br>
 
 * You might want to add the following to your `/.gitignore` file. The `/quasar.config.*.temporary.compiled*` entry refers to files that are left for inspection purposes when something fails with your `/quasar.config` file (and can be removed by the `quasar clean` command):
@@ -180,6 +182,18 @@ Preparations:
   ```
 
   <br>
+
+  * If you have linting, please review your `/.eslintignore` file as well:
+
+  ```bash [highlight=6-7] /.eslintignore
+  /dist
+  /src-capacitor
+  /src-cordova
+  /.quasar
+  /node_modules
+  .eslintrc.cjs
+  /quasar.config.*.temporary.compiled*
+  ```
 
   Update `/quasar.config file > bex` section to satisfy the types, regardless if you use BEX or not. If you are using BEX, please see the [BEX section below](#bex-mode-changes) for more details.
 
