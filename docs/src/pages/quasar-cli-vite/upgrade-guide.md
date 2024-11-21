@@ -209,22 +209,13 @@ Preparations:
 * The types feature flag files will now be auto-generated in the `.quasar` folder. So, you must delete them:
 
   ```tabs
-  <<| bash rimraf through npx |>>
+  <<| bash rimraf through npx (cross-platform) |>>
   # in project folder root:
-  $ npx rimraf -g ./**/*-flag.d.ts
+  $ npx rimraf -g ./src*/*-flag.d.ts
   $ quasar prepare
   <<| bash Unix-like (Linux, macOS) |>>
   # in project folder root:
-  $ shopt -s globstar # enable the ** glob temporarily, if not already enabled
-  $ rm ./**/*-flag.d.ts
-  $ quasar prepare
-  <<| bash Windows (CMD) |>>
-  # in project folder root:
-  $ del /s *-flag.d.ts
-  $ quasar prepare
-  <<| bash Windows (PowerShell) |>>
-  # in project folder root:
-  $ Remove-Item -Recurse -Filter *-flag.d.ts
+  $ rm ./src*/*-flag.d.ts
   $ quasar prepare
   ```
 
@@ -361,18 +352,12 @@ Preparations:
   <br>
 
   ```tabs
-  <<| bash rimraf through npx |>>
+  <<| bash rimraf through npx (cross-platform) |>>
   # in project folder root:
   $ npx rimraf src/quasar.d.ts src/shims-vue.d.ts
   <<| bash Unix-like (Linux, macOS) |>>
   # in project folder root:
   $ rm src/quasar.d.ts src/shims-vue.d.ts
-  <<| bash Windows (CMD) |>>
-  # in project folder root:
-  $ del src\quasar.d.ts src\shims-vue.d.ts
-  <<| bash Windows (PowerShell) |>>
-  # in project folder root:
-  $ Remove-Item src/quasar.d.ts, src/shims-vue.d.ts
   ```
   <br>
 
