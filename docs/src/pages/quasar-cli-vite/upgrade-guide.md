@@ -281,10 +281,16 @@ Preparations:
 
 * For **TypeScript projects**: `@quasar/app-vite/tsconfig-preset` has been dropped, so update your `/tsconfig.json` file to extend the new auto-generated `.quasar/tsconfig.json` file. The underlying configuration is different, so also review the new options in the generated file to see if you need to adjust the rest of your `tsconfig.json` file.
 
-  ```json /tsconfig.json
+  ```diff /tsconfig.json
   {
-    "extends": "./.quasar/tsconfig.json"
+  +  "extends": "./.quasar/tsconfig.json"
+  -  "extends": "@quasar/app-vite/tsconfig-preset",
+     "compilerOptions": {
+  -     "baseUrl": "."
+     }
   }
+
+  
   ```
   <br>
 
