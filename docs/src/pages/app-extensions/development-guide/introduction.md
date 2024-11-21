@@ -100,7 +100,7 @@ If your objective is to install a 3rd-party library into Vue, then it depends up
 $ yarn create quasar
 # then pick the AppExtension option
 <<| bash NPM |>>
-$ npm init quasar
+$ npm init quasar@latest
 # then pick the AppExtension option
 <<| bash PNPM |>>
 $ pnpm create quasar
@@ -157,7 +157,7 @@ We need to create a Quasar project folder to be able to test it while we develop
 ```bash
 $ yarn create quasar
 # or
-$ npm init quasar
+$ npm init quasar@latest
 
 # pick "App with Quasar CLI"
 ```

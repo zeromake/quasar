@@ -18,7 +18,7 @@ Quasar documentation assumes you are already familiar with [vue-i18n](https://gi
 
 ## Setup manually
 
-If you missed enabling i18n during `yarn create quasar` (or `npm init quasar` or the pnpm or Bun equivalent) wizard, here is how you can set it up manually.
+If you missed enabling i18n during `yarn create quasar` (or `npm init quasar@latest` or the pnpm or Bun equivalent) wizard, here is how you can set it up manually.
 
 1. Install the `vue-i18n` dependency into your app.
 

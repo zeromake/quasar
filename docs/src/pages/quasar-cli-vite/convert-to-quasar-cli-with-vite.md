@@ -12,7 +12,7 @@ This page will guide you on how to convert a Quasar CLI with Webpack (`@quasar/a
 $ yarn create quasar
 # then pick "App with Quasar CLI", "Quasar v2", "Quasar App CLI with Vite"
 <<| bash NPM |>>
-$ npm init quasar
+$ npm init quasar@latest
 # then pick "App with Quasar CLI", "Quasar v2", "Quasar App CLI with Vite"
 <<| bash PNPM |>>
 $ pnpm create quasar

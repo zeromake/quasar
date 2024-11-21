@@ -695,7 +695,7 @@ You should use `create-quasar` instead:
 <<| bash Yarn |>>
 yarn create quasar
 <<| bash NPM |>>
-npm init quasar
+npm init quasar@latest
 <<| bash PNPM |>>
 pnpm create quasar
 <<| bash Bun |>>

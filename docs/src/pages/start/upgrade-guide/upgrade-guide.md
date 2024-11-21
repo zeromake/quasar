@@ -320,7 +320,7 @@ $ yarn create quasar
 # then pick "App with Quasar CLI" and "Quasar v2"
 # decide if you want "Quasar CLI with Vite" or "Quasar CLI with Webpack"
 <<| bash NPM |>>
-$ npm init quasar
+$ npm init quasar@latest
 # then pick "App with Quasar CLI" and "Quasar v2"
 # decide if you want "Quasar CLI with Vite" or "Quasar CLI with Webpack"
 <<| bash PNPM |>>

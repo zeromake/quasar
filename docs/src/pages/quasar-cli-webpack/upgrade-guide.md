@@ -160,7 +160,7 @@ If you are unsure that you won't skip by mistake any of the recommended changes,
 <<| bash Yarn |>>
 $ yarn create quasar
 <<| bash NPM |>>
-$ npm init quasar
+$ npm init quasar@latest
 <<| bash PNPM |>>
 $ pnpm create quasar
 <<| bash Bun |>>

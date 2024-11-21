@@ -20,7 +20,7 @@ Enter the following command:
 <<| bash Yarn |>>
 $ yarn create quasar
 <<| bash NPM |>>
-$ npm init quasar
+$ npm init quasar@latest
 <<| bash PNPM |>>
 $ pnpm create quasar
 <<| bash Bun |>>
