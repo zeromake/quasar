@@ -138,8 +138,40 @@ Preparations:
   ```
   <br>
 
-  Rename `postcss.config.js` to `postcss.config.mjs` and convert it to ESM, if it's not already in ESM format.
-  Rename `.eslintrc.js` to `.eslintrc.cjs`, if it's not already have the `.cjs` extension.
+  Convert `postcss.config.js` to ESM, if it's not already in ESM format.
+
+  ```js /postcss.config.js
+  import autoprefixer from 'autoprefixer'
+  // import rtlcss from 'postcss-rtlcss'
+
+  export default {
+    plugins: [
+      // https://github.com/postcss/autoprefixer
+      autoprefixer({
+        overrideBrowserslist: [
+          'last 4 Chrome versions',
+          'last 4 Firefox versions',
+          'last 4 Edge versions',
+          'last 4 Safari versions',
+          'last 4 Android versions',
+          'last 4 ChromeAndroid versions',
+          'last 4 FirefoxAndroid versions',
+          'last 4 iOS versions'
+        ]
+      }),
+
+      // https://github.com/elchininet/postcss-rtlcss
+      // If you want to support RTL css, then
+      // 1. yarn/pnpm/bun/npm install postcss-rtlcss
+      // 2. optionally set quasar.config.js > framework > lang to an RTL language
+      // 3. uncomment the following line (and its import statement above):
+      // rtlcss()
+    ]
+  }
+  ```
+  <br>
+
+  Rename `.eslintrc.js` to `.eslintrc.cjs`, if it doesn't already have the `.cjs` extension.
 
   <br>
 
@@ -194,6 +226,7 @@ Preparations:
   .eslintrc.cjs
   /quasar.config.*.temporary.compiled*
   ```
+  <br>
 
   Update `/quasar.config file > bex` section to satisfy the types, regardless if you use BEX or not. If you are using BEX, please see the [BEX section below](#bex-mode-changes) for more details.
 
