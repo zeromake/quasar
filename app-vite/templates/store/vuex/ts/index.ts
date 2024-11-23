@@ -1,6 +1,5 @@
 import { defineStore } from '#q-app/wrappers'
 import { type InjectionKey } from 'vue'
-import { type Router } from 'vue-router'
 import {
   createStore,
   type Store as VuexStore,
@@ -31,17 +30,16 @@ declare module 'vue' {
   interface ComponentCustomProperties {
     $store: VuexStore<StateInterface>
   }
-}<% /* TODO: move this under .quasar */ %>
+}
 
 // provide typings for `useStore` helper
 export const storeKey: InjectionKey<VuexStore<StateInterface>> = Symbol('vuex-key')
 
-// Provide typings for `this.$router` inside Vuex store
 declare module "vuex" {
  export interface Store<S> {
-    readonly $router: Router;
+    // add your custom properties here, if any
   }
-}<% /* TODO: move this under .quasar */ %>
+}
 
 export default defineStore(function (/* { ssrContext } */) {
   const Store = createStore<StateInterface>({
