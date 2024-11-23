@@ -430,6 +430,27 @@ Preparations:
   }
   ```
 
+  If you are using Pinia, we are now augmenting the `router` property inside `.quasar/pinia.d.ts` automatically. So, you can remove the `router` property from the `PiniaCustomProperties` interface in the `src/router/index.ts` file. It will continue to work as before, but it's recommended to remove it to avoid confusion.
+
+  ```diff /src/router/index.ts
+  import { defineStore } from '#q-app/wrappers'
+  import { createPinia } from 'pinia'
+  - import { type Router } from 'vue-router';
+
+  /*
+   * When adding new properties to stores, you should also
+   * extend the `PiniaCustomProperties` interface.
+  - * @see https://pinia.vuejs.org/core-concepts/plugins.html#typing-new-store-properties
+  + * @see https://pinia.vuejs.org/core-concepts/plugins.html#Typing-new-store-properties
+   */
+  declare module 'pinia' {
+    export interface PiniaCustomProperties {
+  -    readonly router: Router;
+  +    // add your custom properties here, if any
+    }
+  }
+  ```
+
 ### Linting (TS or JS)
 
 We dropped support for our internal linting (quasar.config file > eslint) in favor of the [vite-plugin-checker](https://vite-plugin-checker.netlify.app/) package. We will detail below the changes that you need to make based on if you use TS or not.
