@@ -309,7 +309,7 @@ More on [CSS animations](/options/animations).
 
 ```js
 /**
- * What Quasar CSS animations](/options/animations) to import.
+ * What Quasar CSS animations to import.
  * @example [ 'bounceInLeft', 'bounceOutRight' ]
  * */
 animations?: QuasarAnimationsConfiguration | 'all';
