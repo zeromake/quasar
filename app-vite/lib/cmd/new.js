@@ -227,6 +227,7 @@ names.forEach(name => {
   const hasExtension = !asset.ext || (asset.ext && name.endsWith(asset.ext))
   const ext = hasExtension ? '' : asset.ext
 
+  // TODO: add template rendering for flexibility
   const file = appPaths.resolve.app(path.join(asset.folder, name + ext))
 
   createFile(asset, file)
