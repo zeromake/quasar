@@ -71,11 +71,20 @@ const { components, directives, ...qUserOptions } = quasarUserOptions
 <%
   const bootEntries = boot.filter(asset => asset.server !== false)
   if (bootEntries.length !== 0) { %>
-const bootFunctions = await Promise.all([
+let bootFunctions = null
+let bootPromise = Promise.allSettled([
   <% bootEntries.forEach((asset, index) => { %>
   import('<%= asset.path %>')<%= index < bootEntries.length - 1 ? ',' : '' %>
   <% }) %>
-]).then(bootFiles => bootFiles.map(entry => entry.default).filter(entry => typeof entry === 'function'))
+])
+.then(bootFiles => bootFiles.map(result => {
+  if (result.status === 'rejected') {
+    console.error('[Quasar] boot error:', result.reason)
+    return
+  }
+  return result.value.default
+}))
+.then(bootFiles => bootFiles.filter(entry => typeof entry === 'function'))
 <% } %>
 
 // This is where we perform data-prefetching to determine the
@@ -84,6 +93,13 @@ const bootFunctions = await Promise.all([
 // return a Promise that resolves to the app instance.
 export default ssrContext => {
   return new Promise(async (resolve, reject) => {
+    <% if (bootEntries.length !== 0) { %>
+    if (bootFunctions === null) {
+      bootFunctions = await bootPromise
+      bootPromise = null
+    }
+    <% } %>
+
     const {
       app, router<%= metaConf.hasStore ? ', store' + (metaConf.storePackage === 'vuex' ? ', storeKey' : '') : '' %>
     } = await createQuasarApp(createApp, qUserOptions, ssrContext)
@@ -97,7 +113,7 @@ export default ssrContext => {
 
     for (let i = 0; hasRedirected === false && i < bootFunctions.length; i++) {
       try {
-        await bootFunctions[i]({
+        await bootFunctions[ i ]({
           app,
           router,
           <%= metaConf.hasStore ? 'store,' : '' %>
