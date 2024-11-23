@@ -33,6 +33,7 @@ api.compatibleWith(
 * SSR and Electron modes now build in ESM format.
 * New BEX mode with significant new capabilities and ease of use (includes HMR for Chrome now!).
 * Dropped support for our internal linting system (quasar.config file > eslint). Should use [vite-plugin-checker](https://vite-plugin-checker.netlify.app/) instead.
+* Dropped support for Vuex. [Pinia](https://pinia.vuejs.org/) has been the official store for Vue 3 for a while now. Vuex was deprecated in app-vite v1 and it had problems with the new structure, so it's now removed. You can still use Vuex as any Vue plugin, but you will have to manage everything(installing the store, hydration, no `store` parameter in boot files, etc.) yourself and will not receive any support from Quasar CLI. You will likely have to patch Vuex in order to get it working with TypeScript. We recommend migrating to Pinia.
 * **We will detail more breaking changes for each of the Quasar modes below**.
 
 ### Highlights on what's new
