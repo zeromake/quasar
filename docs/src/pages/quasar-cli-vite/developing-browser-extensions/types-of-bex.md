@@ -65,7 +65,7 @@ Given our Quasar App might need to take the full height of the window (and thus 
 
 ```js /src-bex/my-content-script.js
 // Hooks added here have a bridge allowing communication between the BEX Content Script and the Quasar Application.
-// More info: https://quasar.dev/quasar-cli/developing-browser-extensions/content-hooks
+// More info: https://v2.quasar.dev/quasar-cli/developing-browser-extensions/content-hooks
 import { bexContent } from 'quasar/wrappers'
 
 const

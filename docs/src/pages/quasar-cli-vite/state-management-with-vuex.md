@@ -284,7 +284,7 @@ export default boot(({ store }) => {
 ```
 
 #### Using a typed store in Prefetch
-Similarly, you can also use a typed store when using the [Prefetch feature](https://quasar.dev/quasar-cli-vite/prefetch-feature). Here is an example:
+Similarly, you can also use a typed store when using the [Prefetch feature](/quasar-cli-vite/prefetch-feature). Here is an example:
 
 ```html
 <script lang="ts">
