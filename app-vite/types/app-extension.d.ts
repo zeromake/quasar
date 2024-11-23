@@ -1,21 +1,11 @@
 import { IResolve } from "./app-paths";
-import { QuasarConf } from "./configuration/conf";
+import { QuasarConf, ResolvedQuasarConfValue } from "./configuration/conf";
 import { QuasarContext } from "./configuration/context";
-import { DeepRequired, DeepNonNullable } from "ts-essentials";
 import { BuildOptions as EsbuildConfiguration } from "esbuild";
-
-type QuasarConfProxy = DeepRequired<DeepNonNullable<QuasarConf>>;
-type ExtractQuasarConfParameters<
-  FirstLevelKey extends keyof QuasarConfProxy,
-  SecondLevelKey extends keyof QuasarConfProxy[FirstLevelKey],
-  MaybeFunction = QuasarConfProxy[FirstLevelKey][SecondLevelKey]
-> = MaybeFunction extends (...args: any) => any
-  ? Parameters<MaybeFunction>
-  : never;
 
 type ExtendViteConfHandler = (
   fn: (
-    ...args: [...ExtractQuasarConfParameters<"build", "extendViteConf">, IndexAPI]
+    ...args: [...Parameters<ResolvedQuasarConfValue<"build.extendViteConf">>, api: IndexAPI]
   ) => void
 ) => void;
 

@@ -32,6 +32,9 @@ const qAppPaths = (() => {
 
 // We generate all the files for JS projects as well, because they provide
 // better autocomplete and type checking in the IDE.
+/**
+ * @param {import('../types/configuration/conf').ResolvedQuasarConf} quasarConf
+ */
 export function generateTypes (quasarConf) {
   const { appPaths } = quasarConf.ctx
   const tsConfigDir = appPaths.resolve.app('.quasar')
@@ -60,7 +63,7 @@ export function generateTypes (quasarConf) {
 }
 
 /**
- * @param {import('../types/configuration/conf').QuasarConf} quasarConf
+ * @param {import('../types/configuration/conf').ResolvedQuasarConf} quasarConf
  */
 function generateTsConfig (quasarConf, fsUtils) {
   const { appPaths, mode } = quasarConf.ctx
@@ -193,7 +196,7 @@ declare module "quasar/dist/types/feature-flag.d.ts" {
  * Flags are also available in JS codebases because feature flags still
  * benefit JS users by providing autocomplete.
  *
- * @param {import('../types/configuration/conf').QuasarConf} quasarConf
+ * @param {import('../types/configuration/conf').ResolvedQuasarConf} quasarConf
  */
 function writeFeatureFlags (quasarConf, fsUtils) {
   const { appPaths } = quasarConf.ctx
@@ -245,7 +248,7 @@ declare module '*.vue' {
 `
 
 /**
- * @param {import('../types/configuration/conf').QuasarConf} quasarConf
+ * @param {import('../types/configuration/conf').ResolvedQuasarConf} quasarConf
  */
 function writeDeclarations (quasarConf, fsUtils) {
   fsUtils.writeFileSync('quasar.d.ts', declarationsTemplate)
