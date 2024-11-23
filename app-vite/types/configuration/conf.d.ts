@@ -30,8 +30,7 @@ type QuasarAnimationsConfiguration = "all" | QuasarAnimations[];
  * {
  *  rootComponent: 'src/App.vue',
  *  router: 'src/router/index',
- *  store: 'src/stores/index', // for Pinia
- *  // store: 'src/store/index' // for Vuex
+ *  store: 'src/stores/index',
  *  pwaRegisterServiceWorker: 'src-pwa/register-service-worker',
  *  pwaServiceWorker: 'src-pwa/custom-service-worker',
  *  pwaManifestFile: 'src-pwa/manifest.json',
@@ -135,7 +134,7 @@ interface QuasarMetaConf {
   hasMetaPlugin: boolean;
 
   hasStore: boolean;
-  storePackage: "pinia" | "vuex";
+  storePackage: "pinia";
 
   APP_URL?: string;
   getUrl?: (hostname: string) => string;

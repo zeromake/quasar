@@ -63,18 +63,8 @@ const publicPath = `<%= build.publicPath %>`
 async function start ({
   app,
   router
-  <%= metaConf.hasStore ? ', store' + (metaConf.storePackage === 'vuex' ? ', storeKey' : '') : '' %>
+  <%= metaConf.hasStore ? ', store' : '' %>
 }<%= bootEntries.length !== 0 ? ', bootFiles' : '' %>) {
-  <% if (ctx.mode.ssr && metaConf.hasStore && metaConf.storePackage === 'vuex' && ssr.manualStoreHydration !== true) { %>
-    // prime the store with server-initialized state.
-    // the state is determined during SSR and inlined in the page markup.
-    if (<%= ctx.mode.pwa ? 'ssrIsRunningOnClientPWA !== true &&' : '' %>window.__INITIAL_STATE__ !== void 0) {
-      store.replaceState(window.__INITIAL_STATE__)
-      // for security reasons, we'll delete this
-      delete window.__INITIAL_STATE__
-    }
-  <% } %>
-
   <% if (bootEntries.length !== 0) { %>
   let hasRedirected = false
   const getRedirectUrl = url => {
@@ -133,7 +123,6 @@ async function start ({
   <% } %>
 
   app.use(router)
-  <% if (metaConf.hasStore && metaConf.storePackage === 'vuex') { %>app.use(store, storeKey)<% } %>
 
   <% if (ctx.mode.ssr) { %>
     <% if (ctx.mode.pwa) { %>

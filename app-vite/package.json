@@ -123,7 +123,6 @@
     "typescript": "^5.6.3",
     "vue": "^3.5.12",
     "vue-router": "^4.4.5",
-    "vuex": "^4.1.0",
     "workbox-build": "^7.3.0"
   },
   "peerDependencies": {
@@ -134,7 +133,6 @@
     "typescript": ">= 5.4",
     "vue": "^3.2.29",
     "vue-router": "^4.0.12",
-    "vuex": "^4.0.0",
     "workbox-build": ">= 6"
   },
   "peerDependenciesMeta": {
@@ -151,9 +149,6 @@
       "optional": true
     },
     "pinia": {
-      "optional": true
-    },
-    "vuex": {
       "optional": true
     },
     "workbox-build": {

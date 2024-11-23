@@ -25,7 +25,7 @@ interface BaseAPI {
 
   hasTypescript: () => Promise<boolean>;
   hasLint: () => Promise<boolean>;
-  getStorePackageName: () => 'pinia' | 'vuex' | undefined;
+  getStorePackageName: () => 'pinia' | undefined;
   getNodePackagerName: () => Promise<'npm' | 'yarn' | 'pnpm' | 'bun'>;
 }
 

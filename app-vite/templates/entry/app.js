@@ -91,10 +91,7 @@ export default async function (createAppFn, quasarUserOptions<%= ctx.mode.ssr ? 
       ? await createStore({<%= ctx.mode.ssr ? 'ssrContext' : '' %>})
       : createStore
 
-    <% if (metaConf.storePackage === 'vuex') { %>
-      // obtain Vuex injection key in case we use TypeScript
-      const { storeKey } = await import('app/<%= sourceFiles.store %>')
-    <% } else if (metaConf.storePackage === 'pinia') { %>
+    <% if (metaConf.storePackage === 'pinia') { %>
       app.use(store)
 
       <% if (ctx.mode.ssr && ssr.manualStoreHydration !== true) { %>
@@ -117,9 +114,7 @@ export default async function (createAppFn, quasarUserOptions<%= ctx.mode.ssr ? 
 
   <% if (metaConf.hasStore) { %>
     // make router instance available in store
-    <% if (metaConf.storePackage === 'vuex') { %>
-      store.$router = router
-    <% } else if (metaConf.storePackage === 'pinia') { %>
+    <% if (metaConf.storePackage === 'pinia') { %>
       store.use(({ store }) => { store.router = router })
     <% } %>
   <% } %>
@@ -129,7 +124,7 @@ export default async function (createAppFn, quasarUserOptions<%= ctx.mode.ssr ? 
   // different depending on whether we are in a browser or on the server.
   return {
     app,
-    <%= metaConf.hasStore ? 'store,' + (metaConf.storePackage === 'vuex' ? ' storeKey,' : '') : '' %>
+    <%= metaConf.hasStore ? 'store,' : '' %>
     router
   }
 }
