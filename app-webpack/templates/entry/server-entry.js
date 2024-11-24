@@ -101,7 +101,7 @@ export default ssrContext => {
     <% } %>
 
     const {
-      app, router<%= metaConf.hasStore ? ', store' + (metaConf.storePackage === 'vuex' ? ', storeKey' : '') : '' %>
+      app, router<%= metaConf.hasStore ? ', store' : '' %>
     } = await createQuasarApp(createApp, qUserOptions, ssrContext)
 
     <% if (bootEntries.length !== 0) { %>
@@ -135,7 +135,6 @@ export default ssrContext => {
     <% } %>
 
     app.use(router)
-    <% if (metaConf.hasStore && metaConf.storePackage === 'vuex') { %>app.use(store, storeKey)<% } %>
 
     const url = ssrContext.req.url<% if (build.publicPath !== '/') { %>.replace(publicPath, '/')<% } %>
     const { fullPath } = router.resolve(url)

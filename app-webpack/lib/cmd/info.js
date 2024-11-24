@@ -84,7 +84,6 @@ print({ key: 'Important local packages', section: true })
   'vue',
   'vue-router',
   'pinia',
-  'vuex',
   'eslint',
   'esbuild',
   'typescript',

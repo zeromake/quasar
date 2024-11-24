@@ -28,8 +28,7 @@ type QuasarAnimationsConfiguration = "all" | QuasarAnimations[];
  * {
  *  rootComponent: 'src/App.vue',
  *  router: 'src/router/index',
- *  store: 'src/stores/index', // for Pinia
- *  // store: 'src/store/index' // for Vuex
+ *  store: 'src/stores/index',
  *  indexHtmlTemplate: 'index.html',
  *  pwaRegisterServiceWorker: 'src-pwa/register-service-worker',
  *  pwaServiceWorker: 'src-pwa/custom-service-worker',

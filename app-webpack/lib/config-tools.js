@@ -112,7 +112,7 @@ module.exports.createWebpackChain = async function createWebpackChain (quasarCon
     .merge(resolveModules)
 
   chain.module.noParse(
-    /^(vue|vue-router|pinia|vuex|vuex-router-sync|@quasar[\\/]extras|quasar[\\/]dist)$/
+    /^(vue|vue-router|pinia|@quasar[\\/]extras|quasar[\\/]dist)$/
   )
 
   const vueRule = chain.module.rule('vue')
