@@ -29,19 +29,19 @@ declare module "quasar/wrappers" {
   } from "@quasar/app-vite";
 
   /** Some arguments are available only if you enable the related mode: `store` when using the Store, `ssrContext` when using SSR, etc */
-  function boot<TState = any>(
-    callback: BootCallback<TState>
-  ): BootCallback<TState>;
+  function boot(
+    callback: BootCallback
+  ): BootCallback;
 
   function configure(callback: ConfigureCallback): ConfigureCallback;
 
-  function preFetch<TState = any>(
-    callback: PrefetchCallback<TState>
-  ): PrefetchCallback<TState>;
+  function preFetch(
+    callback: PrefetchCallback
+  ): PrefetchCallback;
 
-  function route<TState = any>(
-    callback: RouteCallback<TState>
-  ): RouteCallback<TState>;
+  function route(
+    callback: RouteCallback
+  ): RouteCallback;
 
   function store(callback: StoreCallback): StoreCallback;
 

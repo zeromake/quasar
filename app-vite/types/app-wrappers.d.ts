@@ -18,17 +18,17 @@ import type {
 
 export function defineConfig(callback: ConfigureCallback): ConfigureCallback;
 
-export function defineBoot<TState = any>(
-  callback: BootCallback<TState>
-): BootCallback<TState>;
+export function defineBoot(
+  callback: BootCallback
+): BootCallback;
 
-export function definePreFetch<TState = any>(
-  callback: PrefetchCallback<TState>
-): PrefetchCallback<TState>;
+export function definePreFetch(
+  callback: PrefetchCallback
+): PrefetchCallback;
 
-export function defineRouter<TState = any>(
-  callback: RouteCallback<TState>
-): RouteCallback<TState>;
+export function defineRouter(
+  callback: RouteCallback
+): RouteCallback;
 
 export function defineStore(callback: StoreCallback): StoreCallback;
 
