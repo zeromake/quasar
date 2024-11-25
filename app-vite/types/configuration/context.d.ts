@@ -10,7 +10,7 @@ import {
 } from "./electron-conf";
 import { QuasarCordovaTargets } from "./cordova-conf";
 
-type QuasarModes = "spa" | "ssr" | "pwa" | "cordova" | "capacitor" | "electron" | "bex";
+export type QuasarMode = "spa" | "ssr" | "pwa" | "cordova" | "capacitor" | "electron" | "bex";
 
 interface BaseQuasarContext {
   /** True if we are in development mode */
@@ -18,8 +18,8 @@ interface BaseQuasarContext {
   /** True if we are in production mode */
   prod: boolean;
   /** App mode */
-  mode: { [index in QuasarModes]?: true };
-  modeName: QuasarModes;
+  mode: { [index in QuasarMode]?: true };
+  modeName: QuasarMode;
   /** True if debugging is enabled */
   debug: boolean;
   /** True if opening remote Vue Devtools in development mode. */

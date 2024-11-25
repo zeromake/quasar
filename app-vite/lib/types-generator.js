@@ -66,7 +66,7 @@ export function generateTypes (quasarConf) {
  * @param {import('../types/configuration/conf').ResolvedQuasarConf} quasarConf
  */
 function generateTsConfig (quasarConf, fsUtils) {
-  const { appPaths, mode } = quasarConf.ctx
+  const { appPaths } = quasarConf.ctx
 
   /** Returns the path relative to the tsconfig.json file, in POSIX format */
   const toTsPath = pathToTransform => {
@@ -91,7 +91,7 @@ function generateTsConfig (quasarConf, fsUtils) {
   delete aliasMap[ '#q-app' ] // remove the existing one so that all the added ones are listed under each other
   Object.assign(aliasMap, qAppPaths)
 
-  if (mode.capacitor) {
+  if (isModeInstalled(appPaths, 'capacitor')) {
     const target = appPaths.resolve.capacitor('node_modules')
     const { dependencies } = JSON.parse(
       fse.readFileSync(appPaths.resolve.capacitor('package.json'), 'utf-8')
