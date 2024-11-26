@@ -223,4 +223,4 @@ export default defineConfig((<% if (preset.i18n) { %>ctx<% } else { %>/* ctx */<
       extraScripts: []
     }
   }
-});
+})
