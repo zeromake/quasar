@@ -20,7 +20,7 @@
     "<%= pkgName %>": <% if (!packageManager || ['pnpm', 'bun'].includes(packageManager?.name)) { %>"workspace:*"<% } else { %>"*"<% } %>
   },
   "devDependencies": {
-    "@quasar/app-webpack": "^4.0.0-rc.1",
+    "@quasar/app-webpack": "^4.0.0",
     "ts-loader": "^9.5.1"
   },
   "browserslist": [

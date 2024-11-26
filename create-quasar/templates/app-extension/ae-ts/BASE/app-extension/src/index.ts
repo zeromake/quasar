@@ -15,11 +15,11 @@ export default function (api: IndexAPI) {
   api.compatibleWith('quasar', '^2.0.0');
 
   if (api.hasVite) {
-    api.compatibleWith('@quasar/app-vite', '^2.0.0-rc.1');
+    api.compatibleWith('@quasar/app-vite', '^2.0.0');
   }
 
   if (api.hasWebpack) {
-    api.compatibleWith('@quasar/app-webpack', '^4.0.0-rc.1');
+    api.compatibleWith('@quasar/app-webpack', '^4.0.0');
   }
 
   api.extendQuasarConf((conf, api) => {
