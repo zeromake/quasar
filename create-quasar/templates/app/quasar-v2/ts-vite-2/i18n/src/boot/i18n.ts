@@ -22,7 +22,7 @@ declare module 'vue-i18n' {
 /* eslint-enable @typescript-eslint/no-empty-interface */
 
 export default defineBoot(({ app }) => {
-  const i18n = createI18n({
+  const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
     locale: 'en-US',<% if (sfcStyle === 'composition' || sfcStyle === 'composition-setup') { %>
     legacy: false,<% } %>
     messages,
