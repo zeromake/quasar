@@ -120,7 +120,8 @@ export default defineConfig((ctx) => {
     build: {
       extendViteConf (viteConf, { isClient, isServer }) {
         if (ctx.mode.ssr) {
-          // do something with ViteConf
+          // do something with viteConf
+          // or return an object to deeply merge with current viteConf
         }
       }
     }

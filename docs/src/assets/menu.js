@@ -1109,8 +1109,8 @@ export default [
             path: 'types-of-bex'
           },
           {
-            name: 'BEX Communication / Events',
-            path: 'bex-communication'
+            name: 'BEX Bridge Communication',
+            path: 'bex-bridge'
           },
           {
             name: 'Background Script',
@@ -1119,10 +1119,6 @@ export default [
           {
             name: 'Content Scripts',
             path: 'content-scripts'
-          },
-          {
-            name: 'DOM Script',
-            path: 'dom-script'
           }
         ]
       },
@@ -1531,20 +1527,16 @@ export default [
             path: 'types-of-bex'
           },
           {
-            name: 'BEX Communication / Events',
-            path: 'bex-communication'
+            name: 'BEX Bridge Communication',
+            path: 'bex-bridge'
           },
           {
-            name: 'Background Hooks',
-            path: 'background-hooks'
+            name: 'Background Script',
+            path: 'background-script'
           },
           {
-            name: 'Content Hooks',
-            path: 'content-hooks'
-          },
-          {
-            name: 'DOM Hooks',
-            path: 'dom-hooks'
+            name: 'Content Scripts',
+            path: 'content-scripts'
           }
         ]
       },

@@ -1292,7 +1292,7 @@ Note that the code in `/src` and `/src-bex` can now use `process.env.TARGET` (wh
 #### HMR for Chrome
 
 Significant improvements to the DX:
-* Full HMR for popup/page
+* Full HMR for devtools/options/popup page
 * When changing the background script, the extension will automatically reload.
 * When changing a content script, the extension will automatically reload & the tabs using those content scripts will auto-refresh.
 
@@ -1493,7 +1493,7 @@ export default {
 </script>
 ```
 
-Please note that the popup/page portName will be `app`.
+Please note that the devtools/popup/options page portName will be `app`.
 
 #### The new BEX bridge
 

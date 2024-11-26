@@ -20,18 +20,27 @@ There are two places in the `/quasar.config` file where you can configure Quasar
 ```js /quasar.config file
 return {
   capacitor: {
-    // (Optional!)
-    hideSplashscreen: false, // disables auto-hiding the Splashscreen by Quasar CLI
+    /**
+     * Automatically hide the Capacitor Splashscreen when app is ready,
+     * (is using the Splashscreen Capacitor plugin).
+     *
+     * @default true
+     */
+    hideSplashscreen?: boolean;
 
-    // (Optional!)
-    capacitorCliPreparationParams: [ 'sync', ctx.targetName ],
+    /**
+     * Preparation params with which the Capacitor CLI is called
+     *
+     * @default [ 'sync', ctx.targetName ]
+     */
+    capacitorCliPreparationParams?: string[];
 
-    // (Optional) If not present, will look for package.json > name
-    appName: '...', // string
-    // (Optional) If not present, will look for package.json > version
-    version: '...', // string
-    // (Optional) If not present, will look for package.json > description
-    description: '...', // string
+    /** If not present, will look for `package.json > name` */
+    appName?: string;
+    /** If not present, will look for `package.json > version` */
+    version?: string;
+    /** If not present, will look for `package.json > description` */
+    description?: string;
   }
 }
 ```
@@ -77,7 +86,7 @@ export default defineConfig((ctx) => {
     build: {
       extendViteConf (viteConf) {
         if (ctx.mode.capacitor) {
-          // do something with ViteConf
+          // do something with viteConf
           // or return an object to deeply merge with current viteConf
         }
       }
