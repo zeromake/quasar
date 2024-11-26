@@ -33,7 +33,7 @@ The `/quasar.config` file is run by the Quasar CLI build system, so this code ru
 You'll notice that the `/quasar.config` file exports a function that takes a `ctx` (context) parameter and returns an Object. This allows you to dynamically change your website/app config based on this context:
 
 ```js
-module.exports = function (ctx) { // can be async too
+export default (ctx) => { // can be async too
   console.log(ctx)
 
   // Example output on console:
@@ -57,7 +57,7 @@ module.exports = function (ctx) { // can be async too
 What this means is that, as an example, you can load a font when building for a certain mode (like PWA), and pick another one for the others:
 
 ```js
-module.exports = function (ctx) {
+export default (ctx) => {
   extras: [
     ctx.mode.pwa // we're adding only if working on a PWA
       ? 'roboto-font'
@@ -69,7 +69,7 @@ module.exports = function (ctx) {
 Or you can use a global CSS file for SPA mode and another one for Cordova mode while avoiding loading any such file for the other modes.
 
 ```js
-module.exports = function (ctx) {
+export default (ctx) => {
   css: [
     ctx.mode.spa ? 'app-spa.sass' : null, // looks for /src/css/app-spa.sass
     ctx.mode.cordova ? 'app-cordova.sass' : null  // looks for /src/css/app-cordova.sass
@@ -80,7 +80,7 @@ module.exports = function (ctx) {
 Or you can configure the dev server to run on port 8000 for SPA mode, on port 9000 for PWA mode or on port 9090 for the other modes:
 
 ```js
-module.exports = function (ctx) {
+export default (ctx) => {
   devServer: {
     port: ctx.mode.spa
       ? 8000
@@ -92,7 +92,7 @@ module.exports = function (ctx) {
 You can also do async work before returning the quasar configuration:
 
 ```js
-module.exports = async function (ctx) {
+export default async (ctx) => {
   const data = await someAsyncFunction()
   return {
     // ... use "data"
@@ -100,7 +100,7 @@ module.exports = async function (ctx) {
 }
 
 // or:
-module.exports = function (ctx) {
+export default (ctx) => {
   return new Promise(resolve => {
     // some async work then:
     // resolve() with the quasar config
@@ -118,9 +118,9 @@ The possibilities are endless.
 You can wrap the returned function with `configure()` helper to get a better IDE autocomplete experience (through Typescript):
 
 ```js
-const { configure } = require('quasar/wrappers')
+import { defineConfig } from '#q-app/wrappers'
 
-module.exports = configure(function (ctx) {
+export default defineConfig((ctx) => {
   /* configuration options */
 })
 ```
@@ -246,7 +246,7 @@ devServer: {
 }
 
 // opens Google Chrome and automatically deals with cross-platform issues:
-const open = require('open')
+import open from 'open'
 
 devServer: {
   open: {
@@ -350,7 +350,7 @@ If, for example, you run "quasar build --debug", sourceMap and extractCSS will b
 You can define and then reference variables in /index.html or /src/index.template.html, like this:
 
 ```js /quasar.config file
-module.exports = function (ctx) {
+export default (ctx) => {
   return {
     htmlVariables: {
       title: 'test name',

@@ -116,9 +116,6 @@ However, should you wish to manually hydrate it yourself, you need to set quasar
 export default ({ store }) => {
   // For Pinia
   store.state.value = window.__INITIAL_STATE__
-
-  // For Vuex
-  store.replaceState(window.__INITIAL_STATE__)
 }
 ```
 

@@ -47,9 +47,9 @@ export default async ({ app, router, store }) => {
 You can wrap the returned function with `boot` helper to get a better IDE autocomplete experience (through Typescript):
 
 ```js
-import { boot } from 'quasar/wrappers'
+import { defineBoot } from '#q-app/wrappers'
 
-export default boot(async ({ app, router, store }) => {
+export default defineBoot(async ({ app, router, store }) => {
   // something to do
   await something()
 })
@@ -299,12 +299,12 @@ In order to better understand how a boot file works and what it does, you need t
 ### Axios
 
 ```js
-import { boot } from 'quasar/wrappers'
+import { defineBoot } from '#q-app/wrappers'
 import axios from 'axios'
 
 const api = axios.create({ baseURL: 'https://api.example.com' })
 
-export default boot(({ app }) => {
+export default defineBoot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
 
   app.config.globalProperties.$axios = axios
@@ -322,11 +322,11 @@ export { axios, api }
 ### vue-i18n
 
 ```js
-import { boot } from 'quasar/wrappers'
+import { defineBoot } from '#q-app/wrappers'
 import { createI18n } from 'vue-i18n'
 import messages from 'src/i18n'
 
-export default boot(({ app }) => {
+export default defineBoot(({ app }) => {
   // Create I18n instance
   const i18n = createI18n({
     locale: 'en-US',
@@ -342,9 +342,9 @@ export default boot(({ app }) => {
 Some boot files might need to interfere with Vue Router configuration:
 
 ```js
-import { boot } from 'quasar/wrappers'
+import { defineBoot } from '#q-app/wrappers'
 
-export default boot(({ router, store }) => {
+export default defineBoot(({ router, store }) => {
   router.beforeEach((to, from, next) => {
     // Now you need to add your authentication logic here, like calling an API endpoint
   })

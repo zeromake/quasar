@@ -122,15 +122,16 @@ return {
 Should you want to tamper with the Vite config for UI in /src:
 
 ```js /quasar.config file
-module.exports = function (ctx) {
+export default defineConfig((ctx) => {
   return {
     build: {
       extendViteConf (viteConf) {
         if (ctx.mode.cordova) {
           // do something with ViteConf
+          // or return an object to deeply merge with current viteConf
         }
       }
     }
   }
-}
+})
 ```

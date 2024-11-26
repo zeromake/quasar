@@ -19,10 +19,7 @@ Using `process.env` can help you in many ways:
 | `SERVER` | Boolean | Code runs on server (not on client) |
 | `MODE` | String | Quasar CLI mode (`spa`, `pwa`, ...) |
 | `NODE_ENV` | String | Has two possible values: `production` or `development` |
-
-## Vite's built-in ".env"
-
-More info [here](https://vitejs.dev/guide/env-and-mode.html).
+| `TARGET` | String | Can be `ios` or `android` for Cordova/Capacitor modes and `chrome` or `firefox` for BEX mode |
 
 ## Example
 
@@ -36,15 +33,16 @@ if (process.env.DEV) {
 // (defaults to 'spa' if -m parameter is not specified)
 
 if (process.env.MODE === 'electron') {
-  const { BrowserWindow } = require('@electron/remote')
-  const win = BrowserWindow.getFocusedWindow()
+  import('@electron/remote').then(({ BrowserWindow }) => {
+    const win = BrowserWindow.getFocusedWindow()
 
-  if (win.isMaximized()) {
-    win.unmaximize()
-  }
-  else {
-    win.maximize()
-  }
+    if (win.isMaximized()) {
+      win.unmaximize()
+    }
+    else {
+      win.maximize()
+    }
+  })
 }
 ```
 
@@ -95,7 +93,7 @@ It's important to understand the different types of environment variables.
 // Accessing terminal variables
 console.log(process.env)
 
-module.exports = function (ctx) {
+export default defineConfig((ctx) => {
   return {
     // ...
 
@@ -108,7 +106,7 @@ module.exports = function (ctx) {
       }
     }
   }
-}
+})
 ```
 
 Then, in your website/app, you can access `process∙env∙API`, and it will point to one of those two links above, depending on dev or production build type.
@@ -131,57 +129,32 @@ build: {
 }
 ```
 
-#### Using dotenv
+#### The env dotfiles support
 
-Should you wish to use `.env` file(s), you can use the [dotenv](https://www.npmjs.com/package/dotenv) package. The following is an example that passes env variables from the `.env` file to your UI code:
+Expanding a bit on the env dotfiles support. These files will be detected and used (the order matters):
 
-```tabs
-<<| bash Yarn |>>
-$ yarn add --dev dotenv
-<<| bash NPM |>>
-$ npm install --save-dev dotenv
-<<| bash PNPM |>>
-$ pnpm add -D dotenv
-<<| bash Bun |>>
-$ bun add --dev dotenv
+```
+.env                                # loaded in all cases
+.env.local                          # loaded in all cases, ignored by git
+.env.[dev|prod]                     # loaded for dev or prod only
+.env.local.[dev|prod]               # loaded for dev or prod only, ignored by git
+.env.[quasarMode]                   # loaded for specific Quasar CLI mode only
+.env.local.[quasarMode]             # loaded for specific Quasar CLI mode only, ignored by git
+.env.[dev|prod].[quasarMode]        # loaded for specific Quasar CLI mode and dev|prod only
+.env.local.[dev|prod].[quasarMode]  # loaded for specific Quasar CLI mode and dev|prod only, ignored by git
 ```
 
-Then, in your `/quasar.config` file:
+...where "ignored by git" assumes a default project folder created after releasing this package, otherwise add `.env.local*` to your `/.gitignore` file.
 
-```js
-build: {
-  env: require('dotenv').config().parsed
-}
-```
-
-Be sure to read the [dotenv documentation](https://www.npmjs.com/package/dotenv) and create the necessary `.env` file(s) in the root of your Quasar CLI project.
-
-Note that the approach above will pass only what's defined in the `.env` file and nothing else. So, the ones defined in the terminal(_e.g. `MY_API=api.com quasar build`_) will not be passed nor used to override the `.env` file.
-
-If you want to be able to override what's inside `.env` or want to make the `.env` file completely optional, you have to follow another approach. If you are using CI/CD, Docker, etc. you probably don't want to stay limited to the `.env` file. Here is an example:
+You can also configure the files above to be picked up from a different folder or even add more files to the list:
 
 ```js /quasar.config file
-
-// This will load from `.env` if it exists, but not override existing `process.env.*` values
-require('dotenv').config()
-
-// process.env now contains the terminal variables and the ones from the .env file
-// Precedence:
-//   1. Terminal variables (API_URL=https://api.com quasar build)
-//   2. `.env` file
-// If you want .env file to override the terminal variables,
-// use `require('dotenv').config({ override: true })` instead
-
-return {
-// ...
-  build: {
-    env: {
-      // You have to manually define all the variables you want to pass in
-      API_URL: process.env.API_URL,
-      // ...
-    }
-  }
-// ...
+build: {
+  envFolder: './' // absolute or relative path to root project folder
+  envFiles: [
+    // Path strings to your custom files --- absolute or relative path to root project folder
+  ]
+}
 ```
 
 ## Troubleshooting
@@ -233,23 +206,29 @@ console.log(process.env.FOO) // ✅
 console.log(process.env.BAR) // ❌ It's not defined in `build > env`
 ```
 
-#### dotenv
+#### The env dotfiles
 
-```js /quasar.config file
-build: {
-  env: require('dotenv').config(/* ... */).parsed
-}
+```
+# order matters!
+.env                                # loaded in all cases
+.env.local                          # loaded in all cases, ignored by git
+.env.[dev|prod]                     # loaded for dev or prod only
+.env.local.[dev|prod]               # loaded for dev or prod only, ignored by git
+.env.[quasarMode]                   # loaded for specific Quasar CLI mode only
+.env.local.[quasarMode]             # loaded for specific Quasar CLI mode only, ignored by git
+.env.[dev|prod].[quasarMode]        # loaded for specific Quasar CLI mode and dev|prod only
+.env.local.[dev|prod].[quasarMode]  # loaded for specific Quasar CLI mode and dev|prod only, ignored by git
 ```
 
-If the `.env` doesn't exist or there is a typo in the file name:
+If the `/.env` doesn't exist or there is a typo in the file name:
 
 ```js
 console.log(process.env.FOO) // ❌ The .env file is not loaded, this will fail
 ```
 
-If the `.env` file exists with the correct name, and has the following content:
+If the `/.env` file exists with the correct name, and has the following content:
 
-```bash
+```bash /.env
 FOO=hello
 ```
 

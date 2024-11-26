@@ -9,12 +9,12 @@ If you haven't selected Axios during the project initialization then you should 
 (Here you can also specify additional settings for your axios instance)
 
 ```js /src/boot/axios.js
-import { boot } from 'quasar/wrappers'
+import { defineBoot } from '#q-app/wrappers'
 import axios from 'axios'
 
 const api = axios.create({ baseURL: 'https://api.example.com' })
 
-export default boot(({ app }) => {
+export default defineBoot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
 
   app.config.globalProperties.$axios = axios

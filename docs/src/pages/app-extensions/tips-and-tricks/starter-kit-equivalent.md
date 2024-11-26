@@ -216,7 +216,7 @@ When the App Extension gets uninstall, we need to do some cleanup. But beware wh
 ```js
 // we yarn added it to our App Extension,
 // so we can import the following:
-const rimraf = require('rimraf')
+import rimraf from 'rimraf'
 
 export default function (api) {
   // Careful when you remove folders!

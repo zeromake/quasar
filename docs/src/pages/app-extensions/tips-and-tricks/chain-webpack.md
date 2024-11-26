@@ -46,10 +46,11 @@ export default function (api) {
 Our "chainWebpack" method, in the same file as above:
 
 ```js File: /index.js
-const MarkdownIt = require('markdown-it')
+import MarkdownIt from 'markdown-it'
+
 const md = new MarkdownIt()
 
-const chainWebpack = function (ctx, chain) {
+const chainWebpack = (ctx, chain) => {
   const rule = chain.module.rule('md')
     .test(/\.md$/)
     .pre()

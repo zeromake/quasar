@@ -637,11 +637,10 @@ Or you can build your own server. Here are some examples:
 
 ```js
 // when using default Vue Router "hash" mode
-const
-  express = require('express'),
-  serveStatic = require('serve-static'),
-  port = process.env.PORT || 5000
+import express from 'express'
+import serveStatic from 'serve-static'
 
+const port = process.env.PORT || 5000
 const app = express()
 
 app.use(serveStatic(...path-to-dist...))
@@ -650,12 +649,11 @@ app.listen(port)
 
 ```js
 // when using Vue Router "history" mode
-const
-  express = require('express'),
-  serveStatic = require('serve-static'),
-  history = require('connect-history-api-fallback'),
-  port = process.env.PORT || 5000
+import express from 'express'
+import serveStatic from 'serve-static'
+import history from 'connect-history-api-fallback'
 
+const port = process.env.PORT || 5000
 const app = express()
 
 app.use(history())
@@ -667,7 +665,7 @@ If you need URL rewrites of API, or simply put you want to proxy your API reques
 
 ```js
 // add this to one of the two previous examples:
-const { createProxyMiddleware } = require('http-proxy-middleware')
+import { createProxyMiddleware } from 'http-proxy-middleware'
 
 // ...
 app.use('/api', createProxyMiddleware({

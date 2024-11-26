@@ -16,7 +16,7 @@ If you previously used a lower version of Capacitor and you want to upgrade to a
 
 It would also be wise to check the changelog of Capacitor itself to see what breaking changes it has.
 
-## Capacitor v6 <q-badge label="@quasar/app-vite v1.4+" />
+## Capacitor v6
 
 ::: warning Requirements
 * Xcode 15+ (for iOS)
@@ -36,7 +36,7 @@ dependencies: {
 
 The `@capacitor/app` and `@capacitor/splash-screen` are optional, but it helps Quasar with some UI functionality if they are installed.
 
-## Capacitor v5 <q-badge label="@quasar/app-vite v1.4+" />
+## Capacitor v5
 
 ::: warning Requirements
 * Xcode 14.1+ (for iOS)
@@ -56,7 +56,7 @@ dependencies: {
 
 The `@capacitor/app` and `@capacitor/splash-screen` are optional, but it helps Quasar with some UI functionality if they are installed.
 
-## Capacitor v4 <q-badge label="@quasar/app-vite v1.4+" />
+## Capacitor v4
 
 Assuming that you've installed Capacitor mode already, this is how your dependencies in /src-capacitor/package.json should look like:
 

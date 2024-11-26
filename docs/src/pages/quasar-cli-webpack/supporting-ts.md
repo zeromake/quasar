@@ -17,9 +17,9 @@ The following steps are only required when you **have not** selected TypeScript 
 In order to support TypeScript, you'll need to change the extension of your quasar.config file: `/quasar.config` file:
 
 ```js
-import { configure } from "quasar/wrappers";
+import { defineConfig } from "#q-app/wrappers";
 
-module.exports = configure((ctx) => {
+export default defineConfig((ctx) => {
   return {
     supportTS: true,
     // ...
@@ -31,19 +31,7 @@ Then create `/tsconfig.json` file at the root of you project with this content:
 
 ```json
 {
-  "extends": "@quasar/app-webpack/tsconfig-preset",
-  "compilerOptions": {
-    // `baseUrl` should be set to the current folder to allow Quasar TypeScript preset to manage paths on your behalf
-    "baseUrl": "."
-  },
-  "exclude": [
-    "./dist",
-    "./.quasar",
-    "./node_modules",
-    "./src-capacitor",
-    "./src-cordova",
-    "./quasar.config.*.temporary.compiled*"
-  ]
+  "extends": "./.quasar/tsconfig.json"
 }
 ```
 
@@ -62,7 +50,7 @@ If you fail to add the `tsconfig.json` file, the application will break at compi
 Behind the curtains, Quasar uses `ts-loader` and `fork-ts-checker-webpack-plugin` (provided by `@quasar/app-webpack` package) to manage TS files. If you ever need to provide a custom configuration for these libs you can do so by making `build` property like so:
 
 ```js /quasar.config file
-module.exports = function (ctx) {
+export default (ctx) => {
   return {
     supportTS: {
       tsLoaderConfig: {
@@ -179,7 +167,7 @@ TypeScript Linting is really slow due to type-checking overhead, we suggest you 
 If you setup TypeScript linting and want `fork-ts-checker-webpack-plugin` (provided by `@quasar/app-webpack` package) to take it into account then you should make use of `tsCheckerConfig` property:
 
 ```js /quasar.config file
-module.exports = function (ctx) {
+export default (ctx) => {
   return {
     supportTS: {
       tsCheckerConfig: {

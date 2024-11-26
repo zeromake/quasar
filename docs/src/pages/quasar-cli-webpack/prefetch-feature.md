@@ -307,7 +307,7 @@ Don't forget to use the `preserveState: true` option for `registerModule` so we 
 You can use `preFetch` helper to type-hint the store parameter (which will otherwise have an `any` type):
 
 ```js
-import { preFetch } from 'quasar/wrappers'
+import { definePreFetch } from '#q-app/wrappers'
 import { Store } from 'vuex'
 
 interface StateInterface {
@@ -315,7 +315,7 @@ interface StateInterface {
 }
 
 export default {
-  preFetch: preFetch<StateInterface>(({ store }) => {
+  preFetch: definePreFetch<StateInterface>(({ store }) => {
     // Do something with your newly-typed store parameter
   }),
 }

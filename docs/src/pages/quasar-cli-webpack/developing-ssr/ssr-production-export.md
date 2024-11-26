@@ -14,7 +14,7 @@ Notice that your generated `/src-ssr` contains a file named `production-export.j
 
 ## Anatomy
 
-The `/src-ssr/production-export.[js|ts]` file is a simple JavaScript file which boots up your SSR webserver and defines what your webserver exports (if exporting anything).
+The `/src-ssr/production-export.js` file is a simple JavaScript file which boots up your SSR webserver and defines what your webserver exports (if exporting anything).
 
 ```js
 // import something here (serverless packages?)
@@ -35,9 +35,9 @@ Remember that whatever this function returns (if anything) will be exported from
 You can wrap the returned function with `ssrProductionExport` helper to get a better IDE autocomplete experience (Quasar v2.3.1+ required):
 
 ```js
-import { ssrProductionExport } from 'quasar/wrappers'
+import { defineSsrProductionExport } from '#q-app/wrappers'
 
-export default ssrProductionExport(({
+export default defineSsrProductionExport(({
   app, port, isReady, ssrHandler,
   resolve, publicPath, folders, render, serve
 }) => {
@@ -123,7 +123,7 @@ export default ssrProductionExport(({ app, port, isReady }) => {
 This is the default option that you get when adding SSR support in a Quasar CLI project. It starts listening on the configured port (process.env.PORT or quasar.config file > ssr > prodPort).
 
 ```js
-// src-ssr/production-export.[js|ts]
+// src-ssr/production-export.js
 
 import { ssrProductionExport } from 'quasar/wrappers'
 
@@ -152,7 +152,7 @@ module.exports.handler = __your_handler__
 Then what you'd need to do is:
 
 ```js
-// src-ssr/production-export.[js|ts]
+// src-ssr/production-export.js
 
 import { ssrProductionExport } from 'quasar/wrappers'
 
@@ -171,7 +171,7 @@ Should you require to export a handler of form `(event, context, callback) => vo
 #### Example: serverless-http
 
 ```js
-// src-ssr/production-export.[js|ts]
+// src-ssr/production-export.js
 
 import serverless from 'serverless-http'
 import { ssrProductionExport } from 'quasar/wrappers'
@@ -184,7 +184,7 @@ export default ssrProductionExport(({ ssrHandler }) => {
 #### Example: Firebase function
 
 ```js
-// src-ssr/production-export.[js|ts]
+// src-ssr/production-export.js
 
 import * as functions from 'firebase-functions'
 import { ssrProductionExport } from 'quasar/wrappers'

@@ -35,5 +35,5 @@ A new folder will appear in your project folder (which is explained in detail on
 
 Both files are going to be detailed in the next pages, but the high overview is:
 
-* The `register-service-worker.[js|ts]` file is part of the UI code and communicates with the service worker.
-* When using InjectManifest, you can write your own custom service worker (`custom-service-worker.[js|ts]`).
+* The `register-service-worker.js` file is part of the UI code and communicates with the service worker.
+* When using InjectManifest, you can write your own custom service worker (`custom-service-worker.js`).

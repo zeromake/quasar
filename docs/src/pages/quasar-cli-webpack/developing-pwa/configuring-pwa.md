@@ -20,12 +20,12 @@ Adding PWA mode to a Quasar project means a new folder will be created: `/src-pw
 
 You can freely edit these files. Notice a few things:
 
-1. `register-service-worker.[js|ts]` is automatically imported into your app (like any other /src file). It registers the service worker (created by Workbox or your custom one, depending on workbox plugin mode -- quasar.config file > pwa > workboxPluginMode) and you can listen for Service Worker's events. You can use ES6 code.
-2. `custom-service-worker.[js|ts]` will be your service worker file ONLY if workbox plugin mode is set to "InjectManifest" (quasar.config file > pwa > workboxPluginMode: 'InjectManifest'). Otherwise, Workbox will create a service-worker file for you.
+1. `register-service-worker.js` is automatically imported into your app (like any other /src file). It registers the service worker (created by Workbox or your custom one, depending on workbox plugin mode -- quasar.config file > pwa > workboxPluginMode) and you can listen for Service Worker's events. You can use ES6 code.
+2. `custom-service-worker.js` will be your service worker file ONLY if workbox plugin mode is set to "InjectManifest" (quasar.config file > pwa > workboxPluginMode: 'InjectManifest'). Otherwise, Workbox will create a service-worker file for you.
 3. It makes sense to run [Lighthouse](https://developers.google.com/web/tools/lighthouse/) tests on production builds only.
 
 ::: tip
-Read more on `register-service-worker.[js|ts]` and how to interact with the Service Worker on [Handling Service Worker](/quasar-cli-webpack/developing-pwa/handling-service-worker) documentation page.
+Read more on `register-service-worker.js` and how to interact with the Service Worker on [Handling Service Worker](/quasar-cli-webpack/developing-pwa/handling-service-worker) documentation page.
 :::
 
 ## quasar.config file
@@ -89,7 +89,7 @@ pwa: {
   },
 
   // optional; webpack config Object for
-  // the custom service worker ONLY (/src-pwa/custom-service-worker.[js|ts])
+  // the custom service worker ONLY (/src-pwa/custom-service-worker.js)
   // if using workbox in InjectManifest mode
   extendWebpackCustomSW (cfg) {
     // directly change props of cfg;
@@ -97,7 +97,7 @@ pwa: {
   },
 
   // optional; EQUIVALENT to extendWebpackCustomSW() but uses webpack-chain;
-  // for the custom service worker ONLY (/src-pwa/custom-service-worker.[js|ts])
+  // for the custom service worker ONLY (/src-pwa/custom-service-worker.js)
   // if using workbox in InjectManifest mode
   chainWebpackCustomSW (chain) {
     // chain is a webpack-chain instance
@@ -163,11 +163,11 @@ When NOT to use InjectManifest:
 * You want the easiest path to adding a service worker to your site.
 
 ::: tip TIPS
-* If you want to use this mode, you will have to write the service worker (`/src-pwa/custom-service-worker.[js|ts]`) file by yourself.
+* If you want to use this mode, you will have to write the service worker (`/src-pwa/custom-service-worker.js`) file by yourself.
 * Please check the available workboxOptions for this mode on [Workbox website](https://developers.google.com/web/tools/workbox/modules/workbox-webpack-plugin#full_injectmanifest_config).
 :::
 
-The following snippet is the default code for a custom service worker (`/src-pwa/custom-service-worker.[js|ts]`):
+The following snippet is the default code for a custom service worker (`/src-pwa/custom-service-worker.js`):
 
 ```js
 import { precacheAndRoute } from 'workbox-precaching'

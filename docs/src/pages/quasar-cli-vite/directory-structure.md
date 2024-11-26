@@ -105,7 +105,7 @@ scope:
     - l: ".eslintrc.cjs"
       e: ESLint config
       url: https://eslint.org/docs/latest/user-guide/configuring/configuration-files#using-configuration-files
-    - l: postcss.config.cjs
+    - l: postcss.config.js
       e: PostCSS config
       url: https://github.com/postcss/postcss
     - l: jsconfig.json

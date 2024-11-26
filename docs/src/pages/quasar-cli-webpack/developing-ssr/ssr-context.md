@@ -17,10 +17,10 @@ Among other places, it is supplied as parameter to [boot files](/quasar-cli-webp
 // a boot file
 export default ({ ..., ssrContext }) => { /* ... */ }
 
-// src/router/index.[js|ts]
+// src/router/index.js
 export default ({ ..., ssrContext }) { /* ... */ }
 
-// src/store/index.[js|ts]
+// src/store/index.js
 export default ({ ..., ssrContext }) { /* ... */ }
 
 // with preFetch:

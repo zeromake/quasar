@@ -3,11 +3,7 @@ title: Upgrade Guide for Quasar CLI with Vite
 desc: (@quasar/app-vite) How to upgrade Quasar CLI with Vite from older versions to the latest one.
 ---
 
-## @quasar/app-vite v2 (RC)
-
-::: danger
-All other docs pages will refer to the old @quasar/app-vite version (v1) specs. Only this page mentions (for now) about how to use the v2 beta/rc.
-:::
+## @quasar/app-vite v2
 
 ### A note to App Extensions owners
 
@@ -17,7 +13,7 @@ You might want to release new versions of your Quasar App Extensions with suppor
 api.compatibleWith(
   '@quasar/app-vite',
 - '^1.0.0'
-+ '^1.0.0 || ^2.0.0-rc.1'
++ '^1.0.0 || ^2.0.0'
 )
 ```
 
@@ -103,11 +99,11 @@ Preparations:
 * If using the global installation of Quasar CLI (`@quasar/cli`), make sure that you have the latest one. This is due to the support of quasar.config file in multiple formats.
 * Again, we highlight that the minimum supported version of Node.js is now v18 (always use the LTS versions of Node.js - the higher the version the better).
 
-* Edit your `/package.json` on the `@quasar/app-vite` entry and assign it `^2.0.0-rc.1`:
+* Edit your `/package.json` on the `@quasar/app-vite` entry and assign it `^2.0.0`:
   ```diff /package.json
   "devDependencies": {
   - "@quasar/app-vite": "^1.0.0",
-  + "@quasar/app-vite": "^2.0.0-rc.1"
+  + "@quasar/app-vite": "^2.0.0"
   }
   ```
   <br>
@@ -366,7 +362,7 @@ Preparations:
   <br>
 
   ```diff /quasar.config.ts
-  build: {
+   build: {
   +  typescript: {
   +    strict: true, // (recommended) enables strict settings for TypeScript
   +    vueShim: true, // required when using ESLint with type-checked rules, will generate a shim file for `*.vue` files

@@ -269,7 +269,7 @@ Before starting, it is highly suggested to make a copy of your current working p
 
   In the `/quasar.config` file, before the `module.exports = function (ctx)` add:
   ```js
-  const ESLintPlugin = require('eslint-webpack-plugin')
+  import ESLintPlugin from 'eslint-webpack-plugin'
   ```
 
   In quasar.config file > build add:
@@ -345,9 +345,10 @@ These need to be addressed by the package owners. But if you don't want to wait 
 
 ```
 // quasar.config file
+import nodePolyfillWebpackPlugin from 'node-polyfill-webpack-plugin'
+
 build: {
   chainWebpack (chain) {
-    const nodePolyfillWebpackPlugin = require('node-polyfill-webpack-plugin')
     chain.plugin('node-polyfill').use(nodePolyfillWebpackPlugin)
   }
 }
@@ -1182,7 +1183,7 @@ electron: {
 
 ### Quasar App CLI PWA mode
 
-If you are using Workbox in InjectManifest mode, then it's useful to know that the `/src-pwa/custom-service-worker.[js|ts]` is now being compiled too. This means that in your code you can now import with relative path too.
+If you are using Workbox in InjectManifest mode, then it's useful to know that the `/src-pwa/custom-service-worker.js` is now being compiled too. This means that in your code you can now import with relative path too.
 
 Due to the upgrade to Webpack 5, you will need to also upgrade `workbox-webpack-plugin` to v6+.
 

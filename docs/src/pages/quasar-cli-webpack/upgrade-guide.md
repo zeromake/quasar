@@ -64,11 +64,7 @@ scope:
         have multiple scripts)
 ---
 
-## @quasar/app-webpack v4 (RC)
-
-::: danger
-All other docs pages will refer to the old @quasar/app-webpack version (v3) specs. Only this page mentions (for now) about how to use the v4 beta/rc.
-:::
+## @quasar/app-webpack v4
 
 ### A note to App Extensions owners
 You might want to release new versions of your Quasar App Extensions with support for the new @quasar/app-webpack. If you are not touching the quasar.config configuration, then it will be as easy as just changing the following:
@@ -77,7 +73,7 @@ You might want to release new versions of your Quasar App Extensions with suppor
 api.compatibleWith(
   '@quasar/app-webpack',
 - '^3.0.0'
-+ '^3.0.0 || ^4.0.0-rc.1'
++ '^3.0.0 || ^4.0.0'
 )
 ```
 
@@ -177,11 +173,11 @@ Preparations:
 * If using the global installation of Quasar CLI (`@quasar/cli`), make sure that you have the latest one. This is due to the support of quasar.config file in multiple formats.
 * Again, we highlight that the minimum supported version of Node.js is now v16 (always use the LTS versions of Node.js - the higher the version the better).
 
-* Edit your `/package.json` on the `@quasar/app-webpack` entry and assign it `^4.0.0-rc.1`:
+* Edit your `/package.json` on the `@quasar/app-webpack` entry and assign it `^4.0.0`:
   ```diff /package.json
   "devDependencies": {
   - "@quasar/app-webpack": "^3.0.0",
-  + "@quasar/app-webpack": "^4.0.0-rc.1"
+  + "@quasar/app-webpack": "^4.0.0"
   }
   ```
   <br>

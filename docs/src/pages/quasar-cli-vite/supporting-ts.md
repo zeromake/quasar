@@ -28,23 +28,13 @@ $ bun add --dev typescript
 
 Then, create `/tsconfig.json` file at the root of you project with this content:
 
-```json
+```json /tsconfig.json
 {
-  "extends": "@quasar/app-vite/tsconfig-preset",
-  "compilerOptions": {
-    // `baseUrl` should be set to the current folder to allow Quasar TypeScript preset to manage paths on your behalf
-    "baseUrl": "."
-  },
-  "exclude": [
-    "./dist",
-    "./.quasar",
-    "./node_modules",
-    "./src-capacitor",
-    "./src-cordova",
-    "./quasar.config.*.temporary.compiled*"
-  ]
+  "extends": "./.quasar/tsconfig.json"
 }
 ```
+
+Run `$ quasar prepare` in the root of your project folder.
 
 Now you can start using TypeScript into your project. Note that some IDEs might require a restart for the new setup to fully kick in.
 
@@ -62,40 +52,34 @@ First add the needed dependencies:
 
 ```tabs
 <<| bash Yarn |>>
-$ yarn add --dev eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
+$ yarn add --dev eslint vite-plugin-checker vue-tsc@2 @typescript-eslint/parser @typescript-eslint/eslint-plugin
 # you might also want to install the `eslint-plugin-vue` package.
 <<| bash NPM |>>
-$ npm install --save-dev eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
+$ npm install --save-dev eslint vite-plugin-checker vue-tsc@2 @typescript-eslint/parser @typescript-eslint/eslint-plugin
 # you might also want to install the `eslint-plugin-vue` package.
 <<| bash PNPM |>>
-$ pnpm add -D eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
+$ pnpm add -D eslint vite-plugin-checker vue-tsc@2 @typescript-eslint/parser @typescript-eslint/eslint-plugin
 # you might also want to install the `eslint-plugin-vue` package.
 <<| bash Bun |>>
-$ bun add --dev eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
+$ bun add --dev eslint vite-plugin-checker vue-tsc@2 @typescript-eslint/parser @typescript-eslint/eslint-plugin
 # you might also want to install the `eslint-plugin-vue` package.
 ```
 
 Then update your ESLint configuration accordingly, like in the following example:
 
 ```js /.eslintrc.cjs
-const { resolve } = require('node:path');
-
 module.exports = {
   // https://eslint.org/docs/user-guide/configuring#configuration-cascading-and-hierarchy
   // This option interrupts the configuration hierarchy at this file
   // Remove this if you have an higher level ESLint config file (it usually happens into a monorepos)
   root: true,
 
-  // https://eslint.vuejs.org/user-guide/#how-to-use-custom-parser
+  // https://eslint.vuejs.org/user-guide/#how-to-use-a-custom-parser
   // Must use parserOptions instead of "parser" to allow vue-eslint-parser to keep working
   // `parser: 'vue-eslint-parser'` is already included with any 'plugin:vue/**' config and should be omitted
   parserOptions: {
-    // https://typescript-eslint.io/packages/parser/#configuration
-    // Needed to make the parser take into account 'vue' files
-    extraFileExtensions: ['.vue'],
     parser: require.resolve('@typescript-eslint/parser'),
-    project: resolve(__dirname, './tsconfig.json'),
-    tsconfigRootDir: __dirname,
+    extraFileExtensions: [ '.vue' ]
   },
 
   env: {
@@ -107,43 +91,75 @@ module.exports = {
   // Rules order is important, please avoid shuffling them
   extends: [
     // Base ESLint recommended rules
-    'eslint:recommended',
+    // 'eslint:recommended',
 
     // https://typescript-eslint.io/getting-started/legacy-eslint-setup
     // ESLint typescript rules
     'plugin:@typescript-eslint/recommended',
-    // consider disabling this class of rules if linting takes too long
-    'plugin:@typescript-eslint/recommended-requiring-type-checking',
 
-    // https://eslint.vuejs.org/rules/#priority-a-essential-error-prevention
-    // consider switching to `plugin:vue/strongly-recommended` or `plugin:vue/recommended` for stricter rules
-    'plugin:vue/essential',
+    // Uncomment any of the lines below to choose desired strictness,
+    // but leave only one uncommented!
+    // See https://eslint.vuejs.org/rules/#available-rules
+    'plugin:vue/vue3-essential', // Priority A: Essential (Error Prevention)
+    // 'plugin:vue/vue3-strongly-recommended', // Priority B: Strongly Recommended (Improving Readability)
+    // 'plugin:vue/vue3-recommended', // Priority C: Recommended (Minimizing Arbitrary Choices and Cognitive Overhead)
 
-    // --- ONLY WHEN USING PRETTIER ---
     // https://github.com/prettier/eslint-config-prettier#installation
     // usage with Prettier, provided by 'eslint-config-prettier'.
-    'prettier',
+    'prettier'
   ],
 
   plugins: [
     // required to apply rules which need type information
     '@typescript-eslint',
 
-    // https://eslint.vuejs.org/user-guide/#why-doesn-t-it-work-on-vue-file
+    // https://eslint.vuejs.org/user-guide/#why-doesn-t-it-work-on-vue-files
     // required to lint *.vue files
-    'vue',
+    'vue'
+
+    // https://github.com/typescript-eslint/typescript-eslint/issues/389#issuecomment-509292674
+    // Prettier has not been included as plugin to avoid performance impact
+    // add it as an extension for your IDE
+
   ],
+
+  globals: {
+    ga: 'readonly', // Google Analytics
+    cordova: 'readonly',
+    __statics: 'readonly',
+    __QUASAR_SSR__: 'readonly',
+    __QUASAR_SSR_SERVER__: 'readonly',
+    __QUASAR_SSR_CLIENT__: 'readonly',
+    __QUASAR_SSR_PWA__: 'readonly',
+    process: 'readonly',
+    Capacitor: 'readonly',
+    chrome: 'readonly'
+  },
 
   // add your custom rules here
   rules: {
-    // others rules...
 
-    // TypeScript
-    'quotes': ['warn', 'single'],
+    'prefer-promise-reject-errors': 'off',
+
+    quotes: ['warn', 'single', { avoidEscape: true }],
+
     // this rule, if on, would require explicit return type on the `render` function
     '@typescript-eslint/explicit-function-return-type': 'off',
+
     // in plain CommonJS modules, you can't use `import foo = require('foo')` to pass this rule, so it has to be disabled
     '@typescript-eslint/no-var-requires': 'off',
+
+    '@typescript-eslint/consistent-type-imports': [
+      'error',
+      { prefer: 'type-imports' },
+    ],
+
+    // The core 'no-unused-vars' rules (in the eslint:recommended ruleset)
+    // does not work with type definitions
+    'no-unused-vars': 'off',
+
+    // allow debugger during development only
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
   }
 }
 ```
@@ -163,32 +179,7 @@ As a last step, update your `package.json > scripts > lint` script to also lint 
 
 ### TypeScript Declaration Files
 
-If you chose TypeScript support when scaffolding the project, these declaration files were automatically scaffolded for you. If TypeScript support wasn't enabled during project creation, create the following files.
-
-```ts /src/shims-vue.d.ts
-/* eslint-disable */
-
-/// <reference types="vite/client" />
-
-// Mocks all files ending in `.vue` showing them as plain Vue instances
-declare module '*.vue' {
-  import type { DefineComponent } from 'vue';
-  const component: DefineComponent<{}, {}, any>;
-  export default component;
-}
-```
-
-```ts /src/quasar.d.ts
-/* eslint-disable */
-
-// Forces TS to apply `@quasar/app-vite` augmentations of `quasar` package
-// Removing this would break `quasar/wrappers` imports as those typings are declared
-//  into `@quasar/app-vite`
-// As a side effect, since `@quasar/app-vite` reference `quasar` to augment it,
-//  this declaration also apply `quasar` own
-//  augmentations (eg. adds `$q` into Vue component context)
-/// <reference types="@quasar/app-vite" />
-```
+If you chose TypeScript support when scaffolding the project, the following declaration file was automatically scaffolded for you. If TypeScript support wasn't enabled during project creation, create it:
 
 ```ts /src/env.d.ts
 /* eslint-disable */
@@ -210,7 +201,7 @@ See the following sections for the features and build modes you are using.
 If you are using [Pinia](/quasar-cli-vite/state-management-with-pinia), add the section below to your project. Quasar CLI provides the `router` property, you may need to add more global properties if you have them.
 
 ```ts /src/stores/index.ts
-import { Router } from 'vue-router';
+import type { Router } from 'vue-router';
 
 /*
  * When adding new properties to stores, you should also
@@ -222,51 +213,6 @@ declare module 'pinia' {
     readonly router: Router;
   }
 }
-```
-
-#### Vuex
-
-If you are using [Vuex](/quasar-cli-vite/state-management-with-vuex), add the section below to your project. Quasar CLI provides the `router` property, you may need to add more global properties if you have them. Adjust the state interface to suit your application.
-
-```ts /src/store/index.ts
-import { InjectionKey } from 'vue'
-import { Router } from 'vue-router'
-import {
-  createStore,
-  Store as VuexStore,
-  useStore as vuexUseStore,
-} from 'vuex'
-
-export interface StateInterface {
-  // Define your own store structure, using submodules if needed
-  // example: ExampleStateInterface;
-  // Declared as unknown to avoid linting issue. Best to strongly type as per the line above.
-  example: unknown
-}
-
-// provide typings for `this.$store`
-declare module 'vue' {
-  interface ComponentCustomProperties {
-    $store: VuexStore<StateInterface>
-  }
-}
-
-// Provide typings for `this.$router` inside Vuex stores
-declare module "vuex" {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  export interface Store<S> {
-    readonly $router: Router;
-  }
-}
-
-// provide typings for `useStore` helper
-export const storeKey: InjectionKey<VuexStore<StateInterface>> = Symbol('vuex-key')
-
-export function useStore() {
-  return vuexUseStore(storeKey)
-}
-
-// createStore<StateInterface>({ ... })
 ```
 
 #### PWA mode
@@ -352,6 +298,18 @@ declare module '@quasar/app-vite' {
     'storage.get': [{ key: string | null }, any];
     'storage.set': [{ key: string; value: any }, any];
     'storage.remove': [{ key: string }, any];
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+  }
+}
+```
+
+You'll also need this in every content script file:
+
+```ts /src-bex/my-content-script.ts
+declare module '@quasar/app-vite' {
+  interface BexEventMap {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    'some.event': [{ someProp: string }, void];
     /* eslint-enable @typescript-eslint/no-explicit-any */
   }
 }

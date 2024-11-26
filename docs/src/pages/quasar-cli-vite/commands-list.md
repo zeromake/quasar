@@ -21,7 +21,8 @@ $ quasar
   Commands
     dev, d        Start a dev server for your App
     build, b      Build your app for production
-    clean, c      Clean all build artifacts
+    prepare, p    Prepare the app for linting, type-checking, IDE integration, etc.
+    clean, c      Clean dev/build cache, /dist folder & entry points
     new, n        Quickly scaffold page/layout/component/... vue file
     mode, m       Add/remove Quasar Modes for your App
     inspect       Inspect Vite/esbuild configs used under the hood
@@ -47,7 +48,7 @@ $ quasar
 See help for any command:
 
 ```bash
-$ quasar [command name] --help
+$ quasar [command-name] --help
 ```
 
 ## Upgrade
@@ -105,25 +106,25 @@ $ quasar dev -h
 
     $ quasar dev -m ssr
 
-    # alias for "quasar dev -m cordova -T ios"
+    # alias for "quasar dev -m capacitor -T ios"
     $ quasar dev -m ios
 
-    # alias for "quasar dev -m cordova -T android"
+    # alias for "quasar dev -m capacitor -T android"
     $ quasar dev -m android
 
     # passing extra parameters and/or options to
     # underlying "cordova" or "electron" executables:
-    $ quasar dev -m ios -- some params --and options --here
+    $ quasar dev -m cordova -T ios -- some params --and options --here
     $ quasar dev -m electron -- --no-sandbox --disable-setuid-sandbox
     # when on Windows and using Powershell:
-    $ quasar dev -m ios '--' some params --and options --here
+    $ quasar dev -m cordova -T ios '--' some params --and options --here
     $ quasar dev -m electron '--' --no-sandbox --disable-setuid-sandbox
 
   Options
     --mode, -m       App mode [spa|ssr|pwa|cordova|capacitor|electron|bex] (default: spa)
     --port, -p       A port number on which to start the application
-    --devtools, -d   Open remote Vue Devtools
     --hostname, -H   A hostname to use for serving the application
+    --devtools, -d   Open remote Vue Devtools
     --help, -h       Displays this message
 
     Only for Cordova mode:
@@ -132,11 +133,15 @@ $ quasar dev -h
                         Examples: iPhone-7, iPhone-X
                         iPhone-X,com.apple.CoreSimulator.SimRuntime.iOS-12-2
     --ide, -i        Open IDE (Android Studio / XCode) instead of letting Cordova
-                        booting up the emulator, in which case the "--emulator"
-                        param will have no effect
+                       boot up the emulator / building in terminal, in which case
+                       the "--emulator" param will have no effect
+
 
     Only for Capacitor mode:
     --target, -T     (required) App target [android|ios]
+
+    Only for BEX mode:
+    --target, -T     (required) Browser family target [chrome|firefox]
 ```
 
 The Quasar development server allows you to develop your App by compiling and maintaining code in-memory. A web server will serve your App while offering hot-reload out of the box. Running in-memory offers faster rebuilds when you change your code.
@@ -169,7 +174,7 @@ $ quasar dev -m [android|ios]
 $ quasar dev -m electron
 
 # Developing a Browser Extension (BEX)
-$ quasar dev -m bex
+$ quasar dev -m bex -T [chrome|firefox]
 
 # passing extra parameters and/or options to
 # underlying "cordova" or "electron" executables:
@@ -244,6 +249,8 @@ $ quasar build -h
                         [darwin|win32|linux|mas|all]
                       - Electron with "electron-builder" bundler (default: yours)
                         [darwin|mac|win32|win|linux|all]
+                      - Bex
+                        [chrome|firefox]
     --publish, -P   Also trigger publishing hooks (if any are specified)
                       - Has special meaning when building with Electron mode and using
                         electron-builder as bundler
@@ -256,7 +263,7 @@ $ quasar build -h
 
     ONLY for Cordova and Capacitor mode:
     --ide, -i       Open IDE (Android Studio / XCode) instead of finalizing with a
-                    terminal/console-only build
+                      terminal/console-only build
 
     ONLY for Electron mode:
     --bundler, -b   Bundler (@electron/packager or electron-builder)
@@ -270,6 +277,9 @@ $ quasar build -h
     ONLY for electron-builder (when using "publish" parameter):
     --publish, -P  Publish options [onTag|onTagOrDraft|always|never]
                      - see https://www.electron.build/configuration/publish
+
+    Only for BEX mode:
+    --target, -T     (required) Browser family target [chrome|firefox]
 ```
 
 The Quasar CLI can pack everything together and optimize your App for production. It minifies source code, extracts vendor components, leverages browser cache and much more.
@@ -287,7 +297,7 @@ $ quasar build -m ssr
 $ quasar build -m pwa
 
 # Build a BEX for production
-$ quasar build -m bex
+$ quasar build -m bex -T [chrome|firefox]
 
 # Build a Mobile App (through Cordova)
 $ quasar build -m cordova -T [android|ios]
@@ -306,6 +316,13 @@ $ quasar build -m ios '--' some params --and options --here
 # Create a production build with ability to debug it
 # (has source-maps and code is NOT minified)
 $ quasar build -d [-m <mode>]
+```
+
+## Prepare
+Prepares your project folder for the IDE, making autocompletion and other IDE features work correctly.
+
+```bash
+$ quasar prepare
 ```
 
 ## Clean
@@ -417,6 +434,11 @@ $ quasar describe -h
   Usage
     $ quasar describe <component/directive/Quasar plugin>
 
+    # list all available API entries:
+    $ quasar describe list
+    # list available API entries that contain a String (ex "storage"):
+    $ quasar describe list storage
+
     # display everything:
     $ quasar describe QIcon
 
@@ -436,13 +458,15 @@ $ quasar describe -h
     --filter, -f <filter> Filters the API
     --props, -p           Displays the API props
     --slots, -s           Displays the API slots
-    --methods, -m         Displays the API methods
     --events, -e          Displays the API events
+    --methods, -m         Displays the API methods
+    --computedProps, -c   Displays the API computed props
     --value, -v           Displays the API value
     --arg, -a             Displays the API arg
     --modifiers, -M       Displays the API modifiers
     --injection, -i       Displays the API injection
     --quasar, -q          Displays the API quasar conf options
+    --docs, -d            Opens the docs API URL
     --help, -h            Displays this message
 ```
 
@@ -639,11 +663,10 @@ When building a SPA or PWA, the distributable folder can be served by any static
 Or you can build your own server. Here are some examples:
 
 ```js When using default Vue Router 'hash' mode
-const
-  express = require('express'),
-  serveStatic = require('serve-static'),
-  port = process.env.PORT || 5000
+import express from 'express'
+import serveStatic from 'serve-static'
 
+const port = process.env.PORT || 5000
 const app = express()
 
 app.use(serveStatic(...path-to-dist...))
@@ -651,12 +674,11 @@ app.listen(port)
 ```
 
 ```js When using Vue Router 'history' mode
-const
-  express = require('express'),
-  serveStatic = require('serve-static'),
-  history = require('connect-history-api-fallback'),
-  port = process.env.PORT || 5000
+import express from 'express'
+import serveStatic from 'serve-static'
+import history from 'connect-history-api-fallback'
 
+const port = process.env.PORT || 5000
 const app = express()
 
 app.use(history())
@@ -668,7 +690,7 @@ If you need URL rewrites of API, or simply put you want to proxy your API reques
 
 ```js
 // add this to one of the two previous examples:
-const { createProxyMiddleware } = require('http-proxy-middleware')
+import { createProxyMiddleware } from 'http-proxy-middleware'
 
 // ...
 app.use('/api', createProxyMiddleware({
@@ -684,66 +706,3 @@ Finally, run one of these files:
 ```bash
 $ node my-server.js
 ```
-
-## Create <q-badge align="top" color="brand-primary" label="legacy" />
-
-### Scaffolding a Quasar project folder
-
-`quasar create` is a legacy command and is not recommended for use except for custom starter kits.
-You should use `create-quasar` instead:
-
-```tabs
-<<| bash Yarn |>>
-$ yarn create quasar
-<<| bash NPM |>>
-$ npm init quasar@latest
-<<| bash PNPM |>>
-$ pnpm create quasar
-<<| bash Bun |>>
-$ bun create quasar
-```
-
-### Scaffolding from a custom starter kit <q-badge align="top" color="brand-primary" label="legacy" />
-
-Should you wish to create a Quasar project (app, AppExtension or UI kit) from **CUSTOM** starter kits, please use the `@quasar/legacy-create` global installable CLI instead:
-
-```tabs
-<<| bash Yarn |>>
-# globally install the @quasar/legacy-create CLI
-$ yarn global add @quasar/legacy-create
-
-# then:
-$ quasar-legacy-create <folder_name> <address> [--branch <branch_name>]
-<<| bash NPM |>>
-# globally install the @quasar/legacy-create CLI
-$ npm i -g @quasar/legacy-create
-
-# then:
-$ quasar-legacy-create <folder_name> <address> [--branch <branch_name>]
-<<| bash PNPM |>>
-# globally install the @quasar/legacy-create CLI
-$ pnpm add -g @quasar/legacy-create
-
-# then:
-$ quasar-legacy-create <folder_name> <address> [--branch <branch_name>]
-<<| bash Bun |>>
-# globally install the @quasar/legacy-create CLI
-# experimental support
-$ bun install -g @quasar/legacy-create
-
-# then:
-$ quasar-legacy-create <folder_name> <address> [--branch <branch_name>]
-```
-
-With a starter kit stored on your machine by providing a **local path** to a folder: `quasar-legacy-create <folder> ./my-custom-starter-kit`.
-
-With a starter kit stored into any publicly accessible Git repository by providing a reference which follows this schema:
-- GitHub - `github:owner/name` or simply `owner/name`
-- GitLab - `gitlab:owner/name`
-- Bitbucket - `bitbucket:owner/name`
-
-`master` branch will be checked out by default, but you can specify the one you prefer via `--branch <branch name>` (eg. `quasar-legacy-create <folder> owner/name --branch my-branch`).
-
-::: warning
-The preferred way to build reusable code and UI Components into Quasar ecosystem are App Extensions. Use a custom starter kit only if you really know what you're doing and be aware that it will make more difficult for the Quasar team to provide you assistance.
-:::

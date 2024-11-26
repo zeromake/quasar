@@ -15,16 +15,16 @@ Among other places, it is supplied as parameter to [boot files](/quasar-cli-vite
 
 ```js
 // a boot file
-export default ({ ..., ssrContext }) => { /* ... */ }
+export default defineBoot(({ ..., ssrContext }) => { /* ... */ })
 
-// src/router/index.[js|ts]
-export default ({ ..., ssrContext }) { /* ... */ }
+// src/router/index.js
+export default defineRouter(({ ..., ssrContext }) { /* ... */ })
 
-// src/store/index.[js|ts]
-export default ({ ..., ssrContext }) { /* ... */ }
+// src/store/index.js
+export default defineStore(({ ..., ssrContext }) { /* ... */ })
 
 // with preFetch:
-preFetch ({ ..., ssrContext }) { /* ... */ }
+preFetch: definePreFetch(({ ..., ssrContext }) { /* ... */ })
 ```
 
 You can also access the ssrContext in your Vue components. Below are two examples, one with Composition API and one with Options API:

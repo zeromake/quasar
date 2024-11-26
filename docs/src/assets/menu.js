@@ -789,10 +789,6 @@ export default [
         path: 'state-management-with-pinia'
       },
       {
-        name: 'State Management with Vuex',
-        path: 'state-management-with-vuex'
-      },
-      {
         name: 'Linter',
         path: 'linter'
       },
@@ -833,10 +829,6 @@ export default [
           {
             name: 'Writing Universal Code',
             path: 'writing-universal-code'
-          },
-          {
-            name: 'Upgrade guide',
-            path: 'ssr-upgrade-guide'
           },
           {
             name: 'Preparation',
@@ -1219,10 +1211,6 @@ export default [
         path: 'state-management-with-pinia'
       },
       {
-        name: 'State Management with Vuex',
-        path: 'state-management-with-vuex'
-      },
-      {
         name: 'Linter',
         path: 'linter'
       },
@@ -1263,10 +1251,6 @@ export default [
           {
             name: 'Writing Universal Code',
             path: 'writing-universal-code'
-          },
-          {
-            name: 'Upgrade guide',
-            path: 'ssr-upgrade-guide'
           },
           {
             name: 'Preparation',

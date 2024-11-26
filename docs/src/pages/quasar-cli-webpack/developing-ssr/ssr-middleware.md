@@ -43,9 +43,9 @@ export default async ({ app, resolve, publicPath, folders, render, serve }) => {
 You can wrap the returned function with `ssrMiddleware` helper to get a better IDE autocomplete experience (through Typescript):
 
 ```js
-import { ssrMiddleware } from 'quasar/wrappers'
+import { defineSsrMiddleware } from '#q-app/wrappers'
 
-export default ssrMiddleware(async ({ app, resolve, publicPath, folders, render, serve }) => {
+export default defineSsrMiddleware(async ({ app, resolve, publicPath, folders, render, serve }) => {
   // something to do
   await something()
 })

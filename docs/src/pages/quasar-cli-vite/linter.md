@@ -77,9 +77,7 @@ Example of ESLint rules below:
 }
 ```
 
-## Typescript projects linting
-
-The linting for a TS project is based on vite-plugin-checker + ESLint + vue-tsc:
+## TypeScript projects linting
 
 ```tabs
 <<| bash Yarn |>>
@@ -92,24 +90,11 @@ $ pnpm add -D vite-plugin-checker vue-tsc@2 typescript
 $ bun add --dev vite-plugin-checker vue-tsc@2 typescript
 ```
 
-Create a file called `tsconfig.vue-tsc.json` in the root of your project folder:
-
-```json /tsconfig.vue-tsc.json
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "skipLibCheck": true
-  }
-}
-```
-
-```js /quasar.config file
+```js [highlight=3-8] /quasar.config file
 build: {
   vitePlugins: [
     ['vite-plugin-checker', {
-      vueTsc: {
-        tsconfigPath: 'tsconfig.vue-tsc.json'
-      },
+      vueTsc: true,
       eslint: {
         lintCommand: 'eslint "./**/*.{js,ts,mjs,cjs,vue}"'
       }
@@ -118,9 +103,7 @@ build: {
 }
 ```
 
-## Javascript projects linting
-
-The linting for a JS project is based on vite-plugin-checker + ESLint:
+## JavaScript projects linting
 
 ```tabs
 <<| bash Yarn |>>
@@ -133,7 +116,7 @@ $ pnpm add -D vite-plugin-checker
 $ bun add --dev vite-plugin-checker
 ```
 
-```js /quasar.config file
+```diff [highlight=3-7] /quasar.config file
 build: {
   vitePlugins: [
     ['vite-plugin-checker', {
@@ -144,79 +127,3 @@ build: {
   ]
 }
 ```
-
-## quasar.config file > eslint <q-badge label="deprecated" />
-
-::: warning
-The property described below has been deprecated in favour of using vite-plugin-checker.
-:::
-
-If you chose ESLint when creating your project folder, you'll also notice that the `eslint` key is added to the `/quasar.config` file:
-
-```js /quasar.config file
-eslint: {
-  // fix: true,
-  // include: [],
-  // exclude: [],
-  // rawOptions: {},
-  warnings: true,
-  errors: true
-},
-```
-
-```js /quasar.config file > eslint
-/** Options with which Quasar CLI will use ESLint */
-eslint?: QuasarEslintConfiguration;
-
-interface QuasarEslintConfiguration {
-  /**
-   * Should it report warnings?
-   * @default true
-   */
-  warnings?: boolean;
-
-  /**
-   * Should it report errors?
-   * @default true
-   */
-  errors?: boolean;
-
-  /**
-   * Fix on save
-   */
-  fix?: boolean;
-
-  /**
-   * Raw options to send to ESLint
-   */
-  rawOptions?: object;
-
-  /**
-   * Files to include (can be in glob format)
-   */
-  include?: string[];
-
-  /**
-   * Files to exclude (can be in glob format).
-   * Recommending to use .eslintignore file instead.
-   */
-  exclude?: string[];
-}
-```
-
-In order for you to disable ESLint later, all you need to do is to:
-
-1. Comment out (or remove) the key below:
-
-  ```js /quasar.config file
-  eslint: { /* ... */ }
-  ```
-
-2. Or, set `warnings` and `errors` to `false`:
-
-  ```js /quasar.config file
-  eslint: {
-    warnings: false,
-    errors: false
-  }
-  ```

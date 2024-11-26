@@ -96,13 +96,12 @@ Also if you configure to build with the Vue compiler version (quasar.config file
 
 ### Adding Webpack aliases
 
-To add your own alias you can extend the webpack config and merge it with the existing alias.
-Use the `path.resolve` helper to resolve the path to your intended alias.
+To add your own alias you can extend the webpack config and merge it with the existing alias. Always use absolute paths.
 
 ```js /quasar.config file
-const path = require('node:path')
+import { fileURLToPath } from 'node:url'
 
-module.exports = function (ctx) {
+export default (ctx) => {
   return {
     build: {
       extendWebpack (cfg, { isServer, isClient }) {
@@ -110,7 +109,7 @@ module.exports = function (ctx) {
           ...cfg.resolve.alias, // This adds the existing alias
 
           // Add your own alias like this
-          myalias: path.resolve(__dirname, './src/somefolder'),
+          myalias: fileURLToPath(new URL('./src/somefolder', import.meta.url)),
         }
       }
     }
@@ -121,14 +120,14 @@ module.exports = function (ctx) {
 Equivalent with chainWebpack():
 
 ```js /quasar.config file
-const path = require('node:path')
+import { fileURLToPath } from 'node:url'
 
-module.exports = function (ctx) {
+export default (ctx) => {
   return {
     build: {
       chainWebpack (chain, { isServer, isClient }) {
         chain.resolve.alias
-          .set('myalias', path.resolve(__dirname, './src/somefolder'))
+          .set('myalias', fileURLToPath(new URL('./src/somefolder', import.meta.url)))
       }
     }
   }
@@ -142,9 +141,10 @@ Quasar App CLI is using Webpack v5. If you are moving your existing project to Q
 These need to be addressed by the package owners. But if you prefer not to wait and just want to run your app/website (with a bit of risk), then you can manually install `node-polyfill-webpack-plugin` (`yarn add --dev node-polyfill-webpack-plugin`) and reference it in `quasar.config file > build > chainWebpack`. Example:
 
 ```js /quasar.config file
+const nodePolyfillWebpackPlugin from 'node-polyfill-webpack-plugin'
+
 build: {
   chainWebpack (chain) {
-    const nodePolyfillWebpackPlugin = require('node-polyfill-webpack-plugin')
     chain.plugin('node-polyfill').use(nodePolyfillWebpackPlugin)
   }
 }

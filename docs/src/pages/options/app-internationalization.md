@@ -89,18 +89,23 @@ $ bun add --dev @intlify/vue-i18n-loader
 We then edit the `quasar.config` file at the root of our project. We have to include the following:
 
 ```js /quasar.config file
-const path = require('node:path')
+import { fileURLToPath } from 'node:url'
 
 build: {
   chainWebpack: chain => {
     chain.module
       .rule('i18n-resource')
         .test(/\.(json5?|ya?ml)$/)
-          .include.add(path.resolve(__dirname, './src/i18n'))
+          .include.add(
+            fileURLToPath(
+              new URL('./src/i18n', import.meta.url)
+            )
+          )
           .end()
         .type('javascript/auto')
         .use('i18n-resource')
           .loader('@intlify/vue-i18n-loader')
+
     chain.module
       .rule('i18n')
         .resourceQuery(/blockType=i18n/)
