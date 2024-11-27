@@ -4,8 +4,7 @@ import { getPackagePath } from '../utils/get-package-path.js'
 
 export function createInstance ({ appPaths }) {
   const hasTypescript = (
-    appPaths.quasarConfigFilename.endsWith('.ts')
-    && existsSync(appPaths.resolve.app('tsconfig.json'))
+    existsSync(appPaths.resolve.app('tsconfig.json'))
   )
 
   if (hasTypescript === true) {
