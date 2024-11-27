@@ -100,7 +100,7 @@ api.compatibleWith(
 * Webpack will now only compile the contents of `/src` folder, while the rest (/src-pwa, /src-electron, etc) are now handled by Esbuild. This translates to a superior build speed and handling of Node.js formats.
 * The "test" cmd was removed due to latest updates for @quasar/testing-* packages. See [here](https://testing.quasar.dev/packages/testing/)
 * The "clean" cmd has been re-designed. Type "quasar clean -h" in your upgraded Quasar project folder for more info.
-* Typescript detection is based on the quasar.config file being in TS form (quasar.config.ts), tsconfig.json file presence and typescript & ts-loader being installed.
+* Typescript detection is based on the presence of /tsconfig.json and typescript & ts-loader being installed.
 * Dropped support for Vuex. [Pinia](https://pinia.vuejs.org/) has been the official store for Vue 3 for a while now. Vuex was deprecated in app-webpack v3 and it had problems with the new structure, so it's now removed. You can still use Vuex as any Vue plugin, but you will have to manage everything(installing the store, hydration, no `store` parameter in boot files, etc.) yourself and will not receive any support from Quasar CLI. You will likely have to patch Vuex in order to get it working with TypeScript. We recommend migrating to Pinia.
 * **We will detail more breaking changes for each of the Quasar modes below**.
 
@@ -1686,7 +1686,7 @@ export interface QuasarAppPaths {
 }
 ```
 
-The Typescript detection is based on the quasar.config file being in TS form (quasar.config.ts), tsconfig.json file presence and typescript & ts-loader being installed, so please remove the following:
+The Typescript detection is based on the tsconfig.json file presence and typescript & ts-loader being installed, so please remove the following:
 
 ```diff /quasar.config
 - /**
