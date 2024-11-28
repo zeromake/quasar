@@ -65,18 +65,21 @@ setup () {
 }
 ```
 
-Usage in Vuex Actions for globally adding headers to axios (such as during authentication):
+Usage in Pinia Actions for globally adding headers to axios (such as during authentication):
 
 ```js
 import { api } from 'boot/axios'
 
-export function register ({ commit }, form) {
-  return api.post('/auth/register', form)
-    .then(response => {
-      api.defaults.headers.common['Authorization'] = 'Bearer ' + response.data.token
-      commit('login', {token: response.data.token, user: response.data.user})
-    })
-}
+export const useAuthStore = defineStore('auth', {
+  actions: {
+    register (form) {
+      return api.post('/auth/register', form)
+        .then(response => {
+          api.defaults.headers.common['Authorization'] = 'Bearer ' + response.data.token
+          // do something with { token: response.data.token, user: response.data.user }
+        })
+  }
+})
 ```
 
 Also look at [Axios docs](https://github.com/axios/axios) for more information.

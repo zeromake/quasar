@@ -1,6 +1,6 @@
 ---
 title: PreFetch Feature
-desc: (@quasar/app-vite) How to prefetch data and initialize your Vuex store, validate the route and redirect to another page in a Quasar app.
+desc: (@quasar/app-vite) How to prefetch data and initialize Pinia, validate the route and redirect to another page in a Quasar app.
 related:
   - /quasar-cli-vite/quasar-config-file
 ---
@@ -25,7 +25,7 @@ return {
 ```
 
 ::: warning
-When you use it to pre-fetch data, you may want to use Pinia or Vuex, so make sure that your project folder has the `/src/stores` (for Pinia) **OR** `/src/store` (for Vuex) folders when you create your project, otherwise generate a new project and copy the store folder contents to your current project (or use `quasar new store` command).
+When you use it to pre-fetch data, you may want to use Pinia, so make sure that your project folder has the `/src/stores` (for Pinia) folders when you create your project, otherwise generate a new project and copy the store folder contents to your current project (or use `quasar new store` command).
 :::
 
 ## How PreFetch Helps SSR Mode
@@ -187,7 +187,7 @@ The `redirect()` method requires a Vue Router location Object.
 
 ### Using preFetch to Initialize Pinia
 
-The `preFetch` hook runs only once, when the app boots up, so you can use this opportunity to initialize the Pinia store(s) or the Vuex Store here.
+The `preFetch` hook runs only once, when the app boots up, so you can use this opportunity to initialize the Pinia store(s) here.
 
 ```tabs
 <<| js Pinia on Non SSR |>>

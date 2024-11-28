@@ -26,13 +26,31 @@ extends: [
 ]
 ```
 
-If you chose ESLint when creating your project folder, you'll also notice that the `/quasar.config` file adds the eslint-loader to Webpack configuration for you:
+Also note that you need the following file:
 
-```js
-build: {
-  chainWebpack (chain) {
-    chain.plugin('eslint-webpack-plugin')
-      .use(ESLintPlugin, [{ extensions: [ 'js', 'vue' ] }])
+```bash /.eslintignore
+/dist
+/src-capacitor
+/src-cordova
+/.quasar
+/node_modules
+.eslintrc.cjs
+/quasar.config.*.temporary.compiled*
+```
+
+And of course, our configuration in the /quasar.config file:
+
+```js /quasar.config file
+return {
+  eslint: {
+    // fix: true,
+    // include: [],
+    // exclude: [],
+    // cache: false,
+    // rawEsbuildEslintOptions: {},
+    // rawWebpackEslintPluginOptions: {},
+    warnings: true,
+    errors: true
   }
 }
 ```
@@ -78,14 +96,8 @@ Example of ESLint rules below:
 In order for you to disable ESLint later, all you need to do is comment out (or remove) the following code from the `/quasar.config` file:
 
 ```js
-build: {
-  chainWebpack (chain) {
-    /*
-     * we comment out this block
-     *
-    chain.plugin('eslint-webpack-plugin')
-      .use(ESLintPlugin, [{ extensions: [ 'js', 'vue' ] }])
-    */
-  }
+eslint: {
+  warnings: false,
+  errors: false
 }
 ```

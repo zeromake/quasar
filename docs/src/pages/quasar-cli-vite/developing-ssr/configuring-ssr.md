@@ -131,7 +131,7 @@ export default defineConfig((ctx) => {
 
 ### Manually triggering store hydration
 
-By default, Quasar CLI takes care of hydrating the Vuex store (if you use it) on client-side.
+By default, Quasar CLI takes care of hydrating the Pinia stores (if you use it) on client-side.
 
 However, should you wish to manually hydrate it yourself, you need to set quasar.config file > ssr > manualStoreHydration: true. One good example is doing it from [a boot file](/quasar-cli-vite/boot-files):
 

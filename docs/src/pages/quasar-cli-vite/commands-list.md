@@ -6,7 +6,7 @@ desc: (@quasar/app-vite) The entire list of Quasar CLI commands.
 Familiarize yourself with the list of available commands inside a Quasar project:
 
 ```bash
-$ quasar
+$ quasar -h
 
   Example usage
     $ quasar <command> <options>
@@ -330,13 +330,14 @@ Cleans up all the build assets:
 
 ```bash
 $ quasar clean
+# requires "quasar prepare" to be called again
 ```
 
 ## New
-Generates Components, Pages, Layouts, Vuex Store.
+Generates Components, Pages, Layouts, Pinia Store.
 
 ::: tip
-This command is simply a helper in order to quickly scaffold a page/layout/component/vuex store module. You are not required to use it, but can help you when you don't know how to start.
+This command is simply a helper in order to quickly scaffold a page/layout/component/pinia store module. You are not required to use it, but can help you when you don't know how to start.
 :::
 
 ```bash

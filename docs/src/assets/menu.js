@@ -1265,8 +1265,8 @@ export default [
             path: 'ssr-middleware'
           },
           {
-            name: 'SSR Production Export',
-            path: 'ssr-production-export'
+            name: 'SSR Webserver',
+            path: 'ssr-webserver'
           },
           {
             name: 'Vue SSR Directives',
@@ -1293,7 +1293,7 @@ export default [
             path: 'ssr-with-pwa'
           },
           {
-            name: 'SSR Frequently Asked Questions',
+            name: 'SSR FAQ',
             path: 'ssr-frequently-asked-questions'
           },
           {

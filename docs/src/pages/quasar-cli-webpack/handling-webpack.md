@@ -60,21 +60,22 @@ Quasar CLI offers a useful command for this:
 $ quasar inspect -h
 
   Description
-    Inspect Quasar generated Webpack config
+    Inspect Quasar generated Webpack/Esbuild config
 
   Usage
     $ quasar inspect
     $ quasar inspect -c build
-    $ quasar inspect -m electron -p 'module.rules'
+    $ quasar inspect -m electron -p 'build.outDir'
 
   Options
     --cmd, -c        Quasar command [dev|build] (default: dev)
-    --mode, -m       App mode [spa|ssr|pwa|cordova|electron] (default: spa)
-    --depth, -d      Number of levels deep (default: 5)
+    --mode, -m       App mode [spa|ssr|pwa|bex|cordova|capacitor|electron] (default: spa)
+    --depth, -d      Number of levels deep (default: 2)
     --path, -p       Path of config in dot notation
                         Examples:
                           -p module.rules
                           -p plugins
+    --thread, -t     Display only one specific app mode config thread
     --help, -h       Displays this message
 ```
 
@@ -99,9 +100,10 @@ Also if you configure to build with the Vue compiler version (quasar.config file
 To add your own alias you can extend the webpack config and merge it with the existing alias. Always use absolute paths.
 
 ```js /quasar.config file
+import { defineConfig } from '#q-app/wrappers'
 import { fileURLToPath } from 'node:url'
 
-export default (ctx) => {
+export default defineConfig((ctx) => {
   return {
     build: {
       extendWebpack (cfg, { isServer, isClient }) {
@@ -114,15 +116,16 @@ export default (ctx) => {
       }
     }
   }
-}
+})
 ```
 
 Equivalent with chainWebpack():
 
 ```js /quasar.config file
+import { defineConfig } from '#q-app/wrappers'
 import { fileURLToPath } from 'node:url'
 
-export default (ctx) => {
+export default defineConfig((ctx) => {
   return {
     build: {
       chainWebpack (chain, { isServer, isClient }) {
@@ -131,7 +134,7 @@ export default (ctx) => {
       }
     }
   }
-}
+})
 ```
 
 ## Webpack v5 compatibility issues
@@ -158,8 +161,15 @@ Let's take an example. You want to be able to import `.json` files. **Out of the
 
 So, you need a loader for it. You search Google to see what webpack loader you need. In this case, it's "json-loader". We first install it:
 
-```bash
+```tabs
+<<| bash Yarn |>>
 $ yarn add --dev json-loader
+<<| bash NPM |>>
+$ npm install --save-dev json-loader
+<<| bash PNPM |>>
+$ pnpm add -D json-loader
+<<| bash Bun |>>
+$ bun add --dev json-loader
 ```
 
 After installing your new loader, we want to tell Webpack to use it. So we edit the `/quasar.config` file and change `build.extendWebpack()` to add entries to `module/rules` for this new loader:
@@ -199,8 +209,15 @@ By default, PostCSS is configured to use Autoprefixer. Take a look at `/postcss.
 ### Pug
 First, you need to install some dependencies:
 
-```bash
+```tabs
+<<| bash Yarn |>>
 $ yarn add --dev pug pug-plain-loader
+<<| bash NPM |>>
+$ npm install --save-dev pug pug-plain-loader
+<<| bash PNPM |>>
+$ pnpm add -D pug pug-plain-loader
+<<| bash Bun |>>
+$ bun add --dev pug pug-plain-loader
 ```
 
 Then you need to extend the webpack configuration through the `/quasar.config` file:

@@ -192,7 +192,7 @@ import { defineStore } from 'pinia'
 export const useWhateverStore = defineStore('whatever', {
   // ...
   actions: {
-    whateverAction () {
+    whateverAction () { // do NOT use arrow function
       this.router.push('...')
     }
   }

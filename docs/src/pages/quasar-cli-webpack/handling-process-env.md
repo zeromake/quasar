@@ -19,6 +19,7 @@ Accessing `process.env` can help you in many ways:
 | `SERVER` | Boolean | Code runs on server (not on client) |
 | `MODE` | String | Quasar CLI mode (`spa`, `pwa`, ...) |
 | `NODE_ENV` | String | Has two possible values: `production` or `development` |
+| `TARGET` | String | Can be `ios` or `android` for Cordova/Capacitor modes and `chrome` or `firefox` for BEX mode |
 
 ## Example
 
@@ -88,7 +89,7 @@ But first, there's two concepts that need to be understood here. The env variabl
 // Accessing terminal variables
 console.log(process.env)
 
-export default (ctx) => {
+export default defineConfig((ctx) => {
   return {
     // ...
 
@@ -101,7 +102,7 @@ export default (ctx) => {
       }
     }
   }
-}
+})
 ```
 
 Then in your website/app you can access `process∙env∙API` and it's gonna point to one of those two links above, based on dev or production build type.

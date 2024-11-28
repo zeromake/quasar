@@ -23,7 +23,7 @@ A boot file is a simple JavaScript file which can optionally export a function. 
 | --- | --- |
 | `app` | Vue app instance |
 | `router` | Instance of Vue Router from 'src/router/index.js' |
-| `store` | Instance of the Pinia or the Vuex store - **store only will be passed if your project uses Pinia (you have src/stores) or Vuex (you have src/store)** |
+| `store` | Instance of Pinia - **store only will be passed if your project uses Pinia (you have src/stores)** |
 | `ssrContext` | Available only on server-side, if building for SSR. [More info](/quasar-cli-vite/developing-ssr/ssr-context) |
 | `urlPath` | The pathname (path + search) part of the URL. It also contains the hash on client-side. |
 | `publicPath` | The configured public path. |
@@ -65,7 +65,7 @@ You may ask yourself why we need to export a function. This is actually optional
 // Outside of default export:
 //  - Code here gets executed immediately,
 //  - Good place for import statements,
-//  - No access to router, Vuex store, ...
+//  - No access to router, Pinia instance, ...
 
 export default async defineBoot(({ app, router, store }) => {
   // Code here has access to the Object param above, connecting
@@ -75,7 +75,7 @@ export default async defineBoot(({ app, router, store }) => {
 
   // Code here gets executed by Quasar CLI at the correct time in app's lifecycle:
   //  - we have a Router instantiated,
-  //  - we have the optional Vuex store instantiated,
+  //  - we have the optional Pinia instance,
   //  - we have the root app's component ["app" prop in Object param] Object with
   //      which Quasar will instantiate the Vue app
   //      ("new Vue(app)" -- do NOT call this by yourself),
@@ -286,8 +286,7 @@ In order to better understand how a boot file works and what it does, you need t
 2. Quasar Extras get imported (Roboto font -- if used, icons, animations, ...)
 3. Quasar CSS & your app's global CSS are imported
 4. App.vue is loaded (not yet being used)
-5. Store is imported (if using Pinia in src/stores or Vuex in src/store)
-6. Pinia (if using) is injected into the Vue app instance
+5. Pinia (if using) is injected into the Vue app instance
 6. Router is imported (in src/router)
 7. Boot files are imported
 8. Router default export function executed

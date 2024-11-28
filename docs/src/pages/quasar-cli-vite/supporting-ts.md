@@ -17,13 +17,13 @@ Install the `typescript` package:
 
 ```tabs
 <<| bash Yarn |>>
-$ yarn add --dev typescript
+$ yarn add --dev typescript@~5.5.3
 <<| bash NPM |>>
-$ npm install --save-dev typescript
+$ npm install --save-dev typescript@~5.5.3
 <<| bash PNPM |>>
-$ pnpm add -D typescript
+$ pnpm add -D typescript@~5.5.3
 <<| bash Bun |>>
-$ bun add --dev typescript
+$ bun add --dev typescript@~5.5.3
 ```
 
 Then, create `/tsconfig.json` file at the root of you project with this content:

@@ -40,7 +40,7 @@ scope:
         - l: routes.js
           e: App Routes definitions
       - l: stores
-        e: Pinia Stores (if not using Vuex)
+        e: Pinia Stores
         url: "/quasar-cli-webpack/state-management-with-pinia"
         c:
         - l: index.js
@@ -48,20 +48,8 @@ scope:
         - l: "<store>"
           e: Pinia stores...
         - l: "<store>..."
-      - l: store
-        e: Vuex Store (if not using Pinia)
-        url: "/quasar-cli-webpack/state-management-with-vuex"
-        c:
-        - l: index.js
-          e: Vuex Store definition
-        - l: "<folder>"
-          e: Vuex Store Module...
-        - l: "<folder>"
-          e: Vuex Store Module...
       - l: App.vue
         e: Root Vue component of your App
-      - l: index.template.html
-        e: Template for index.html
     - l: src-ssr/
       e: SSR specific code (like production Node webserver)
       url: "/quasar-cli-webpack/developing-ssr/introduction"
@@ -93,6 +81,8 @@ scope:
     - l: quasar.config.js
       e: Quasar App Config file
       url: "/quasar-cli-webpack/quasar-config-file"
+    - l: index.html
+      e: Template for index.html
     - l: ".gitignore"
       e: GIT ignore paths
       url: https://git-scm.com/docs/gitignore

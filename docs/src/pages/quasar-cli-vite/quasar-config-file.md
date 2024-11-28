@@ -200,9 +200,7 @@ extras?: (QuasarIconSets | QuasarFonts)[];
  * What Quasar language pack to use, what Quasar icon
  * set to use for Quasar components, etc.
  */
-framework?: QuasarFrameworkConfiguration;
-
-interface QuasarFrameworkConfiguration {
+framework?: {
   /**
    * @see - QuasarConfOptions tab in API cards throughout the docs
    */
@@ -732,14 +730,11 @@ See these references for more info:
 ### sourceFiles
 
 ```js
-sourceFiles?: QuasarSourceFilesConfiguration;
-
 /**
  * Use this property to change the default names of some files of your website/app if you have to.
  * All paths must be relative to the root folder of your project.
  *
  * @default
- * ```typescript
  * {
  *  rootComponent: 'src/App.vue',
  *  router: 'src/router/index',
@@ -750,9 +745,8 @@ sourceFiles?: QuasarSourceFilesConfiguration;
  *  electronMain: 'src-electron/electron-main',
  *  bexManifestFile: 'src-bex/manifest.json'
  * }
- * ```
  */
-interface QuasarSourceFilesConfiguration {
+sourceFiles?: {
   rootComponent?: string;
   router?: string;
   store?: string;
