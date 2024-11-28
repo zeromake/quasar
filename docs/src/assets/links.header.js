@@ -12,15 +12,17 @@ import { socialLinks } from './links.social.js'
 export const versionLinks = [{
   name: `v${Quasar.version}`,
   children: [
-    {
-      header: `Latest (v${Quasar.version})`
-    },
     { name: 'Release notes', icon: mdiClipboardText, path: '/start/release-notes' },
     { name: 'Report a bug', icon: mdiBug, path: 'https://github.com/quasarframework/quasar/issues', external: true },
     { name: 'Report a vulnerability', icon: mdiSecurity, path: '/security/report-a-vulnerability', external: true },
     { name: 'Repository', icon: mdiGithub, path: 'https://github.com/quasarframework', external: true },
     {
-      header: 'Older Releases'
+      header: 'Older CLI Releases'
+    },
+    { name: '@quasar/app-vite v1', path: 'https://legacy-app.quasar.dev/', external: true },
+    { name: '@quasar/app-webpack v3', path: 'https://legacy-app.quasar.dev/', external: true },
+    {
+      header: 'Older UI Releases'
     },
     { name: 'v1', path: 'https://v1.quasar.dev/', external: true },
     { name: 'v0.17', path: 'https://v0-17.quasar-framework.org/', external: true },
