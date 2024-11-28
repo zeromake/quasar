@@ -46,7 +46,7 @@
     "@types/node": "^20.5.9",
     "@quasar/app-webpack": "^4.0.0",
     "ts-loader": "^9.4.2",
-    "typescript": "^5.2.2"
+    "typescript": "~5.5.3"
   },
   "browserslist": [
     "last 10 Chrome versions",
