@@ -15,7 +15,9 @@ scope:
         - l: index.html
         - l: package.json
         - l: electron-main.js
+          e: (or .ts)
         - l: electron-preload.js
+          e: (or .ts)
         - l: "...contents of /public"
 ---
 

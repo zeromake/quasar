@@ -56,11 +56,11 @@ scope:
     - l: _locales/
       e: Optional BEX locales files that you might define in manifest
     - l: background.js
-      e: Standard background script BEX file (auto injected via manifest.json)
+      e: (or .ts) Standard background script BEX file (auto injected via manifest.json)
     - l: manifest.json
       e: The browser extension manifest file
     - l: my-content-script.js
-      e: Standard content script BEX file - auto injected via manifest.json (you can
+      e: (or .ts) Standard content script BEX file - auto injected via manifest.json (you can
         have multiple scripts)
 ---
 

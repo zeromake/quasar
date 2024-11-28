@@ -10,7 +10,7 @@ scope:
     - l: middlewares/
       e: SSR middleware files
     - l: server.js
-      e: SSR webserver
+      e: (or .ts) SSR webserver
 ---
 
 ## quasar.config file
@@ -194,7 +194,7 @@ return {
 }
 ```
 
-4. The `/src-ssr/server.js` file is detailed in [SSR Webserver](/quasar-cli-vite/developing-ssr/ssr-webserver) page. Read it especially if you need to support serverless functions.
+4. The `/src-ssr/server.js` file is detailed in [SSR Webserver](/quasar-cli-webpack/developing-ssr/ssr-webserver) page. Read it especially if you need to support serverless functions.
 
 ## Helping SEO
 
@@ -202,7 +202,7 @@ One of the main reasons when you develop a SSR instead of a SPA is for taking ca
 
 ## Boot Files
 
-When running on SSR mode, your application code needs to be isomorphic or "universal", which means that it must run both on a Node context and in the browser. This applies to your [Boot Files](/quasar-cli-vite/boot-files) too.
+When running on SSR mode, your application code needs to be isomorphic or "universal", which means that it must run both on a Node context and in the browser. This applies to your [Boot Files](/quasar-cli-webpack/boot-files) too.
 
 However, there are cases where you only want some boot files to run only on the server or only on the client-side. You can achieve that by specifying:
 
@@ -219,7 +219,7 @@ return {
 
 Just make sure that your app is consistent, though.
 
-When a boot file runs on the server, you will have access to one more parameter (called [ssrContext](/quasar-cli-vite/developing-ssr/ssr-context)) on the default exported function:
+When a boot file runs on the server, you will have access to one more parameter (called [ssrContext](/quasar-cli-webpack/developing-ssr/ssr-context)) on the default exported function:
 
 ```js Some boot file
 export default ({ app, ..., ssrContext }) => {

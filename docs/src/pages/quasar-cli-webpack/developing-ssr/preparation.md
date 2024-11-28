@@ -10,7 +10,7 @@ scope:
     - l: middlewares/
       e: SSR middleware files
     - l: server.js
-      e: SSR webserver
+      e: (or .ts) SSR webserver
 ---
 
 We’ll be using Quasar CLI to develop and build a SSR website. The difference between building a SPA, Mobile App, Electron App, PWA or SSR is simply determined by the “mode” parameter in “quasar dev” and “quasar build” commands.
@@ -29,6 +29,6 @@ $ quasar dev -m ssr
 
 This will add SSR mode automatically, if it is missing.
 
-A new folder will appear in your project folder (which is explained in detail on the [Configuring SSR](/quasar-cli-vite/developing-ssr/configuring-ssr) page):
+A new folder will appear in your project folder (which is explained in detail on the [Configuring SSR](/quasar-cli-webpack/developing-ssr/configuring-ssr) page):
 
 <DocTree :def="scope.nodeJsTree" />

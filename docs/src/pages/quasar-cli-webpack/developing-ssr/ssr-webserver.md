@@ -125,7 +125,7 @@ const pngRE = /\.png$/
  */
 export const renderPreloadTag = defineSsrRenderPreloadTag((file/* , { ssrContext } */) => {
   if (jsRE.test(file) === true) {
-    return `<link rel="modulepreload" href="${file}" crossorigin>`
+    return `<script src="${file}" defer crossorigin></script>`
   }
 
   if (cssRE.test(file) === true) {

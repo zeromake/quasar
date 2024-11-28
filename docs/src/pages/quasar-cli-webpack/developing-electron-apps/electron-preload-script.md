@@ -12,10 +12,12 @@ In `/src-electron/` folder, there is a file named `electron-preload.js`. Fill it
 
 Make sure that your `/src-electron/electron-main.js` has the following (near the "webPreferences" section):
 
-```js File: /src-electron/electron-main
+```js /src-electron/electron-main
 // Add this at the top:
 import path from 'path'
+import { fileURLToPath } from 'url'
 
+const currentDir = fileURLToPath(new URL('.', import.meta.url))
 // ...
 
 function createWindow () {
@@ -24,7 +26,10 @@ function createWindow () {
     // ...
     webPreferences: {
       // HERE IS THE MAGIC:
-      preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD)
+      preload: path.resolve(
+        currentDir,
+        path.join(process.env.QUASAR_ELECTRON_PRELOAD_FOLDER, 'electron-preload' + process.env.QUASAR_ELECTRON_PRELOAD_EXTENSION)
+      )
     }
   })
 ```
@@ -86,10 +91,9 @@ ipcMain.handle('myAPI:load-prefs', () => {
 ## Custom path to the preload script
 Should you wish to change the location of the preload script (and/or even the main thread file) then edit the `/quasar.config` file:
 
-```
+```js /quasar.config file
 // should you wish to change default files
 sourceFiles: {
-  electronMain: 'src-electron/electron-main.js',
-  electronPreload: 'src-electron/electron-preload.js'
+  electronMain: 'src-electron/electron-main.js'
 }
 ```

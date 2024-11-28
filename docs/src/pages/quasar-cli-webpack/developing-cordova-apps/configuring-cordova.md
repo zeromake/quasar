@@ -22,15 +22,7 @@ For determining the values for each of the properties mentioned above, Quasar CL
 2. If not, then it looks into your `/package.json` for "cordovaId", "version" and "description" fields.
 
 ```js /quasar.config file > cordova
-/*
-  return {
-    cordova: {
-      // ...defined by interface below
-    }
-  }
-*/
-
-interface QuasarCordovaConfiguration {
+cordova: {
   /** If not present, will look for `package.json > version` */
   version?: string;
   /** If not present, will look for `package.json > description` */
@@ -46,8 +38,6 @@ interface QuasarCordovaConfiguration {
   noIosLegacyBuildFlag?: boolean;
 
   /**
-   * (Requires @quasar/app-webpack v3.12.8+)
-   *
    * Function to return the Cordova build command parameters that
    * will be executed after the UI has compiled.
    *
@@ -61,8 +51,6 @@ interface QuasarCordovaConfiguration {
   getCordovaBuildParams?: (context: { debug: boolean; target: 'ios' | 'android' }) => string[];
 
   /**
-   * (Requires @quasar/app-webpack v3.12.8+)
-   *
    * Function to return the Cordova output folder after the "cordova build"
    * command is executed.
    * The relative to /src-cordova path is used to copy the Cordova output
@@ -99,7 +87,7 @@ interface QuasarCordovaConfiguration {
 
 Other options you can configure:
 
-```js
+```js /quasar.config file
 return {
   framework: {
     config: {
@@ -116,5 +104,14 @@ return {
       }
     }
   }
+}
+```
+
+Should you want to tamper with the Webpack config for UI in /src you have two options:
+
+```js /quasar.config file
+build: {
+  extendWebpack(webpackCfg) { ... },
+  chainWebpack(webpackChain) { ... }
 }
 ```

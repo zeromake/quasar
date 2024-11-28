@@ -36,15 +36,15 @@ scope:
         url: "/quasar-cli-vite/routing"
         c:
         - l: index.js
-          e: Vue Router definition
+          e: (or .ts) Vue Router definition
         - l: routes.js
-          e: App Routes definitions
+          e: (or .ts) App Routes definitions
       - l: stores
         e: Pinia Stores
         url: "/quasar-cli-vite/state-management-with-pinia"
         c:
         - l: index.js
-          e: Pinia initialization
+          e: (or .ts) Pinia initialization
         - l: "<store>"
           e: Pinia stores...
         - l: "<store>..."
@@ -79,7 +79,7 @@ scope:
         e: Example when building Electron
       - l: "..."
     - l: quasar.config.js
-      e: Quasar App Config file
+      e: (or .ts) Quasar App Config file
       url: "/quasar-cli-vite/quasar-config-file"
     - l: index.html
       e: Template for index.html

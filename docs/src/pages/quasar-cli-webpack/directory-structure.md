@@ -11,7 +11,7 @@ scope:
     - l: src
       c:
       - l: assets/
-        e: Dynamic assets (processed by Vite)
+        e: Dynamic assets (processed by Webpack)
         url: "/quasar-cli-webpack/handling-assets#regular-assets-src-assets"
       - l: components/
         e: ".vue components used in pages & layouts"
@@ -36,15 +36,15 @@ scope:
         url: "/quasar-cli-webpack/routing"
         c:
         - l: index.js
-          e: Vue Router definition
+          e: (or .ts) Vue Router definition
         - l: routes.js
-          e: App Routes definitions
+          e: (or .ts) App Routes definitions
       - l: stores
         e: Pinia Stores
         url: "/quasar-cli-webpack/state-management-with-pinia"
         c:
         - l: index.js
-          e: Pinia initialization
+          e: (or .ts) Pinia initialization
         - l: "<store>"
           e: Pinia stores...
         - l: "<store>..."
@@ -79,7 +79,7 @@ scope:
         e: Example when building Electron
       - l: "..."
     - l: quasar.config.js
-      e: Quasar App Config file
+      e: (or .ts) Quasar App Config file
       url: "/quasar-cli-webpack/quasar-config-file"
     - l: index.html
       e: Template for index.html

@@ -10,7 +10,7 @@ scope:
     - l: middlewares/
       e: SSR middleware files
     - l: server.js
-      e: SSR webserver
+      e: (or .ts) SSR webserver
 ---
 
 ## quasar.config file

@@ -57,19 +57,19 @@ Importing tunnelmole as an ES module
 
 ```js
 // import as ESM:
-import { tunnelmole } from 'tunnelmole';
+import { tunnelmole } from 'tunnelmole'
 
 // or import as CommonJS module:
-const tunnelmole = require('tunnelmole/cjs');
+const tunnelmole = require('tunnelmole/cjs')
 ```
 
 Once the module is imported you can start tunnelmole with the code below, changing port `80` to the port your application listens on if it is different.
 
 ```js
 const url = await tunnelmole({
-    port: 80
-    // Optionally, add "domain: 'mysubdomain.tunnelmole.com'" if using a custom subdomain
-});
+  port: 80
+  // Optionally, add "domain: 'mysubdomain.tunnelmole.com'" if using a custom subdomain
+})
 // url = https://idsq6j-ip-157-211-195-169.tunnelmole.com
 ```
 
