@@ -88,7 +88,7 @@ Now, let's see how the hooks are called when the user visits these routes in the
 ## Usage
 The hook is defined as a custom static function called `preFetch` on our route components. Note that because this function will be called before the components are instantiated, it doesn't have access to `this`.
 
-Example below is when using Vuex:
+Example below is when using Pinia:
 
 ```html Some .vue component used as route
 <template>
@@ -96,7 +96,8 @@ Example below is when using Vuex:
 </template>
 
 <script>
-import { useStore } from 'vuex'
+import { useRoute } from 'vue-router'
+import { useMyStore } from 'stores/myStore.js'
 
 export default {
   // our hook here
@@ -109,14 +110,16 @@ export default {
 
     // Return a Promise if you are running an async job
     // Example:
-    return store.dispatch('fetchItem', currentRoute.params.id)
+    const myStore = useMyStore() // useMyStore(store) for SSR
+    return myStore.fetchItem(currentRoute.params.id) // assumes it is async
   },
 
   setup () {
-    const $store = useStore()
+    const myStore = useMyStore()
+    const $route = useRoute()
 
     // display the item from store state.
-    const item = computed(() => $store.state.items[this.$route.params.id])
+    const item = computed(() => myStore.items[$route.params.id])
 
     return { item }
   }
@@ -152,7 +155,7 @@ If you are developing a SSR app, then you can check out the [ssrContext](/quasar
 actions: {
   fetchItem ({ commit }, id) {
     return axiosInstance.get(url, id).then(({ data }) => {
-      commit('mutation', data)
+      this.items = data
     })
   }
 }
@@ -166,9 +169,12 @@ Below is an example of redirecting the user under some circumstances, like when 
 
 ```js
 // We assume here we already wrote the authentication logic
-// in the Vuex Store, so take as a high-level example only.
+// in one Pinia Store, so take as a high-level example only.
+import { useMyStore } from 'stores/myStore'
+
 preFetch ({ store, redirect }) {
-  if (!store.state.authenticated) {
+  const myStore = useMyStore() // useMyStore(store) for SSR
+  if (!myStore.isAuthenticated) {
     redirect({ path: '/login' })
   }
 }
