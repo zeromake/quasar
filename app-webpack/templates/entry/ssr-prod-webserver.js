@@ -37,7 +37,7 @@ const render = getProdRenderFunction({
   vueRenderToString: renderToString,
   basedir: __dirname,
   clientManifest,
-  serverEntry,
+  serverEntry: serverEntry.default,
   renderTemplate,
   renderPreloadTag,
   manualStoreSerialization: <%= ssr.manualStoreSerialization === true %>

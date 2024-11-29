@@ -96,7 +96,7 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
     this.#pathMap = {
       rootFolder: appPaths.appDir,
       publicFolder,
-      serverFile: appPaths.resolve.entry('compiled-dev-webserver.js'),
+      serverFile: appPaths.resolve.entry('compiled-dev-webserver.cjs'),
       serverEntryFile: appPaths.resolve.entry('server-entry.js'),
       resolvePublicFolder () {
         return join(publicFolder, ...arguments)

@@ -63,8 +63,8 @@ const quasarElectronConfig = {
 
     cfg.entryPoints = [ quasarConf.sourceFiles.electronMain ]
     cfg.outfile = quasarConf.ctx.dev === true
-      ? appPaths.resolve.entry('electron-main.mjs')
-      : join(quasarConf.build.distDir, 'UnPackaged/electron-main.mjs')
+      ? appPaths.resolve.entry('electron-main.js')
+      : join(quasarConf.build.distDir, 'UnPackaged/electron-main.js')
 
     cfg.define = {
       ...cfg.define,

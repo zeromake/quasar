@@ -8,7 +8,6 @@ const {
   createNodeEsbuildConfig, extendEsbuildConfig
 } = require('../../config-tools.js')
 
-const { cliPkg } = require('../../utils/cli-runtime.js')
 const { getBuildSystemDefine } = require('../../utils/env.js')
 const { injectWebpackHtml } = require('../../utils/html-template.js')
 
@@ -171,7 +170,7 @@ const quasarSsrConfig = {
 
     if (ctx.dev) {
       cfg.entryPoints = [ appPaths.resolve.entry('ssr-dev-webserver.js') ]
-      cfg.outfile = appPaths.resolve.entry('compiled-dev-webserver.js')
+      cfg.outfile = appPaths.resolve.entry('compiled-dev-webserver.cjs')
     }
     else {
       cfg.external = [
