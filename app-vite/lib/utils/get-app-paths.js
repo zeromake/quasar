@@ -6,8 +6,8 @@ import { cliDir, resolveToCliDir } from './cli-runtime.js'
 
 const quasarConfigList = [
   { name: 'quasar.config.js', inputFormat: 'esm', outputFormat: 'esm' },
-  { name: 'quasar.config.mjs', inputFormat: 'esm', outputFormat: 'esm' },
   { name: 'quasar.config.ts', inputFormat: 'ts', outputFormat: 'esm' },
+  { name: 'quasar.config.mjs', inputFormat: 'esm', outputFormat: 'esm' },
   { name: 'quasar.config.cjs', inputFormat: 'cjs', outputFormat: 'cjs' }
 ]
 

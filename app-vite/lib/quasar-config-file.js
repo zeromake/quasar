@@ -704,7 +704,6 @@ export class QuasarConfigFile {
     }
 
     Object.assign(cfg.metaConf, {
-      packageTypeBasedExtension: this.#ctx.pkg.appPkg.type === 'module' ? 'js' : 'mjs',
       hasLoadingBarPlugin: cfg.framework.plugins.includes('LoadingBar'),
       hasMetaPlugin: cfg.framework.plugins.includes('Meta')
     })

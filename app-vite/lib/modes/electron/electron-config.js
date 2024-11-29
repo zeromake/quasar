@@ -54,12 +54,11 @@ export const quasarElectronConfig = {
   main: quasarConf => {
     const cfg = createNodeEsbuildConfig(quasarConf, { compileId: 'node-electron-main', format: 'esm' })
     const { appPaths } = quasarConf.ctx
-    const ext = quasarConf.metaConf.packageTypeBasedExtension
 
     cfg.entryPoints = [ quasarConf.sourceFiles.electronMain ]
     cfg.outfile = quasarConf.ctx.dev === true
-      ? appPaths.resolve.entry(`electron-main.${ ext }`)
-      : join(quasarConf.build.distDir, `UnPackaged/electron-main.${ ext }`)
+      ? appPaths.resolve.entry('electron-main.js')
+      : join(quasarConf.build.distDir, 'UnPackaged/electron-main.js')
 
     cfg.define = {
       ...cfg.define,

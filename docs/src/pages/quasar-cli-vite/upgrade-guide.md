@@ -127,7 +127,7 @@ Preparations:
   You can now write this file in TS too should you wish (rename `/quasar.config.js` to `/quasar.config.ts` -- notice the `.ts` file extension).
   :::
 
-* We **highly recommend** setting `type` to `module` in your `/package.json`. Do not overlook this step.
+* Set `type` to `module` in your `/package.json`. Do not overlook this step!
   ```diff /package.json
   {
   + "type": "module"

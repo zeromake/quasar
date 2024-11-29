@@ -129,7 +129,6 @@ interface QuasarMetaConf {
   };
   css: Record<string, string>;
 
-  packageTypeBasedExtension: "js" | "mjs";
   hasLoadingBarPlugin: boolean;
   hasMetaPlugin: boolean;
 

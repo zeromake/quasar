@@ -56,7 +56,7 @@ export const quasarSsrConfig = {
   viteServer: async quasarConf => {
     let cfg = await createViteConfig(quasarConf, { compileId: 'vite-ssr-server' })
     const { appPaths } = quasarConf.ctx
-    const ssrEntryFile = appPaths.resolve.entry('server-entry.mjs')
+    const ssrEntryFile = appPaths.resolve.entry('server-entry.js')
 
     cfg = mergeViteConfig(cfg, {
       target: quasarConf.build.target.node,
@@ -108,25 +108,20 @@ export const quasarSsrConfig = {
     }))
 
     if (quasarConf.ctx.dev) {
-      cfg.entryPoints = [ appPaths.resolve.entry('ssr-dev-webserver.mjs') ]
-      cfg.outfile = appPaths.resolve.entry('compiled-dev-webserver.mjs')
+      cfg.entryPoints = [ appPaths.resolve.entry('ssr-dev-webserver.js') ]
+      cfg.outfile = appPaths.resolve.entry('compiled-dev-webserver.js')
     }
     else {
       cfg.external = [
         ...cfg.external,
-
         'vue/server-renderer',
         'vue/compiler-sfc',
         './render-template.js',
         './quasar.manifest.json',
-
-        // based on project's package.json > type (module | commonjs), one of the
-        // following will be compiled:
-        './server/server-entry.js',
-        './server/server-entry.mjs'
+        './server/server-entry.js'
       ]
 
-      cfg.entryPoints = [ appPaths.resolve.entry('ssr-prod-webserver.mjs') ]
+      cfg.entryPoints = [ appPaths.resolve.entry('ssr-prod-webserver.js') ]
       cfg.outfile = join(quasarConf.build.distDir, 'index.js')
     }
 

@@ -75,8 +75,8 @@ export class QuasarModeDevserver extends AppDevserver {
       rootFolder: appPaths.appDir,
       publicFolder,
       templatePath: appPaths.resolve.app('index.html'),
-      serverFile: appPaths.resolve.entry('compiled-dev-webserver.mjs'),
-      serverEntryFile: appPaths.resolve.entry('server-entry.mjs'),
+      serverFile: appPaths.resolve.entry('compiled-dev-webserver.js'),
+      serverEntryFile: appPaths.resolve.entry('server-entry.js'),
       resolvePublicFolder () {
         const dir = join(...arguments)
         return isAbsolute(dir) === true
