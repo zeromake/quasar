@@ -18,8 +18,7 @@ export async function script ({ scope, utils }) {
       message: 'Pick an ESLint preset:',
       choices: [
         { title: 'Prettier', value: 'prettier', description: 'https://github.com/prettier/prettier' },
-        { title: 'Standard', value: 'standard', description: 'https://github.com/standard/standard' },
-        { title: 'Airbnb', value: 'airbnb', description: 'https://github.com/airbnb/javascript' }
+        { title: 'Standard', value: 'standard', description: 'https://github.com/standard/standard' }
       ]
     }
   ])
