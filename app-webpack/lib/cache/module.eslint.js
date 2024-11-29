@@ -4,12 +4,12 @@ const { getPackage } = require('../utils/get-package.js')
 
 module.exports.createInstance = function createInstance ({ appPaths }) {
   const eslintConfigFile = [
+    'eslint.config.js',
     '.eslintrc.cjs',
     '.eslintrc.js',
     '.eslintrc.yaml',
     '.eslintrc.yml',
-    '.eslintrc.json',
-    'eslint.config.js'
+    '.eslintrc.json'
   ].find(path => existsSync(appPaths.resolve.app(path)))
 
   const acc = {
@@ -18,6 +18,8 @@ module.exports.createInstance = function createInstance ({ appPaths }) {
   }
 
   if (acc.hasEslint === true) {
+    acc.configType = eslintConfigFile === 'eslint.config.js' ? 'flat' : 'eslintrc'
+
     const linter = getPackage('eslint', appPaths.appDir)
 
     if (linter !== void 0 && linter.ESLint !== void 0) {

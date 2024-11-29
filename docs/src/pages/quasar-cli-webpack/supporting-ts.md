@@ -126,15 +126,11 @@ module.exports = {
 
   globals: {
     ga: 'readonly', // Google Analytics
-    cordova: 'readonly',
-    __statics: 'readonly',
-    __QUASAR_SSR__: 'readonly',
-    __QUASAR_SSR_SERVER__: 'readonly',
-    __QUASAR_SSR_CLIENT__: 'readonly',
-    __QUASAR_SSR_PWA__: 'readonly',
     process: 'readonly',
+    cordova: 'readonly',
     Capacitor: 'readonly',
-    chrome: 'readonly',
+    chrome: 'readonly', // BEX related
+    browser: 'readonly' // BEX related
   },
 
   // add your custom rules here

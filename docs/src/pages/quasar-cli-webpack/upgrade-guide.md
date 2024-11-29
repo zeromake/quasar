@@ -201,6 +201,47 @@ Preparations:
   You can now write this file in TS too should you wish (rename `/quasar.config.js` to `/quasar.config.ts` -- notice the `.ts` file extension).
   :::
 
+* Set `type` to `module` in your `/package.json`. Do not overlook this step!
+  ```diff /package.json
+  {
+  + "type": "module"
+  }
+  ```
+  <br>
+
+  Convert `postcss.config.js` to ESM format:
+
+  ```js /postcss.config.js
+  // https://github.com/michael-ciniawsky/postcss-load-config
+  import autoprefixer from 'autoprefixer'
+
+  export default {
+    plugins: [
+      // to edit target browsers: use "browserslist" field in package.json
+      autoprefixer
+    ]
+  }
+  ```
+  <br>
+
+  Convert `babel.config.cjs` to ESM format:
+
+  ```js /babel.config.js
+  export default api => {
+    return {
+      presets: [
+        [
+          '@quasar/babel-preset-app',
+          api.caller(caller => caller && caller.target === 'node')
+            ? { targets: { node: 'current' } }
+            : {}
+        ]
+      ]
+    }
+  }
+  ```
+  <br>
+
 * For consistency with `@quasar/app-vite` (and easy switch between `@quasar/app-webpack` and it) move `/src/index.template.html` to `/index.html` and do the following changes:
   ```diff /index.html
   <body>
@@ -209,15 +250,6 @@ Preparations:
   + <!-- quasar:entry-point -->
   </body>
   ```
-  <br>
-
-* (Optional, but recommended) For future-proofing some tools config files, rename the following files (in the root project folder):
-  | Old name | New name |
-  | -------- | -------- |
-  | postcss.config.js | postcss.config.cjs |
-  | .eslintrc.js | .eslintrc.cjs |
-  | babel.config.js | babel.config.cjs |
-
   <br>
 
 * You might want to add the following to your `/.gitignore` file. These kind of files are left for inspection purposes when something fails with your `/quasar.config` file (and can be removed by the `quasar clean` command):
