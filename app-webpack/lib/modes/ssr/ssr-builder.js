@@ -67,7 +67,8 @@ module.exports.QuasarModeBuilder = class QuasarModeBuilder extends AppBuilder {
       author: localAppPkg.author,
       private: true,
       type: 'commonjs',
-      module: 'index.js',
+      main: 'index.mjs',
+      module: 'index.mjs',
       scripts: {
         start: 'node index.mjs'
       },
