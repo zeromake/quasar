@@ -286,7 +286,9 @@ export function createNodeEsbuildConfig (quasarConf, { format }) {
     alias: {
       ...quasarConf.build.alias
     },
-    resolveExtensions: [ format === 'esm' ? '.mjs' : '.cjs', '.js', '.ts', '.json' ],
+    resolveExtensions: format === 'esm'
+      ? [ '.mjs', '.js', '.cjs', '.ts', '.json' ]
+      : [ '.cjs', '.js', '.mjs', '.ts', '.json' ],
     // we use a fresh list since this can be tampered with by the user:
     external: [ ...externalsList ],
     define: getBuildSystemDefine({

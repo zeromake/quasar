@@ -76,8 +76,8 @@ module.exports.createWebpackChain = async function createWebpackChain (quasarCon
   chain.resolve.extensions
     .merge(
       hasTypescript === true
-        ? [ '.mjs', '.ts', '.js', '.vue', '.json', '.wasm' ]
-        : [ '.mjs', '.js', '.vue', '.json', '.wasm' ]
+        ? [ '.mjs', '.ts', '.js', '.cjs', '.vue', '.json', '.wasm' ]
+        : [ '.mjs', '.js', '.cjs', '.vue', '.json', '.wasm' ]
     )
 
   chain.resolve.modules
@@ -215,7 +215,7 @@ module.exports.createWebpackChain = async function createWebpackChain (quasarCon
       name: `media/[name]${ assetHash }.[ext]`
     })
 
-  injectStyleRules(chain, {
+  await injectStyleRules(chain, {
     appPaths,
     cssVariables: cacheProxy.getModule('cssVariables'),
     isServerBuild: isSsrServer,
@@ -475,7 +475,9 @@ module.exports.createNodeEsbuildConfig = async function createNodeEsbuildConfig 
     alias: {
       ...quasarConf.build.alias
     },
-    resolveExtensions: [ format === 'esm' ? '.mjs' : '.cjs', '.js', '.ts', '.json' ],
+    resolveExtensions: format === 'esm'
+      ? [ '.mjs', '.js', '.cjs', '.ts', '.json' ]
+      : [ '.cjs', '.js', '.mjs', '.ts', '.json' ],
     // we use a fresh list since this can be tampered with by the user:
     external: [ ...externalsList ],
     define: getBuildSystemDefine({
