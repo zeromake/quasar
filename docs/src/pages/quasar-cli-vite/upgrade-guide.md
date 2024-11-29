@@ -236,6 +236,14 @@ Preparations:
 
   <br>
 
+* If you've installed the `dotenv` package and are using it in your quasar.config file then uninstall it and use our CLIs native [dotenv support](#the-env-dotfiles-support).
+
+  ```diff /quasar.config file
+  - build: {
+  -  env: require('dotenv').config().parsed
+  - }
+  ```
+
 * The types feature flag files will now be auto-generated in the `.quasar` folder. So, you must delete them:
 
   ```tabs
