@@ -6,7 +6,7 @@ export const useTableColumnSelectionProps = {
   visibleColumns: Array
 }
 
-export function useTableColumnSelection (props, computedPagination, hasSelectionMode) {
+export function useTableColumnSelection (props, computedPagination, hasSelectionMode, skipSort) {
   const colList = computed(() => {
     if (props.columns !== void 0) {
       return props.columns
@@ -43,7 +43,7 @@ export function useTableColumnSelection (props, computedPagination, hasSelection
         __iconClass: `q-table__sort-icon q-table__sort-icon--${ align }`,
         __thClass: alignClass
           + (col.headerClasses !== void 0 ? ' ' + col.headerClasses : '')
-          + (col.sortable === true ? ' sortable' : '')
+          + (col.sortable === true && !skipSort.value ? ' sortable' : '')
           + (col.name === sortBy ? ` sorted ${ descending === true ? 'sort-desc' : '' }` : ''),
 
         __tdStyle: col.style !== void 0

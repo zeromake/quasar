@@ -139,6 +139,94 @@ export default createComponent({
     const rootRef = ref(null)
     const virtScrollRef = ref(null)
     const hasVirtScroll = computed(() => props.grid !== true && props.virtualScroll === true)
+    const resizableState = ref({
+      open: false,
+      move: false,
+      target: null,
+      tableX: 0,
+      startX: 0,
+      resizableLeft: 0,
+    });
+    const resizableWidths = ref([]);
+    const isResizable = true//computed(() => (props.columns || []).some(col => col.resizable === true))
+
+    const resizableOut = () => {
+      document.body.style.cursor = ''
+      resizableState.value.open = false
+      resizableState.value.startX = 0
+      resizableState.value.tableX = 0
+      resizableState.value.resizableLeft = 0
+    }
+
+    const resizableMouseMove = (e) => {
+      if (resizableState.value.move) {
+        const x =  e.pageX - resizableState.value.tableX
+        if (resizableState.value.resizableLeft !== x) {
+          requestAnimationFrame(() => {
+            resizableState.value.resizableLeft = x
+          })
+        }
+        return
+      }
+      const thEl = e.target.closest('th')
+      if (!thEl) {
+        return
+      }
+      const rect = thEl.getBoundingClientRect()
+      const isLastTh = thEl.parentNode?.lastElementChild === thEl
+      if (rect.width > 12 && rect.right - e.pageX < 8 && !isLastTh) {
+        const tableEl = e.target.closest('.q-table')
+        const x = rect.right - resizableState.value.tableX
+        const tableX = tableEl.getBoundingClientRect().left
+        if (!resizableState.value.open || resizableState.value.resizableLeft !== x || resizableState.value.tableX !== tableX) {
+          requestAnimationFrame(() => {
+            resizableState.value.open = true
+            resizableState.value.resizableLeft = x
+            resizableState.value.tableX = tableX
+            document.body.style.cursor = 'col-resize'
+          })
+        }
+      } else {
+        resizableOut()
+      }
+    }
+
+    const resizableMouseOut = (e) => {
+      if (resizableState.value.move) {
+        return
+      }
+      resizableOut()
+      document.removeEventListener('mousemove', resizableMouseMove)
+      document.removeEventListener('mouseup', resizableMouseUp)
+    }
+    const resizableMouseUp = (e) => {
+      const offestX = e.pageX - resizableState.value.startX
+      let columnIndex = 0;
+      for (const item of Array.from(resizableState.value.target.parentNode.children)) {
+        if (item === resizableState.value.target) {
+          break;
+        }
+        columnIndex++;
+      }
+      const width = Math.floor(resizableState.value.target.getBoundingClientRect().width += offestX);
+      resizableWidths.value[columnIndex] = width;
+      resizableOut(resizableState.value.target)
+      resizableState.value.move = false
+      resizableState.value.target = null
+    }
+    const resizableMouseDown = (e) => {
+      if (resizableState.value.open) {
+        const thEl = e.target.closest('th')
+        if (!thEl) {
+          return
+        }
+        resizableState.value.move = true
+        resizableState.value.startX = e.pageX
+        resizableState.value.target = thEl
+        document.addEventListener('mousemove', resizableMouseMove)
+        document.addEventListener('mouseup', resizableMouseUp)
+      }
+    }
 
     const cardDefaultClass = computed(() =>
       ' q-table__card'
@@ -240,9 +328,18 @@ export default createComponent({
       updateSelection
     } = useTableRowSelection(props, emit, computedRows, getRowKey)
 
-    const { colList, computedCols, computedColsMap, computedColspan } = useTableColumnSelection(props, computedPagination, hasSelectionMode)
+    const skipSort = computed(() => resizableState.value.open)
 
-    const { columnToSort, computedSortMethod, sort } = useTableSort(props, computedPagination, colList, setPagination)
+    const { colList, computedCols, computedColsMap, computedColspan } = useTableColumnSelection(props, computedPagination, hasSelectionMode, skipSort)
+
+    const { columnToSort, computedSortMethod, sort: _sort } = useTableSort(props, computedPagination, colList, setPagination)
+
+    const sort = (col) => {
+      if (skipSort.value) {
+        return
+      }
+      return _sort(col)
+    };
 
     const {
       firstRowIndex,
@@ -327,6 +424,14 @@ export default createComponent({
 
       if (header !== null) {
         child.unshift(header())
+      }
+
+      if (isResizable === true) {
+        const resizeStyle = {
+          left: resizableState.value.resizableLeft + 'px',
+          display: resizableState.value.open ? 'block' : 'none',
+        };
+        child.push(h('div', { class: 'q-table__resize-proxy', style: resizeStyle }))
       }
 
       return getTableMiddle({
@@ -635,12 +740,17 @@ export default createComponent({
         ).slice()
       }
 
-      const child = computedCols.value.map(col => {
+      const child = computedCols.value.map((col, index) => {
         const
           headerCellCol = slots[ `header-cell-${ col.name }` ],
           slot = headerCellCol !== void 0 ? headerCellCol : headerCell,
           props = getHeaderScope({ col })
-
+        if (!props.headerStyle) props.headerStyle = {}
+        if (resizableWidths.value[index] > 0) {
+          props.headerStyle.width = resizableWidths.value[index] + 'px'
+        } else if (props.headerStyle.width) {
+          delete props.headerStyle.width
+        }
         return slot !== void 0
           ? slot(props)
           : h(QTh, {
@@ -676,7 +786,10 @@ export default createComponent({
       return [
         h('tr', {
           class: props.tableHeaderClass,
-          style: props.tableHeaderStyle
+          style: props.tableHeaderStyle,
+          onMousemove: resizableMouseMove,
+          onMouseout: resizableMouseOut,
+          onMousedown: resizableMouseDown,
         }, child)
       ]
     }
